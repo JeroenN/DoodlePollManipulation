@@ -9,12 +9,9 @@
     - [Poll](#poll)
       - [Attributes](#attributes)
       - [Functions](#functions)
-    - [Player](#player)
+    - [Agent](#agent)
       - [Attributes](#attributes-1)
       - [Functions](#functions-1)
-    - [Date](#date)
-      - [Attributes](#attributes-2)
-      - [Functions](#functions-2)
 
 
 ## Programming language
@@ -23,62 +20,38 @@ Python
 
 ## Type of programming
 
-Object oriented (I think)
+Object oriented
 
 ## Structure 
 
-three classes: Poll, Player, Date 
+Two classes: agent, environment 
 
 ### Design choices
 
-- Does the date have the score or is that stored in the poll? (currently it is stored in the date itself)
-- Does the number of dates & voters get decided when creating the poll or afterwards (when creating probably makes more sense) (currently the number of dates gets decided when making the poll, but users get added one by one to make sure an adequately sized list of preferences can be created) 
-
 ### Assumptions 
-- The dates do not change after the poll was created 
-
 
 ### Poll
 
 #### Attributes
 
-- Set of voters
 - Set of dates
 - Set of winning dates
+- number of time slots in the environment
   
 #### Functions
 
-- add player
-- add date
-- choose winner 
-- get players
-- get dates 
-- get winners
+- vote 
+- get time slots
+- get the number of time slots 
 
-### Player
+### Agent
 
 #### Attributes 
 
-- Vector of "ballots"
 - Preferences
-- Utility (based on Z. Sbratsova et al)
-- Strategy
-- ID 
-
-#### Functions 
-
-- set preferences 
-- set vote 
-- description thing which displays ID when the thing is printed
-
-### Date 
-
-#### Attributes
-
-- Score
+- Environment
+- number of time slots in the environment
 - ID 
 
 #### Functions
-- get score
-- add to score 
-
+- create time slot preference
