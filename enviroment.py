@@ -9,6 +9,7 @@ class Environment:
         self.__n_time_slots = number_of_slots
         self.__create_time_slots()
 
+    # Set how
     def __create_time_slots(self):
         for i in range(self.__n_time_slots):
             self.__time_slots_chosen.append(0)
