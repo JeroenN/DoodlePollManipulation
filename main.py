@@ -4,7 +4,6 @@ import agent
 
 
 # TODO:
-# create something that counts the utility at the end of the round
 
 # Right now this function creates agents with the standard strategy
 def create_agents(n_agents, environment):
@@ -33,10 +32,11 @@ def let_agents_calculate_utility(agents):
         agent.calculate_utility()
         agent.change_time_slot_preference()
 
-def play_game(agents):
+def play_game(environment, agents):
     rounds = 10
     for i in range(rounds):
         let_agents_vote(agents)
+        environment.determine_most_popular_time_slot()
         let_agents_calculate_utility(agents)
     for agent in agents:
         print(f"agent utility {agent.get_utility()}")
@@ -48,7 +48,7 @@ def main():
     agents = create_agents(int(input("How many voters are in the Doodle poll?: ")),
                            environment)  # create and store agents
     print_game(environment, agents)
-    play_game(agents)
+    play_game(environment, agents)
 
 
 if __name__ == "__main__":
