@@ -1,10 +1,17 @@
+def partition(arr, low, high):
+    pass
+
+def quick_sort(arr, low, high):
+    if low < high:
+        pi = partition()
+
 # The class creates the time-slots and counts how often
 # a certain time slot is chosen
 class Environment:
     __n_time_slots = 0  # number of time-slots
     __time_slots_chosen = [] # How often each time slot is chosen
-    __idx_most_popular_time_slot = 0 #The idx of the most poular time slot
-
+    __idx_most_popular_time_slot = 0 # The idx of the most poular time slot
+    __rank_popularity_time_slots = []
 
     def __init__(self, number_of_slots=0):
         self.__n_time_slots = number_of_slots
@@ -34,6 +41,10 @@ class Environment:
                 max = self.__time_slots_chosen[i]
                 idx = i
         self.__idx_most_popular_time_slot = idx
+
+    # Using quicksort to sort the time-slots based on popularity
+    def rank_popularity_time_slots(self):
+        quick_sort()
 
     def get_most_popular_time_slot(self):
         return self.__idx_most_popular_time_slot

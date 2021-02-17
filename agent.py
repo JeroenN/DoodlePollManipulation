@@ -44,26 +44,15 @@ class Agent:
             # creates random value between 0 and 1 and stores this in time_slot_preference
             self._time_slot_preference[i] = random.uniform(0, 1)
 
-    # TODO: right know for some reason the time slot preference for each agent is the same for the first round
+    # FIXME: right know for some reason the time slot preference for each agent is the same for the first round
     def __create_time_slot_preference(self):
         for i in range(self._n_time_slots):
             # creates random value between 0 and 1 and stores this in time_slot_preference
             self._time_slot_preference.append(random.uniform(0, 1))
 
 
-class Standard(Agent):
-    __threshold = 0.7
 
-    def __init__(self, environment, ID):
-        Agent.__init__(self, environment, ID)
 
-    # vote for a time slot if the time slot preference for that time slot is above the threshold
-    # Update also for the particular object that it voted on that specific time slot
-    def vote(self):
-        for i in range(self._n_time_slots):
-            if self._time_slot_preference[i] >= self.__threshold:
-                self.environment.vote_time_slot(i)
-                self._time_slots_chosen.append(i)
 
 
 
