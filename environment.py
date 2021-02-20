@@ -1,9 +1,28 @@
+def swap(arr, idx1, idx2):
+    element1 = arr[idx1]
+    arr[idx1] = arr[idx2]
+    arr[idx2] = element1
+
 def partition(arr, low, high):
-    pass
+    pivot = arr[high]
+
+    i = low - 1
+
+    for j in range(low, high):
+        if arr[j] < pivot:
+            i += 1
+            arr[i], arr[j] = arr[j], arr[i]
+
+    arr[i + 1], arr[high] = arr[high], arr[i + 1]
+    return i + 1
 
 def quick_sort(arr, low, high):
     if low < high:
-        pi = partition()
+        pi = partition(arr, low, high)
+
+        quick_sort(arr, low, pi - 1)
+        quick_sort(arr, pi + 1, high)
+
 
 # The class creates the time-slots and counts how often
 # a certain time slot is chosen
@@ -44,7 +63,8 @@ class Environment:
 
     # Using quicksort to sort the time-slots based on popularity
     def rank_popularity_time_slots(self):
-        quick_sort()
+        n_elements = len(self.__time_slots_chosen)
+        quick_sort(self.__time_slots_chosen, 0, n_elements - 1)
 
     def get_most_popular_time_slot(self):
         return self.__idx_most_popular_time_slot
