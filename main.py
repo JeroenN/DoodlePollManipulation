@@ -1,26 +1,18 @@
 from environment import Environment
-import agent
-
-
-# TODO:
+from agent import Agent
+from strategies import Standard
 
 # Right now this function creates agents with the standard strategy
+# storing these agents might not be necessary anymore because it is stored in the environment now 
 def create_agents(n_agents, environment):
     agents = []
     for i in range(n_agents):
-        agents.append(agent.Standard(environment, i))
+        agents.append(Standard(environment, i))
     return agents
 
 
 def create_environment(n_time_slots):
     return Environment(n_time_slots)
-
-
-def print_game(environment, agents):
-    print(environment, '\n')
-    print('\n'.join(map(str, agents)))
-    # agents[0].print_voted_time_slots()
-    # agents[0].print_time_slot_preference()
 
 def let_agents_vote(agents):
     for agent in agents:
@@ -31,15 +23,34 @@ def let_agents_calculate_utility(agents):
         agent.calculate_utility()
         agent.change_time_slot_preference()
 
+def calculate_social_welfare(environment, agents):
+    social_welfare = 0
+    for agent in agents:
+        social_welfare += agent.get_utility()
+    
+    return social_welfare
+
+def print_game(environment, agents):
+    print(environment, f"and {len(agents)} agents:")
+    print('\n'.join(map(str, agents)))
+    # get social welfare? + put in graph OR display social welfare over time 
+
+def print_game_results(environment, agents):
+    print("Game ended! \n")
+    for agent in agents:
+        print(agent, f", Utility: {agent.get_utility()}")
+
+    print(f'\nSocial welfare: ', calculate_social_welfare(environment, agents))
+
 def play_game(environment, agents):
     rounds = 10
-    for i in range(rounds):
+    print("\nPlaying game... \n")
+    for _ in range(rounds):
         let_agents_vote(agents)
         environment.determine_most_popular_time_slot()
         let_agents_calculate_utility(agents)
-    for agent in agents:
-        print(f"agent utility {agent.get_utility()}")
 
+    print_game_results(environment, agents)
 
 def main():
     environment = create_environment(

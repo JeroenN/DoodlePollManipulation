@@ -20,7 +20,7 @@ class Agent:
         self._n_time_slots = environment.get_n_time_slots()
         self.__create_time_slot_preference()
         self.__ID = ID  # assign an ID
-
+        
     def __str__(self):
         return f"Basic agent {self.__ID}"
 

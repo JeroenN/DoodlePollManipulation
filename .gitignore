@@ -1,0 +1,6 @@
+.vscode/settings.json
+__pycache__/agent.cpython-38.pyc
+__pycache__/environment.cpython-38.pyc
+__pycache__/strategies.cpython-38.pyc
+.idea/DoodlePoolManipulation.iml
+.idea/misc.xml

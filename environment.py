@@ -51,5 +51,5 @@ class Environment:
 
     # For each time slot the amount of times it is chosen is set to 0
     def __create_time_slots(self):
-        for i in range(self.__n_time_slots):
+        for _ in range(self.__n_time_slots):
             self.__time_slots_chosen.append(0)
