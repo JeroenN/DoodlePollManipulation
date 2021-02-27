@@ -43,9 +43,8 @@ def print_game_results(environment, agents):
     print(f'\nSocial welfare: ', calculate_social_welfare(environment, agents))
 
 def play_game(environment, agents):
-    rounds = 10
     print("\nPlaying game... \n")
-    for _ in range(rounds):
+    while(environment.increase_time()):
         let_agents_vote(agents)
         environment.determine_most_popular_time_slot()
         let_agents_calculate_utility(agents)

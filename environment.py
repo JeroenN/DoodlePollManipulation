@@ -31,6 +31,7 @@ class Environment:
     __time_slots_chosen = [] # How often each time slot is chosen
     __idx_most_popular_time_slot = 0 # The idx of the most poular time slot
     __rank_popularity_time_slots = []
+    __time_step = 0
 
     def __init__(self, number_of_slots=0):
         self.__n_time_slots = number_of_slots
@@ -73,3 +74,13 @@ class Environment:
     def __create_time_slots(self):
         for _ in range(self.__n_time_slots):
             self.__time_slots_chosen.append(0)
+
+    def increase_time(self):
+        if self.__time_step >= 100: 
+            return 0
+        else: 
+            self.__time_step += 1
+            return 1
+
+    def get_time(self):
+        return self.__time_step

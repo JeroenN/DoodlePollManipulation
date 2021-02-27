@@ -11,6 +11,7 @@ class Agent:
     _n_time_slots = 0  # number of time slots
     _time_slots_chosen = [] # The index's of the time slots chosen
     __utility = 0 # The utility that is gained by having the time slots chosen by the environment
+    _voted = False #will keep track of whether an agent has already voted 
 
     __ID = None  # unique identification
 
