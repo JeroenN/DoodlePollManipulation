@@ -1,5 +1,5 @@
 from environment import Environment
-import agent
+import strategies
 
 
 # TODO:
@@ -8,7 +8,9 @@ import agent
 def create_agents(n_agents, environment):
     agents = []
     for i in range(n_agents):
-        agents.append(agent.Standard(environment, i))
+        agents.append(strategies.Standard(environment, i))
+    agents.append(strategies.Popular(environment, 6))
+
     return agents
 
 
@@ -18,7 +20,7 @@ def create_environment(n_time_slots):
 
 def print_game(environment, agents):
     print(environment, '\n')
-    print('\n'.join(map(str, agents)))
+    #print('\n'.join(map(str, agents)))
     # agents[0].print_voted_time_slots()
     # agents[0].print_time_slot_preference()
 
@@ -33,13 +35,19 @@ def let_agents_calculate_utility(agents):
 
 def play_game(environment, agents):
     rounds = 10
+
     for i in range(rounds):
         let_agents_vote(agents)
         environment.determine_most_popular_time_slot()
         let_agents_calculate_utility(agents)
+        environment.reset_time_slots()
     for agent in agents:
         print(f"agent utility {agent.get_utility()}")
 
+    print(environment.get_time_slots())
+    environment.rank_popularity_time_slots()
+    print(environment.get_time_slots())
+    print(environment.initial_idx_time_slots)
 
 def main():
     environment = create_environment(
