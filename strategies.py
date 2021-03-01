@@ -44,18 +44,20 @@ class Popular(Agent):
         Agent.__init__(self, environment, ID)
         environment.rank_popularity_time_slots()
 
-    def vote(self):
+    def __create_list_popular_slots(self):
         self.environment.rank_popularity_time_slots()  # Ranks the time slots from least popular to most popular
 
         # Goes over the last n_slots_consideration and adds the index of those to the array idx_popular_time_slots
         for idx in range(self._n_time_slots - self.__n_slots_consideration, self._n_time_slots):
             self.__popular_time_slots_idx.append(idx)
 
+    def __create_list_preference_popular_slots(self):
         # Makes a new list with the most popular time-slots
         for idx in self.__popular_time_slots_idx:
             preference = self._time_slot_preference[idx]
             self.__popular_time_slots_preference.append(preference)
 
+    def __vote_for_slots_highest_preference(self):
         # Rank in terms of highest preference
         quick_sort.quick_sort(self.__popular_time_slots_preference, self.__popular_time_slots_idx, 0, self.__n_slots_consideration - 1)
 
@@ -63,6 +65,11 @@ class Popular(Agent):
         for idx in range(self.__n_slots_consideration - self.__n_votes, self.__n_slots_consideration):
             self.environment.vote_time_slot(self.__popular_time_slots_idx[idx])
             self._time_slots_chosen.append(self.__popular_time_slots_idx[idx])
+
+    def vote(self):
+        self.__create_list_popular_slots()
+        self.__create_list_preference_popular_slots()
+        self.__vote_for_slots_highest_preference()
 
 
 
