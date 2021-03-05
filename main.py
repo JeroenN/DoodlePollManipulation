@@ -47,26 +47,23 @@ def print_game(environment, agents):
     print('\n'.join(map(str, agents)))
     # get social welfare? + put in graph OR display social welfare over time 
 
-def print_game_results(environment, agents):
+def print_game_results(environment, agents, rounds):
     print("Game ended! \n")
     for agent in agents:
-        print(agent, f", Utility: {agent.get_utility()}")
+        print(agent, f", Strategy: {agent.get_strategy()}, Average utility: {agent.get_utility()/rounds}")
 
-    print(f'\nSocial welfare: ', calculate_social_welfare(environment, agents))
+    print(f'\nSocial welfare: ', calculate_social_welfare(environment, agents)/rounds)
 
 def play_game(environment, agents):
-    let_agents_vote(agents, environment)
-    environment.determine_most_popular_time_slot()
-    let_agents_calculate_utility(agents)
-    environment.reset_time_slots()
-    for agent in agents:
-        print(f"agent utility {agent.get_utility()}")
+    rounds = 100
+    for _ in range(rounds):
+        let_agents_vote(agents, environment)
+        environment.determine_most_popular_time_slot()
+        let_agents_calculate_utility(agents)
+        environment.reset_enviroment(agents)
 
-    print(environment.get_time_slots())
     environment.rank_popularity_time_slots()
-    print(environment.get_time_slots())
-    print(environment.initial_idx_time_slots)
-    print_game_results(environment, agents)
+    print_game_results(environment, agents, rounds)
 
 def main():
     environment = create_environment(
@@ -75,7 +72,6 @@ def main():
                            environment)  # create and store agents
     environment.determine_willingness(agents)
     environment.rank_willingness()
-    #print_game(environment, agents)
     play_game(environment, agents)
 
 

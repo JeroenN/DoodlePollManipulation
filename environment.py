@@ -62,9 +62,12 @@ class Environment:
             self.__time_slots.append(0)
             self.initial_idx_time_slots.append(i)
 
-    def reset_time_slots(self):
+    def reset_enviroment(self, agents):
         for idx in range(len(self.__time_slots)):
             self.__time_slots[idx] = 0
+        # TODO: make the willingness change each round
+        self.determine_willingness(agents)
+        self.rank_willingness()
 
     # Get the willingness from each agent and put it in a list
     def determine_willingness(self, agents):

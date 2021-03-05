@@ -12,6 +12,7 @@ class Standard(Agent):
     def __init__(self, environment, ID):
         Agent.__init__(self, environment, ID)
         self._willingness = random.randint(0,100) #TODO: change to normal distribution
+        self._strategy = "standard"
 
     # vote for a time slot if the time slot preference for that time slot is above the threshold
     # Update also for the particular object that it voted on that specific time slot
@@ -43,6 +44,7 @@ class Popular(Agent):
         Agent.__init__(self, environment, ID)
         environment.rank_popularity_time_slots()
         self._willingness = 99
+        self._strategy = "popular"
 
     def __create_list_popular_slots(self):
         self.environment.rank_popularity_time_slots()  # Ranks the time slots from least popular to most popular
