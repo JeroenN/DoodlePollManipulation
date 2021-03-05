@@ -10,7 +10,6 @@ def create_agents(n_agents, environment):
         agents.append(Standard(environment, i))
     agents.append(strategies.Popular(environment, 6))
 
-
     return agents
 
 
@@ -24,9 +23,12 @@ def print_game(environment, agents):
     # agents[0].print_voted_time_slots()
     # agents[0].print_time_slot_preference()
 
-def let_agents_vote(agents):
-    for agent in agents:
+def let_agents_vote(agents, environment):
+    idx = environment.get_index_agent_willingness()
+    while idx is not None:
+        agent = agents[idx]
         agent.vote()  # Agents vote for their preferred time slots
+        idx = environment.get_index_agent_willingness()
 
 def let_agents_calculate_utility(agents):
     for agent in agents:
@@ -53,13 +55,10 @@ def print_game_results(environment, agents):
     print(f'\nSocial welfare: ', calculate_social_welfare(environment, agents))
 
 def play_game(environment, agents):
-    rounds = 10
-
-    while(environment.increase_time()):
-        let_agents_vote(agents)
-        environment.determine_most_popular_time_slot()
-        let_agents_calculate_utility(agents)
-        environment.reset_time_slots()
+    let_agents_vote(agents, environment)
+    environment.determine_most_popular_time_slot()
+    let_agents_calculate_utility(agents)
+    environment.reset_time_slots()
     for agent in agents:
         print(f"agent utility {agent.get_utility()}")
 
@@ -74,7 +73,9 @@ def main():
         int(input("How many dates are in the Doodle poll?: ")))  # create and store environment
     agents = create_agents(int(input("How many voters are in the Doodle poll?: ")),
                            environment)  # create and store agents
-    print_game(environment, agents)
+    environment.determine_willingness(agents)
+    environment.rank_willingness()
+    #print_game(environment, agents)
     play_game(environment, agents)
 
 

@@ -7,10 +7,12 @@ class Environment:
     __time_slots = []  # How often each time slot is chosen
     initial_idx_time_slots = []  # The initial index of the time slots, when quick sort is used to find the most
                                  # popular time slots the original indexs should still be known
-    __time_slots_chosen = [] # How often each time slot is chosen
-    __idx_most_popular_time_slot = 0 # The idx of the most poular time slot
+    __time_slots_chosen = []  # How often each time slot is chosen
+    __idx_most_popular_time_slot = 0  # The idx of the most poular time slot
     __rank_popularity_time_slots = []
     __time_step = 0
+    __willingness_agents = []
+    __index_agents = []
 
     def __init__(self, number_of_slots=0):
         self.__n_time_slots = number_of_slots
@@ -20,8 +22,13 @@ class Environment:
         return f"Environment with {self.__n_time_slots} time slots"
 
     # This function can be called by an agent to vote for that particular time slot
+    # it also removes the first element from the willingness_agents list
     def vote_time_slot(self, index_time_slot):
         self.__time_slots[index_time_slot] += 1
+
+    def remove_agent_from_voting_list(self):
+        self.__willingness_agents.pop(0)
+        self.__index_agents.pop(0)
 
     # This function can be called by an agent to see how often a time slot is voted for
     def get_time_slots(self):
@@ -59,6 +66,23 @@ class Environment:
         for idx in range(len(self.__time_slots)):
             self.__time_slots[idx] = 0
 
+    # Get the willingness from each agent and put it in a list
+    def determine_willingness(self, agents):
+        for idx in range(len(agents)):
+            agent = agents[idx]
+            self.__willingness_agents.append(agent.get_willingness())
+            self.__index_agents.append(idx)
+
+    # Quick-sort the willingness
+    def rank_willingness(self):
+        n_elements = len(self.__willingness_agents)
+        quick_sort.quick_sort(self.__willingness_agents, self.__index_agents, 0, n_elements - 1)
+
+    def get_index_agent_willingness(self):
+        if self.__index_agents:
+            return self.__index_agents[0]
+        else:
+            return None
 
     def increase_time(self):
         if self.__time_step >= 100: 

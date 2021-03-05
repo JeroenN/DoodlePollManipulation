@@ -12,6 +12,7 @@ class Agent:
     _time_slots_chosen = [] # The index's of the time slots chosen
     __utility = 0 # The utility that is gained by having the time slots chosen by the environment
     _voted = False #will keep track of whether an agent has already voted 
+    _willingness = 0
 
     __ID = None  # unique identification
 
@@ -36,6 +37,9 @@ class Agent:
     # Calculate and return the total utility
     def calculate_utility(self):
         self.__utility += self._time_slot_preference[self.environment.get_most_popular_time_slot()]
+
+    def get_willingness(self):
+        return self._willingness
 
     def get_utility(self):
         return self.__utility
