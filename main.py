@@ -1,14 +1,16 @@
 from environment import Environment
 import strategies
-from strategies import Standard
 
 # Right now this function creates agents with the standard strategy
 # storing these agents might not be necessary anymore because it is stored in the environment now 
-def create_agents(n_agents, environment):
+def create_agents(n_agents, n_pop_agents, environment):
     agents = []
     for i in range(n_agents):
-        agents.append(Standard(environment, i))
-    agents.append(strategies.Popular(environment, 6))
+        agent = strategies.Standard(environment, i)
+        agents.append(agent)
+    for i in range(n_agents):
+        agents.append(strategies.Popular(environment, i+n_agents))
+        agents.append(agent)
 
     return agents
 
@@ -68,7 +70,7 @@ def play_game(environment, agents):
 def main():
     environment = create_environment(
         int(input("How many dates are in the Doodle poll?: ")))  # create and store environment
-    agents = create_agents(int(input("How many voters are in the Doodle poll?: ")),
+    agents = create_agents(int(input("How many standard voters are in the Doodle poll?: ")), int(input("How many popular voters are in the Doodle poll?: ")),
                            environment)  # create and store agents
     environment.determine_willingness(agents)
     environment.rank_willingness()

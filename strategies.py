@@ -2,27 +2,30 @@ from agent import Agent
 import quick_sort
 import random
 from datetime import datetime
+import numpy as np
 
 # This is the standard strategy, agents with this strategy vote for all the time-slots for which the
 # agent has a preference above or equal to the specified threshold
 class Standard(Agent):
-    __threshold = random.random() #TODO: change to normal distribution
-
 
     def __init__(self, environment, ID):
         Agent.__init__(self, environment, ID)
-        self._willingness = random.randint(0,100) #TODO: change to normal distribution
+        self._willingness = np.random.normal(0,50) # I wasn't sure what to set the mean and standard deviation to 
+        self.__threshold = np.random.normal(0, 1)
         self._strategy = "standard"
 
     # vote for a time slot if the time slot preference for that time slot is above the threshold
     # Update also for the particular object that it voted on that specific time slot
     def vote(self):
         for i in range(self._n_time_slots):
-            if self._time_slot_preference[i] >= self.__threshold:
+            if self._time_slot_preference[i] >= self.__threshold and self._voted is False:
                 self.environment.vote_time_slot(i)
                 self._time_slots_chosen.append(i)
                 self._voted = True
         self.environment.remove_agent_from_voting_list()
+
+    def set_willingness(self, ID):
+        self._willingness = np.random.normal(0, 50)
 
 # This is the popular strategy, agents with this strategy look at the most popular time slots and vote for
 # the popular time slots that have the highest preference. For this strategy to work the agent has to wait
