@@ -6,25 +6,27 @@ import environment
 # From this class children classes can be made a use different strategies
 
 class Agent:
-    _time_slot_preference = []  # the time slot preferences of an agent
     environment = environment.Environment()  # the environment that the agent is in
-    _n_time_slots = 0  # number of time slots
-    _time_slots_chosen = [] # The index's of the time slots chosen
-    __utility = 0 # The utility that is gained by having the time slots chosen by the environment
-    _voted = False #will keep track of whether an agent has already voted 
-    _willingness = 0
-    _strategy = ""
-    __ID = None  # unique identification
-
-
     def __init__(self, environment, ID):
+        self.__utility = 0  # The utility that is gained by having the time slots chosen by the environment
+        self._time_slot_preference = [] # the time slot preferences of an agent
+        self._time_slots_chosen = []  # The index's of the time slots chosen
         self.environment = environment  # assign the environment class
         self._n_time_slots = environment.get_n_time_slots()
         self.__create_time_slot_preference()
         self.__ID = ID  # assign an ID
+        self._willingness = 0
+        self._strategy = ""
+        self.__debug()
         
     def __str__(self):
         return f"Basic agent {self.__ID}"
+
+    def get_willingness(self):
+        return self._willingness
+
+    def get_strategy(self):
+        return self._strategy
 
     def print_voted_time_slots(self):
         for time_slot_chosen in self._time_slots_chosen:
@@ -38,12 +40,6 @@ class Agent:
     def calculate_utility(self):
         self.__utility += self._time_slot_preference[self.environment.get_most_popular_time_slot()]
 
-    def get_strategy(self):
-        return self._strategy
-
-    def get_willingness(self):
-        return self._willingness
-
     def get_utility(self):
         return self.__utility
 
@@ -52,13 +48,13 @@ class Agent:
             # creates random value between 0 and 1 and stores this in time_slot_preference
             self._time_slot_preference[i] = random.uniform(0, 1)
 
-    # FIXME: right know for some reason the time slot preference for each agent is the same for the first round
     def __create_time_slot_preference(self):
         for i in range(self._n_time_slots):
             # creates random value between 0 and 1 and stores this in time_slot_preference
             self._time_slot_preference.append(random.uniform(0, 1))
 
-
+    def __debug(self):
+        print(f"agent {self.__ID}: {self._time_slot_preference}")
 
 
 

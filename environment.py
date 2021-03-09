@@ -7,7 +7,6 @@ class Environment:
     __time_slots = []  # How often each time slot is chosen
     initial_idx_time_slots = []  # The initial index of the time slots, when quick sort is used to find the most
                                  # popular time slots the original indexs should still be known
-    __time_slots_chosen = []  # How often each time slot is chosen
     __idx_most_popular_time_slot = 0  # The idx of the most poular time slot
     __rank_popularity_time_slots = []
     __time_step = 0
@@ -42,6 +41,7 @@ class Environment:
     def determine_most_popular_time_slot(self):
         max = 0
         idx = 0
+        #print(self.__time_slots)
         for i in range(len(self.__time_slots)):
             if self.__time_slots[i] > max:
                 max = self.__time_slots[i]
@@ -86,13 +86,6 @@ class Environment:
             return self.__index_agents[0]
         else:
             return None
-
-    def increase_time(self):
-        if self.__time_step >= 100: 
-            return 0
-        else: 
-            self.__time_step += 1
-            return 1
 
     def get_time(self):
         return self.__time_step
