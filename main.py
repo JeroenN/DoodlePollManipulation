@@ -1,6 +1,5 @@
 from environment import Environment
 import strategies
-from strategies import Standard
 import quick_sort
 
 # Right now this function creates agents with the standard strategy
@@ -11,8 +10,7 @@ def create_agents(n_agents, n_pop_agents, environment):
         agent = strategies.Standard(environment, i)
         agents.append(agent)
     for i in range(n_pop_agents):
-        agents.append(strategies.Popular(environment, i+5))
-    #agents.append(strategies.Popular(environment, 6))
+        agents.append(strategies.Popular(environment, i+n_agents))
 
     return agents
 
@@ -75,7 +73,7 @@ def print_game_results(environment, agents, rounds):
     print(f"\nMaximum utility: agent ", welfare_agent_max, " with utility ", welfare_max) # agent with largest utility
 
 def play_game(environment, agents):
-    rounds = 100000
+    rounds = 10000
     for _ in range(rounds):
         let_agents_vote(agents, environment)
         environment.determine_most_popular_time_slot()
@@ -88,7 +86,7 @@ def play_game(environment, agents):
 def main():
     environment = create_environment(
         int(input("How many dates are in the Doodle poll?: ")))  # create and store environment
-    agents = create_agents(int(input("How many voters are in the Doodle poll?: ")), int(input("How many pop voters are in the Doodle poll?: ")),
+    agents = create_agents(int(input("How many standard voters are in the Doodle poll?: ")), int(input("How many popular voters are in the Doodle poll?: ")),
                            environment)  # create and store agents
     environment.determine_willingness(agents)
     environment.rank_willingness()

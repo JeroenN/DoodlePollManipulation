@@ -1,5 +1,6 @@
 import random
 import environment
+import numpy as np
 
 
 # creates the parent class agent. This class contains the time_slot_preference (and maybe more later).
@@ -49,9 +50,9 @@ class Agent:
             self._time_slot_preference[i] = random.uniform(0, 1)
 
     def __create_time_slot_preference(self):
-        for i in range(self._n_time_slots):
-            # creates random value between 0 and 1 and stores this in time_slot_preference
-            self._time_slot_preference.append(random.uniform(0, 1))
+        for _ in range(self._n_time_slots):
+            # creates normally distributed random value with mean 0 and sd 1 and stores this in time_slot_preference
+            self._time_slot_preference.append(np.random.normal(0, 1))
 
     def __debug(self):
         print(f"agent {self.__ID}: {self._time_slot_preference}")
