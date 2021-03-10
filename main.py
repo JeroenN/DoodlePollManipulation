@@ -35,7 +35,7 @@ def let_agents_calculate_utility(agents):
         agent.calculate_utility()
         agent.change_time_slot_preference()
 
-def calculate_social_welfare(environment, agents):
+def calculate_social_welfare(environment, agents, rounds):
     social_welfare = 0
     for agent in agents:
         social_welfare += agent.get_utility()
@@ -47,41 +47,43 @@ def calculate_egalitarian_welfare(agents, rounds):
     welfare_idx = []
 
     for idx, agent in enumerate(agents):
-        welfares.append(agent.get_utility()/rounds)
+        welfares.append(agent.get_utility())
         welfare_idx.append(idx)
 
     quick_sort.quick_sort(welfares, welfare_idx, 0, len(agents)-1)
 
-    return welfares[0], welfare_idx[0], welfares[len(agents)-1], welfare_idx[len(agents)-1]
+    return welfares[0], welfares[len(agents)-1]
 
-def print_game(environment, agents):
-    print(environment, f"and {len(agents)} agents:")
-    print('\n'.join(map(str, agents)))
-    # get social welfare? + put in graph OR display social welfare over time
-
-def print_game_results(environment, agents, rounds):
+def print_game_results(environment, agents, rounds, social_welfare, min_utility, max_utility):
     print("Game ended! \n")
     for agent in agents:
         print(agent, f", Strategy: {agent.get_strategy()}, Average utility: {agent.get_utility()/rounds}")
 
-    social_welfare = calculate_social_welfare(environment, agents)/rounds
-    print(f'\nSocial welfare: ', social_welfare)
-    print(f'\nMean utility; ', social_welfare/len(agents))
+    print(f'\nSocial welfare: ', social_welfare/rounds)
+    print(f'\nMean utility; ', (social_welfare/len(agents))/rounds)
 
-    welfare_min, welfare_agent_min, welfare_max, welfare_agent_max = calculate_egalitarian_welfare(agents, rounds)
-    print(f"\nMinimum utility: agent ", welfare_agent_min, " with utility ", welfare_min) # agent with smallest utility
-    print(f"\nMaximum utility: agent ", welfare_agent_max, " with utility ", welfare_max) # agent with largest utility
+    print(f"\nMinimum utility ", min_utility/rounds) # agent with smallest utility
+    print(f"\nMaximum utility: ", max_utility/rounds) # agent with largest utility
 
 def play_game(environment, agents):
     rounds = 10000
+    social_welfare=0
+    min_utility=0
+    max_utility=0
+    print("Playing game...")
+
     for _ in range(rounds):
         let_agents_vote(agents, environment)
         environment.determine_most_popular_time_slot()
         let_agents_calculate_utility(agents)
+        social_welfare += calculate_social_welfare(environment, agents, rounds)
+        min, max = calculate_egalitarian_welfare(agents, rounds)
+        min_utility += min
+        max_utility += max
         environment.reset_enviroment(agents)
 
     environment.rank_popularity_time_slots()
-    print_game_results(environment, agents, rounds)
+    print_game_results(environment, agents, rounds, social_welfare, min_utility, max_utility)
 
 def main():
     environment = create_environment(

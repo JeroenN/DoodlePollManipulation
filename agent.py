@@ -18,7 +18,7 @@ class Agent:
         self.__ID = ID  # assign an ID
         self._willingness = 0
         self._strategy = ""
-        self.__debug()
+        #self.__debug()
         
     def __str__(self):
         return f"Basic agent {self.__ID}"
@@ -44,6 +44,9 @@ class Agent:
     def get_utility(self):
         return self.__utility
 
+    def reset_utility(self):
+        self.__utility = 0
+
     def change_time_slot_preference(self):
         for i in range(self._n_time_slots):
             # creates random value between 0 and 1 and stores this in time_slot_preference
@@ -52,7 +55,7 @@ class Agent:
     def __create_time_slot_preference(self):
         for _ in range(self._n_time_slots):
             # creates normally distributed random value with mean 0 and sd 1 and stores this in time_slot_preference
-            self._time_slot_preference.append(np.random.normal(0, 1))
+            self._time_slot_preference.append(random.uniform(0, 1))
 
     def __debug(self):
         print(f"agent {self.__ID}: {self._time_slot_preference}")

@@ -68,6 +68,7 @@ class Environment:
         # TODO: make the willingness change each round
         self.determine_willingness(agents)
         self.rank_willingness()
+        self.reset_utilities(agents)
 
     # Get the willingness from each agent and put it in a list
     def determine_willingness(self, agents):
@@ -75,6 +76,10 @@ class Environment:
             agent = agents[idx]
             self.__willingness_agents.append(agent.get_willingness())
             self.__index_agents.append(idx)
+    
+    def reset_utilities(self, agents):
+        for agent in agents: 
+            agent.reset_utility()
 
     # Quick-sort the willingness
     def rank_willingness(self):
