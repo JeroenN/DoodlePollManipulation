@@ -36,7 +36,6 @@ class Standard(Agent):
 # which time slots it should take into consideration.
 class Popular(Agent):
     def __init__(self, environment, ID):
-
         Agent.__init__(self, environment, ID)
         self.__popular_time_slots_idx = []
         self.__popular_time_slots_preference = []
@@ -46,7 +45,6 @@ class Popular(Agent):
         self._willingness = random.randint(80, 100)
         self._strategy = "popular"
         self.__ID = ID
-
 
     def __create_list_popular_slots(self):
         self.environment.rank_popularity_time_slots()  # Ranks the time slots from least popular to most popular
@@ -73,6 +71,12 @@ class Popular(Agent):
     def __debug(self):
         #print(f"preference: {self._time_slot_preference}")
         print(f"popular time slots preference: {self.__popular_time_slots_preference} \n")
+
+    def set_k(self, k):
+        self.__n_slots_consideration = k
+
+    def set_m(self, m):
+        self.__n_votes = m
 
     def vote(self):
         self.__create_list_popular_slots()
