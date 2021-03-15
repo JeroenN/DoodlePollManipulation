@@ -5,7 +5,7 @@ import quick_sort
 class Environment:
     __n_time_slots = 0  # number of time-slots
     __time_slots = []  # How often each time slot is chosen
-    initial_idx_time_slots = []  # The initial index of the time slots, when quick sort is used to find the most
+    __initial_idx_time_slots = []  # The initial index of the time slots, when quick sort is used to find the most
                                  # popular time slots the original indexs should still be known
     __idx_most_popular_time_slot = 0  # The idx of the most poular time slot
     __rank_popularity_time_slots = []
@@ -23,7 +23,11 @@ class Environment:
     # This function can be called by an agent to vote for that particular time slot
     # it also removes the first element from the willingness_agents list
     def vote_time_slot(self, index_time_slot):
-        self.__time_slots[index_time_slot] += 1
+
+        for idx in range(len(self.__initial_idx_time_slots)):
+            if index_time_slot == self.__initial_idx_time_slots[idx]:
+                self.__time_slots[idx] += 1
+                break
 
     def remove_agent_from_voting_list(self):
         self.__willingness_agents.pop(0)
@@ -45,13 +49,16 @@ class Environment:
         for i in range(len(self.__time_slots)):
             if self.__time_slots[i] > max:
                 max = self.__time_slots[i]
-                idx = i
+                idx = self.__initial_idx_time_slots[i]
         self.__idx_most_popular_time_slot = idx
+        #print(f"most popular time slots: {idx}")
 
     # Using quick_sort to sort the time-slots based on popularity
     def rank_popularity_time_slots(self):
         n_elements = len(self.__time_slots)
-        quick_sort.quick_sort(self.__time_slots, self.initial_idx_time_slots, 0, n_elements - 1)
+        quick_sort.quick_sort(self.__time_slots, self.__initial_idx_time_slots, 0, n_elements - 1)
+        #print(self.__time_slots)
+        #print(self.__initial_idx_time_slots)
 
     def get_most_popular_time_slot(self):
         return self.__idx_most_popular_time_slot
@@ -60,7 +67,7 @@ class Environment:
     def __create_time_slots(self):
         for i in range(self.__n_time_slots):
             self.__time_slots.append(0)
-            self.initial_idx_time_slots.append(i)
+            self.__initial_idx_time_slots.append(i)
 
     def reset_enviroment(self, agents):
         for idx in range(len(self.__time_slots)):
@@ -91,6 +98,9 @@ class Environment:
             return self.__index_agents[0]
         else:
             return None
+
+    def get_initial_idx_time_slots(self):
+        return self.__initial_idx_time_slots
 
     def get_time(self):
         return self.__time_step
