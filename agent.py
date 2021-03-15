@@ -10,6 +10,7 @@ class Agent:
     environment = environment.Environment()  # the environment that the agent is in
     def __init__(self, environment, ID):
         self.__utility = 0  # The utility that is gained by having the time slots chosen by the environment
+        self.__total_utility = 0 # the total utility of an agent 
         self._time_slot_preference = [] # the time slot preferences of an agent
         self._time_slots_chosen = []  # The index's of the time slots chosen
         self.environment = environment  # assign the environment class
@@ -40,9 +41,13 @@ class Agent:
     # Calculate and return the total utility
     def calculate_utility(self):
         self.__utility += self._time_slot_preference[self.environment.get_most_popular_time_slot()]
+        self.__total_utility += self.__utility
 
     def get_utility(self):
         return self.__utility
+
+    def get_total_utility(self):
+        return self.__total_utility
 
     def reset_utility(self):
         self.__utility = 0

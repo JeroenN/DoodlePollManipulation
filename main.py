@@ -57,7 +57,7 @@ def calculate_egalitarian_welfare(agents, rounds):
 def print_game_results(environment, agents, rounds, social_welfare, min_utility, max_utility):
     print("Game ended! \n")
     for agent in agents:
-        print(agent, f", Strategy: {agent.get_strategy()}, Average utility: {agent.get_utility()/rounds}")
+        print(agent, f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility()/rounds}")
 
     print(f'\nSocial welfare: ', social_welfare/rounds)
     print(f'\nMean utility; ', (social_welfare/len(agents))/rounds)
