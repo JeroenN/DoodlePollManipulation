@@ -1,6 +1,9 @@
 from environment import Environment
 import strategies
 import quick_sort
+import numpy as np
+from matplotlib import pyplot as plt
+from progress.bar import IncrementalBar
 
 # Right now this function creates agents with the standard strategy
 # storing these agents might not be necessary anymore because it is stored in the environment now 
@@ -115,8 +118,49 @@ def play_km_game(environment, agents, rounds):
     environment.rank_popularity_time_slots()
     print_game_results(environment, agents, rounds, social_welfare, min_utility, max_utility)
 
+def set_threshold_normal_agents(agents, threshold):
+    for agent in agents:
+        if agent.get_strategy() == "standard":
+            agent.set_threshold(threshold)
+
+def print_threshold_results(threshold_welfares):
+    plt.plot(np.arange(0, 1.1, 0.1), threshold_welfares)
+    plt.xlabel('Threshold')
+    plt.ylabel('Social welfare')
+    plt.title('Influence of threshold on social welfare')
+    plt.show()
+    plt.savefig('test.png')
+
+
+def play_threshold_game(environment, agents, rounds):
+    social_welfare=0
+    min_utility=0
+    max_utility=0
+    threshold_welfares=[]
+
+    bar = IncrementalBar('Progress', max = 11)
+
+    for threshold in np.arange(0, 1.1, 0.1): # TODO: change to reflect useful 
+        for _ in range(rounds):
+            set_threshold_normal_agents(agents, threshold)
+            let_agents_vote(agents, environment)
+            environment.determine_most_popular_time_slot()
+            let_agents_calculate_utility(agents)
+            social_welfare += calculate_social_welfare(environment, agents, rounds)
+            min, max = calculate_egalitarian_welfare(agents, rounds)
+            min_utility += min
+            max_utility += max
+            environment.reset_enviroment(agents)
+        threshold_welfares.append(social_welfare/rounds)
+        social_welfare = 0 #reset social welfare between games
+        bar.next()
+     
+    bar.finish()
+    print_threshold_results(threshold_welfares)
+
+
 def play_game(environment, agents):
-    type_of_game = 0  # 0 = normal game, 1 = km game
+    type_of_game = 2  # 0 = normal game, 1 = km game
     rounds = 10000
     print("Playing game...")
 
@@ -124,6 +168,8 @@ def play_game(environment, agents):
         play_normal_game(environment, agents, rounds)
     elif type_of_game == 1:
         play_km_game(environment, agents, rounds)
+    elif type_of_game == 2: 
+        play_threshold_game(environment, agents, rounds)
 
 def main():
     environment = create_environment(
