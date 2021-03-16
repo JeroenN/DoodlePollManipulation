@@ -121,7 +121,6 @@ def play_km_game(environment, agents, rounds):
         for m in range(k, max_m):
             set_km_popular_agents(agents, k, m)
             for _ in range(rounds):
-                set_km_popular_agents(agents)
                 let_agents_vote(agents, environment)
                 environment.determine_most_popular_time_slot()
                 let_agents_calculate_utility(agents)
