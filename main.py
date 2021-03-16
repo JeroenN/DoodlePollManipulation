@@ -1,4 +1,5 @@
 from environment import Environment
+import plots
 import strategies
 import quick_sort
 import numpy as np
@@ -85,6 +86,24 @@ def print_game_results_multiple_runs(agents, rounds, social_welfare_scores, min_
 
         print(f"popular agent utility: ", popular_agent_utility[idx]/rounds, "\n")
 
+def print_agent_slot_game_results(agents, rounds, social_welfare_scores, min_utility_scores, max_utility_scores,
+                                  agents_per_run, slots_per_run):
+    print("Game ended! \n")
+    for agent in agents:
+        print(agent, f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility()/rounds}")
+
+    for idx in range(len(social_welfare_scores)):
+        print(f"n_agents: ", agents_per_run[idx])
+        print(f"n_slots: ", slots_per_run[idx])
+        print(f'Social welfare: ', social_welfare_scores[idx]/rounds)
+        n_agents = agents_per_run[idx]
+        print(f'Mean utility; ', (social_welfare_scores[idx] / n_agents / rounds))
+
+        print(f"Minimum utility ", min_utility_scores[idx]/rounds) # agent with smallest utility
+        print(f"Maximum utility: ", max_utility_scores[idx]/rounds) # agent with largest utility
+
+
+
 # If this is chosen the program is only run once, thus no parameters are changed
 def play_normal_game(environment, agents, rounds):
     social_welfare=0
@@ -110,6 +129,57 @@ def set_km_popular_agents(agents, k, m):
             agent.set_k(k)
             agent.set_m(m)
 
+def set_number_of_agents(environment, agents, n_agents):
+    agents.clear()  # TODO: make this more efficient, should not be cleared every time
+    for i in range(n_agents):
+        agent = strategies.Standard(environment, i)
+        agents.append(agent)
+
+def play_agent_slot_game(environment, agents, rounds):
+    social_welfare=0
+    min_utility=0
+    max_utility=0
+
+    max_agents = 30
+    max_slots = 30
+
+    social_welfare_scores = []
+    min_utility_scores = []
+    max_utility_scores = []
+    slots_per_run = []
+    agents_per_run = []
+    mean_utility = []
+
+    for n_agents in range(1, max_agents + 1):
+        for n_slots in range(1, max_slots + 1):
+            set_number_of_agents(environment, agents, n_agents)
+            environment.change_time_slots(n_slots)
+            for _ in range(rounds):
+                let_agents_vote(agents, environment)
+                environment.determine_most_popular_time_slot()
+                let_agents_calculate_utility(agents)
+                social_welfare += calculate_social_welfare(environment, agents, rounds)
+                min, max = calculate_egalitarian_welfare(agents, rounds)
+                min_utility += min
+                max_utility += max
+                environment.reset_enviroment(agents)
+
+            slots_per_run.append(n_slots)
+            agents_per_run.append(n_agents)
+            social_welfare_scores.append(social_welfare)
+            min_utility_scores.append(min_utility)
+            max_utility_scores.append(max_utility)
+            social_welfare = 0
+            min_utility = 0
+            max_utility = 0
+
+    environment.rank_popularity_time_slots()
+    print_agent_slot_game_results(agents, rounds, social_welfare_scores, min_utility_scores, max_utility_scores, agents_per_run, slots_per_run)
+    for idx in range(len(social_welfare_scores)):
+        n_agents = agents_per_run[idx]
+        mean_utility.append(social_welfare_scores[idx] / n_agents / rounds)
+    plots.plot_agents_slots_mean_utility(agents_per_run, slots_per_run, min_utility_scores, max_agents, max_slots)
+
 # If this is chosen the program will run of multiple rounds, each round either k (the number of slots the popular agent takes in consideration) or m (the number of votes the popular agents casts) is changed
 def play_km_game(environment, agents, rounds):
     social_welfare = 0
@@ -124,7 +194,6 @@ def play_km_game(environment, agents, rounds):
     popular_agent_utility = []
     list_k = []
     list_m = []
-
 
     for k in range(1, max_k):
         for m in range(k, max_m):
@@ -152,7 +221,6 @@ def play_km_game(environment, agents, rounds):
             social_welfare = 0
             min_utility = 0
             max_utility = 0
-
 
     environment.rank_popularity_time_slots()
     print_game_results_multiple_runs(agents, rounds, social_welfare_scores, min_utility_scores, max_utility_scores,
@@ -231,16 +299,18 @@ def play_threshold_game(environment, agents, rounds):
 # Chooses which type of game is going to be played
 def play_game(environment, agents):
 
-    type_of_game = 1  # 0 = normal game, 1 = km game, 2 = threshold game
-    rounds = 1000
+    game_type = 2 # 0 = normal game, 1 = km game, 2 = threshold game
+    rounds = 100000
     print("Playing game...")
 
-    if type_of_game == 0:
+    if game_type == 0:
         play_normal_game(environment, agents, rounds)
-    elif type_of_game == 1:
+    elif game_type == 1:
         play_km_game(environment, agents, rounds)
-    elif type_of_game == 2: 
+    elif game_type == 2:
         play_threshold_game(environment, agents, rounds)
+    elif game_type == 3:
+        play_agent_slot_game(environment, agents, rounds)
 
 def main():
     environment = create_environment(

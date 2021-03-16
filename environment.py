@@ -69,6 +69,15 @@ class Environment:
             self.__time_slots.append(0)
             self.__initial_idx_time_slots.append(i)
 
+    def change_time_slots(self, n_time_slots):
+        self.__n_time_slots = n_time_slots
+        self.__time_slots.clear()  # TODO: make this more efficient, should not be changed every time
+        self.__initial_idx_time_slots.clear()  # Probably not necessary
+
+        for i in range(self.__n_time_slots):
+            self.__time_slots.append(0)
+            self.__initial_idx_time_slots.append(i)
+
     def reset_enviroment(self, agents):
         for idx in range(len(self.__time_slots)):
             self.__time_slots[idx] = 0
