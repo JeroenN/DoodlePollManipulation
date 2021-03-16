@@ -13,7 +13,7 @@ def partition(arr, idx, low, high):
     idx[i + 1], idx[high] = idx[high], idx[i + 1]
     return i + 1
 
-# Sorts from low to high
+#sorts from low to high 
 def quick_sort(arr, idx, low, high):
     if low < high:
         pi = partition(arr, idx, low, high)
