@@ -118,7 +118,7 @@ def play_km_game(environment, agents, rounds):
     max_utility_scores = []
 
     for k in range(1, max_k):
-        for m in range(1, max_m):
+        for m in range(k, max_m):
             set_km_popular_agents(agents, k, m)
             for _ in range(rounds):
                 set_km_popular_agents(agents)
