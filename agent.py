@@ -43,6 +43,9 @@ class Agent:
         self.__utility += self._time_slot_preference[self.environment.get_most_popular_time_slot()]
         self.__total_utility += self.__utility
 
+    def reset_total_utility(self):
+        self.__total_utility = 0
+
     def get_utility(self):
         return self.__utility
 

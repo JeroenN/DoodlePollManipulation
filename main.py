@@ -66,17 +66,22 @@ def print_game_results(environment, agents, rounds, social_welfare, min_utility,
     print(f"\nMaximum utility: ", max_utility/rounds) # agent with largest utility
 
 
-def print_game_results_multiple_runs(agents, rounds, social_welfare_scores, min_utility_scores, max_utility_scores):
+def print_game_results_multiple_runs(agents, rounds, social_welfare_scores, min_utility_scores, max_utility_scores,
+                                     popular_agent_utility, list_k, list_m):
     print("Game ended! \n")
     for agent in agents:
         print(agent, f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility()/rounds}")
 
     for idx in range(len(social_welfare_scores)):
-        print(f'\nSocial welfare: ', social_welfare_scores[idx]/rounds)
-        print(f'\nMean utility; ', (social_welfare_scores[idx]/len(agents))/rounds)
+        print(f"n_votes: ", list_k[idx])
+        print(f"n_considerations: ", list_m[idx])
+        print(f'Social welfare: ', social_welfare_scores[idx]/rounds)
+        print(f'Mean utility; ', (social_welfare_scores[idx]/len(agents))/rounds)
 
-        print(f"\nMinimum utility ", min_utility_scores[idx]/rounds) # agent with smallest utility
-        print(f"\nMaximum utility: ", max_utility_scores[idx]/rounds) # agent with largest utility
+        print(f"Minimum utility ", min_utility_scores[idx]/rounds) # agent with smallest utility
+        print(f"Maximum utility: ", max_utility_scores[idx]/rounds) # agent with largest utility
+
+        print(f"popular agent utility: ", popular_agent_utility[idx]/rounds, "\n")
 
 # If this is chosen the program is only run once, thus no parameters are changed
 def play_normal_game(environment, agents, rounds):
@@ -102,20 +107,22 @@ def set_km_popular_agents(agents, k, m):
         if agent.get_strategy() == "popular":
             agent.set_k(k)
             agent.set_m(m)
-            #print(f"k {k}")
-            #print(f"m {m}")
 
 # If this is chosen the program will run of multiple rounds, each round either k (the number of slots the popular agent takes in consideration) or m (the number of votes the popular agents casts) is changed
 def play_km_game(environment, agents, rounds):
-    social_welfare=0
-    min_utility=0
-    max_utility=0
-    max_k = 5
-    max_m = 5
+    social_welfare = 0
+    min_utility = 0
+    max_utility = 0
+    max_k = 10
+    max_m = 10
 
     social_welfare_scores = []
     min_utility_scores = []
     max_utility_scores = []
+    popular_agent_utility = []
+    list_k = []
+    list_m = []
+
     for k in range(1, max_k):
         for m in range(k, max_m):
             set_km_popular_agents(agents, k, m)
@@ -128,6 +135,14 @@ def play_km_game(environment, agents, rounds):
                 min_utility += min
                 max_utility += max
                 environment.reset_enviroment(agents)
+
+            for agent in agents:
+                if agent.get_strategy() == "popular":
+                    popular_agent_utility.append(agent.get_total_utility())
+                    agent.reset_total_utility()
+
+            list_k.append(k)
+            list_m.append(m)
             social_welfare_scores.append(social_welfare)
             min_utility_scores.append(min_utility)
             max_utility_scores.append(max_utility)
@@ -135,11 +150,14 @@ def play_km_game(environment, agents, rounds):
             min_utility = 0
             max_utility = 0
 
-    environment.rank_popularity_time_slots()
-    print_game_results_multiple_runs(agents, rounds, social_welfare_scores, min_utility_scores, max_utility_scores)
 
+    environment.rank_popularity_time_slots()
+    print_game_results_multiple_runs(agents, rounds, social_welfare_scores, min_utility_scores, max_utility_scores,
+                                     popular_agent_utility, list_k, list_m)
+
+# Chooses which type of game is going to be played
 def play_game(environment, agents):
-    type_of_game = 0  # 0 = normal game, 1 = km game
+    type_of_game = 1  # 0 = normal game, 1 = km game
     rounds = 1000
     print("Playing game...")
 
