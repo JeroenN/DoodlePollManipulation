@@ -68,6 +68,18 @@ def print_game_results(environment, agents, rounds, social_welfare, min_utility,
     print(f"\nMinimum utility ", min_utility/rounds) # agent with smallest utility
     print(f"\nMaximum utility: ", max_utility/rounds) # agent with largest utility
 
+def print_game_results_multiple_runs(agents, rounds, social_welfare_scores, min_utility_scores, max_utility_scores):
+    print("Game ended! \n")
+    for agent in agents:
+        print(agent, f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility()/rounds}")
+
+    for idx in range(len(social_welfare_scores)):
+        print(f'\nSocial welfare: ', social_welfare_scores[idx]/rounds)
+        print(f'\nMean utility; ', (social_welfare_scores[idx]/len(agents))/rounds)
+
+        print(f"\nMinimum utility ", min_utility_scores[idx]/rounds) # agent with smallest utility
+        print(f"\nMaximum utility: ", max_utility_scores[idx]/rounds) # agent with largest utility
+
 # If this is chosen the program is only run once, thus no parameters are changed
 def play_normal_game(environment, agents, rounds):
     social_welfare=0
@@ -101,6 +113,10 @@ def play_km_game(environment, agents, rounds):
     max_k = 5
     max_m = 5
 
+    social_welfare_scores = []
+    min_utility_scores = []
+    max_utility_scores = []
+
     for k in range(1, max_k):
         for m in range(1, max_m):
             set_km_popular_agents(agents, k, m)
@@ -114,6 +130,12 @@ def play_km_game(environment, agents, rounds):
                 min_utility += min
                 max_utility += max
                 environment.reset_enviroment(agents)
+            social_welfare_scores.append(social_welfare)
+            min_utility_scores.append(min_utility)
+            max_utility_scores.append(max_utility)
+            social_welfare = 0
+            min_utility = 0
+            max_utility = 0
 
     environment.rank_popularity_time_slots()
     print_game_results(environment, agents, rounds, social_welfare, min_utility, max_utility)
@@ -176,7 +198,7 @@ def play_threshold_game(environment, agents, rounds):
 
 def play_game(environment, agents):
     type_of_game = 2  # 0 = normal game, 1 = km game
-    rounds = 10000
+    rounds = 1000
     print("Playing game...")
 
     if type_of_game == 0:
