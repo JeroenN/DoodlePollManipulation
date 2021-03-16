@@ -144,25 +144,38 @@ def set_threshold_normal_agents(agents, threshold):
         if agent.get_strategy() == "standard":
             agent.set_threshold(threshold)
 
-def print_threshold_results(threshold_welfares_standard, threshold_welfares_popular):
-    price_of_anarchy=[]
+def print_threshold_results(threshold_welfares_standard, threshold_welfares_popular, game_type):
 
-    for i in range(0, 11):
-        price_of_anarchy.append(threshold_welfares_popular[i]/threshold_welfares_standard[i])
+    if game_type == 1: 
+        plt.plot(np.arange(0, 1.1, 0.1), threshold_welfares_standard)
+        plt.xlabel('Threshold')
+        plt.ylabel('Social welfare')
+        plt.title('Influence of threshold on social welfare')
+        plt.show()
+        plt.savefig('social_welfare_threshold.png')
+    elif game_type == 2: 
+        price_of_anarchy=[]
 
-    plt.plot(np.arange(0, 1.1, 0.1), price_of_anarchy)
-    plt.xlabel('Threshold')
-    plt.ylabel('Social welfare')
-    plt.title('Influence of threshold on social welfare')
-    plt.show()
-    plt.savefig('test.png')
+        for i in range(0, 11):
+            price_of_anarchy.append(threshold_welfares_standard[i]/threshold_welfares_popular[i])
+
+        plt.plot(np.arange(0, 1.1, 0.1), price_of_anarchy)
+        plt.xlabel('Threshold')
+        plt.ylabel('Price of Anarchy')
+        plt.title('Influence of threshold on price of anarchy')
+        plt.show()
+        plt.savefig('price_of_anarchy_threshold.png')
 
 def play_threshold_game(environment, agents, rounds):
     social_welfare=0
     threshold_welfares_standard=[]
     threshold_welfares_popular=[]
+    game_type = 2 # 1 = social welfare,  2 = price of anarchy
 
-    bar = IncrementalBar('Progress', max = 22)
+    if game_type == 1:
+        bar = IncrementalBar('Progress', max = 11)
+    elif game_type == 2:
+        bar = IncrementalBar('Progress', max = 22)
 
     for threshold in np.arange(0, 1.1, 0.1): # TODO: change to reflect useful 
         for _ in range(rounds):
@@ -176,28 +189,29 @@ def play_threshold_game(environment, agents, rounds):
         social_welfare = 0 #reset social welfare between games
         bar.next()
 
-    environment = create_environment(10)
-    agents = create_agents(0, 10, environment)
-    social_welfare=0
-    for threshold in np.arange(0, 1.1, 0.1): # TODO: change to reflect useful 
-        for _ in range(rounds):
-            set_threshold_normal_agents(agents, threshold)
-            let_agents_vote(agents, environment)
-            environment.determine_most_popular_time_slot()
-            let_agents_calculate_utility(agents)
-            social_welfare += calculate_social_welfare(environment, agents, rounds)
-            environment.reset_enviroment(agents)
-        threshold_welfares_popular.append(social_welfare/rounds)
-        social_welfare = 0 #reset social welfare between games
-        bar.next()
+    if game_type == 2: 
+        environment = create_environment(10)
+        agents = create_agents(0, 10, environment)
+        social_welfare=0
+        for threshold in np.arange(0, 1.1, 0.1): # TODO: change to reflect useful 
+            for _ in range(rounds):
+                set_threshold_normal_agents(agents, threshold)
+                let_agents_vote(agents, environment)
+                environment.determine_most_popular_time_slot()
+                let_agents_calculate_utility(agents)
+                social_welfare += calculate_social_welfare(environment, agents, rounds)
+                environment.reset_enviroment(agents)
+            threshold_welfares_popular.append(social_welfare/rounds)
+            social_welfare = 0 #reset social welfare between games
+            bar.next()
     
     bar.finish()
-    print_threshold_results(threshold_welfares_standard, threshold_welfares_popular)
+    print_threshold_results(threshold_welfares_standard, threshold_welfares_popular, game_type)
 
 
 def play_game(environment, agents):
     type_of_game = 2  # 0 = normal game, 1 = km game
-    rounds = 1000
+    rounds = 10000
     print("Playing game...")
 
     if type_of_game == 0:

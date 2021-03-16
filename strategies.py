@@ -24,6 +24,9 @@ class Standard(Agent):
                 self._time_slots_chosen.append(i)
         self.environment.remove_agent_from_voting_list()
 
+    def set_threshold(self, threshold):
+        self.__threshold = threshold
+
 # This is the popular strategy, agents with this strategy look at the most popular time slots and vote for
 # the popular time slots that have the highest preference. For this strategy to work the agent has to wait
 # for other agents to vote.
