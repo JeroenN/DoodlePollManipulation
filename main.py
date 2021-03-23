@@ -260,8 +260,8 @@ def play_threshold_game(environment, agents, rounds):
         bar.next()
 
     if game_type == 2: 
-        environment = create_environment(10)
         agents = create_agents(0, 10, environment)
+        environment.reset_enviroment(agents)
         social_welfare=0
         for threshold in np.arange(0, 1.1, 0.1): # TODO: change to reflect useful 
             for _ in range(rounds):
@@ -281,12 +281,37 @@ def play_threshold_game(environment, agents, rounds):
     bar.finish()
     plots.plot_threshold_results(threshold_welfares_standard, threshold_welfares_popular, threshold_egalitarian_standard, threshold_egalitarian_popular, game_type)
 
+def play_type_of_agent_game(environment, rounds):
+    n_of_agents = 100
+    social_welfare=0
+    egalitarian_welfare=0
+    agent_welfares=[]
+    agent_egalitarian=[]
 
+    bar = IncrementalBar('Progress', max = n_of_agents+1)
+
+    for i in range(0,n_of_agents+1):
+        agents = create_agents(n_of_agents-i, i, environment) #create agents 
+        environment.reset_enviroment(agents)
+        for _ in range(rounds):
+            let_agents_vote(agents, environment)
+            environment.determine_most_popular_time_slot()
+            let_agents_calculate_utility(agents)
+            social_welfare += calculate_social_welfare(environment, agents, rounds)
+            egalitarian_welfare += calculate_egalitarian_welfare(agents, rounds)[0]
+            environment.reset_enviroment(agents)
+        agent_welfares.append((social_welfare/rounds)/n_of_agents)
+        agent_egalitarian.append(egalitarian_welfare/rounds)
+        social_welfare = 0 #reset social welfare between games
+        egalitarian_welfare = 0 #reset egalitarian welfare between games 
+        bar.next()
+    bar.finish()
+    plots.plot_agent_results(agent_welfares, agent_egalitarian, n_of_agents)
+    
 # Chooses which type of game is going to be played
 def play_game(environment, agents):
-
-    game_type = 2 # 0 = normal game, 1 = km game, 2 = threshold game
-    rounds = 1000
+    game_type = 4 # 0 = normal game, 1 = km game, 2 = threshold game, 3 = agent slot game, 4 = type of agent game
+    rounds = 10000
     print("Playing game...")
 
     if game_type == 0:
@@ -297,6 +322,8 @@ def play_game(environment, agents):
         play_threshold_game(environment, agents, rounds)
     elif game_type == 3:
         play_agent_slot_game(environment, agents, rounds)
+    elif game_type == 4: 
+        play_type_of_agent_game(environment, rounds)
 
 def main():
     environment = create_environment(

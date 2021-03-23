@@ -58,3 +58,17 @@ def plot_threshold_results(threshold_welfares_standard, threshold_welfares_popul
         plt.title('Influence of threshold on price of anarchy in terms of egalitarian welfare')
         plt.show()
         plt.savefig('price_of_anarchy_egalitarian_threshold.png')
+
+def plot_agent_results(agent_welfares, agent_egalitarian, n_of_agents):
+    plt.plot(range(0, n_of_agents+1), agent_welfares)
+    plt.xlabel('Number of popular agents')
+    plt.ylabel('Mean utility')
+    plt.show()
+    plt.savefig(f'agents_social_welfare_{n_of_agents}.png')
+    plt.clf()
+
+    plt.plot(range(0, n_of_agents+1), agent_egalitarian)
+    plt.xlabel(f'Number of popular agents out of {n_of_agents}')
+    plt.ylabel('Egalitarian welfare')
+    plt.show()
+    plt.savefig(f'agents_egalitarian_welfare_{n_of_agents}.png')
