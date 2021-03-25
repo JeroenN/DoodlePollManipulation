@@ -2,6 +2,7 @@ from environment import Environment
 import plots
 import strategies
 import quick_sort
+import games
 import numpy as np
 from matplotlib import pyplot as plt
 from progress.bar import IncrementalBar
@@ -39,7 +40,7 @@ def let_agents_calculate_utility(agents):
         agent.calculate_utility()
         agent.change_time_slot_preference()
 
-def calculate_social_welfare(environment, agents, rounds):
+def calculate_social_welfare(agents):
     social_welfare = 0
     for agent in agents:
         social_welfare += agent.get_utility()
@@ -135,10 +136,23 @@ def set_number_of_agents(environment, agents, n_agents):
         agent = strategies.Standard(environment, i)
         agents.append(agent)
 
+def create_list_mean_utility_varying_agents_per_run(social_welfare_scores, agents_per_run, rounds):
+    mean_utility = []
+    for idx in range(len(social_welfare_scores)):
+        n_agents = agents_per_run[idx]
+        mean_utility.append(social_welfare_scores[idx] / n_agents / rounds)
+    return mean_utility
+
+def create_list_mean_utility(social_welfare_scores, n_agents, rounds):
+    mean_utility = []
+    for idx in range(len(social_welfare_scores)):
+        mean_utility.append(social_welfare_scores[idx] / n_agents / rounds)
+    return mean_utility
+
 def play_agent_slot_game(environment, agents, rounds):
-    social_welfare=0
-    min_utility=0
-    max_utility=0
+    social_welfare = 0
+    min_utility = 0
+    max_utility = 0
 
     max_agents = 30
     max_slots = 30
@@ -148,7 +162,6 @@ def play_agent_slot_game(environment, agents, rounds):
     max_utility_scores = []
     slots_per_run = []
     agents_per_run = []
-    mean_utility = []
 
     for n_agents in range(1, max_agents + 1):
         for n_slots in range(1, max_slots + 1):
@@ -175,13 +188,12 @@ def play_agent_slot_game(environment, agents, rounds):
 
     environment.rank_popularity_time_slots()
     print_agent_slot_game_results(agents, rounds, social_welfare_scores, min_utility_scores, max_utility_scores, agents_per_run, slots_per_run)
-    for idx in range(len(social_welfare_scores)):
-        n_agents = agents_per_run[idx]
-        mean_utility.append(social_welfare_scores[idx] / n_agents / rounds)
-    plots.plot_agents_slots_mean_utility(agents_per_run, slots_per_run, min_utility_scores, max_agents, max_slots)
+    mean_utility = create_list_mean_utility_varying_agents_per_run(social_welfare_scores, agents_per_run, rounds)
+    plots.plot_3d_graph(agents_per_run, slots_per_run, mean_utility, max_agents, max_slots, 'agents', 'slots',
+                        'mean_utility', 'mean utility based on agents and time slots')
 
 # If this is chosen the program will run of multiple rounds, each round either k (the number of slots the popular agent takes in consideration) or m (the number of votes the popular agents casts) is changed
-def play_km_game(environment, agents, rounds):
+def play_km_game(environment, agents, rounds, n_popular_agents=1):
     social_welfare = 0
     min_utility = 0
     max_utility = 0
@@ -196,17 +208,18 @@ def play_km_game(environment, agents, rounds):
     list_m = []
 
     for k in range(1, max_k):
-        for m in range(k, max_m):
-            set_km_popular_agents(agents, k, m)
-            for _ in range(rounds):
-                let_agents_vote(agents, environment)
-                environment.determine_most_popular_time_slot()
-                let_agents_calculate_utility(agents)
-                social_welfare += calculate_social_welfare(environment, agents, rounds)
-                min, max = calculate_egalitarian_welfare(agents, rounds)
-                min_utility += min
-                max_utility += max
-                environment.reset_enviroment(agents)
+        for m in range(1, max_m):
+            if not k > m:
+                set_km_popular_agents(agents, k, m)
+                for _ in range(rounds):
+                    let_agents_vote(agents, environment)
+                    environment.determine_most_popular_time_slot()
+                    let_agents_calculate_utility(agents)
+                    social_welfare += calculate_social_welfare(environment, agents, rounds)
+                    min, max = calculate_egalitarian_welfare(agents, rounds)
+                    min_utility += min
+                    max_utility += max
+                    environment.reset_enviroment(agents)
 
             for agent in agents:
                 if agent.get_strategy() == "popular":
@@ -225,6 +238,9 @@ def play_km_game(environment, agents, rounds):
     environment.rank_popularity_time_slots()
     print_game_results_multiple_runs(agents, rounds, social_welfare_scores, min_utility_scores, max_utility_scores,
                                      popular_agent_utility, list_k, list_m)
+    mean_utility = create_list_mean_utility(popular_agent_utility, n_popular_agents, rounds)
+    plots.plot_3d_graph_cutoff(list_k, list_m, mean_utility, max_k-1, max_m-1, 'votes per agent',
+                        'slots taken into consideration per agent', 'mean utility', 'mean utility with popular strategy')
 
 def set_threshold_normal_agents(agents, threshold):
     for agent in agents:
@@ -233,38 +249,47 @@ def set_threshold_normal_agents(agents, threshold):
 
 def print_threshold_results(threshold_welfares_standard, threshold_welfares_popular, game_type):
 
-    if game_type == 1: 
-        plt.plot(np.arange(0, 1.1, 0.1), threshold_welfares_standard)
+    if game_type == 1:
+        plt.plot(np.arange(0, 1.01, 0.01), threshold_welfares_standard)
         plt.xlabel('Threshold')
         plt.ylabel('Social welfare')
         plt.title('Influence of threshold on social welfare')
         plt.show()
         plt.savefig('social_welfare_threshold.png')
-    elif game_type == 2: 
+    elif game_type == 2:
         price_of_anarchy=[]
 
         for i in range(0, 11):
             price_of_anarchy.append(threshold_welfares_standard[i]/threshold_welfares_popular[i])
 
-        plt.plot(np.arange(0, 1.1, 0.1), price_of_anarchy)
+        plt.plot(np.arange(0, 1.1, 0.01), price_of_anarchy)
         plt.xlabel('Threshold')
         plt.ylabel('Price of Anarchy')
         plt.title('Influence of threshold on price of anarchy')
         plt.show()
         plt.savefig('price_of_anarchy_threshold.png')
 
+def print_max_threshold(threshold_welfares_standard):
+    max = 0
+    index = 0
+    for idx in range(len(threshold_welfares_standard)):
+        if max < threshold_welfares_standard[idx]:
+            max = threshold_welfares_standard[idx]
+            index = idx
+    print(f"max welfare: ", max, "threshold: ", index/len(threshold_welfares_standard))
+
 def play_threshold_game(environment, agents, rounds):
-    social_welfare=0
-    threshold_welfares_standard=[]
-    threshold_welfares_popular=[]
-    game_type = 2 # 1 = social welfare,  2 = price of anarchy
+    social_welfare = 0
+    threshold_welfares_standard = []
+    threshold_welfares_popular = []
+    game_type = 1 # 1 = social welfare,  2 = price of anarchy
 
     if game_type == 1:
         bar = IncrementalBar('Progress', max = 11)
     elif game_type == 2:
         bar = IncrementalBar('Progress', max = 22)
 
-    for threshold in np.arange(0, 1.1, 0.1): # TODO: change to reflect useful 
+    for threshold in np.arange(0, 1.01, 0.01): # TODO: change to reflect useful
         for _ in range(rounds):
             set_threshold_normal_agents(agents, threshold)
             let_agents_vote(agents, environment)
@@ -279,8 +304,8 @@ def play_threshold_game(environment, agents, rounds):
     if game_type == 2: 
         environment = create_environment(10)
         agents = create_agents(0, 10, environment)
-        social_welfare=0
-        for threshold in np.arange(0, 1.1, 0.1): # TODO: change to reflect useful 
+        social_welfare = 0
+        for threshold in np.arange(0, 1.1, 0.01): # TODO: change to reflect useful
             for _ in range(rounds):
                 set_threshold_normal_agents(agents, threshold)
                 let_agents_vote(agents, environment)
@@ -289,24 +314,26 @@ def play_threshold_game(environment, agents, rounds):
                 social_welfare += calculate_social_welfare(environment, agents, rounds)
                 environment.reset_enviroment(agents)
             threshold_welfares_popular.append(social_welfare/rounds)
-            social_welfare = 0 #reset social welfare between games
+            social_welfare = 0  #reset social welfare between games
             bar.next()
     
     bar.finish()
+    print_max_threshold(threshold_welfares_standard)
     print_threshold_results(threshold_welfares_standard, threshold_welfares_popular, game_type)
 
 
 # Chooses which type of game is going to be played
 def play_game(environment, agents):
 
-    game_type = 2 # 0 = normal game, 1 = km game, 2 = threshold game
-    rounds = 100000
+    game_type = 1  # 0 = normal game, 1 = km game, 2 = threshold game
+    rounds = 50000
     print("Playing game...")
 
     if game_type == 0:
         play_normal_game(environment, agents, rounds)
     elif game_type == 1:
-        play_km_game(environment, agents, rounds)
+        games.km(agents, environment, 4, 4)
+        #play_km_game(environment, agents, rounds)
     elif game_type == 2:
         play_threshold_game(environment, agents, rounds)
     elif game_type == 3:

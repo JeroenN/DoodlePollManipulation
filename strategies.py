@@ -10,9 +10,9 @@ class Standard(Agent):
 
     def __init__(self, environment, ID):
         Agent.__init__(self, environment, ID)
-        self.__threshold = 0.7 # TODO: change to normal distribution
+        self.__threshold = 0.55  # TODO: change to normal distribution
         self.__ID = ID
-        self._willingness = random.uniform(0, 80) # I wasn't sure what to set the mean and standard deviation to
+        self._willingness = random.uniform(0, 80)  # I wasn't sure what to set the mean and standard deviation to
         self._strategy = "standard"
 
     # vote for a time slot if the time slot preference for that time slot is above the threshold

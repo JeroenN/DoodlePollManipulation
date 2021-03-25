@@ -6,7 +6,7 @@ class Environment:
     __n_time_slots = 0  # number of time-slots
     __time_slots = []  # How often each time slot is chosen
     __initial_idx_time_slots = []  # The initial index of the time slots, when quick sort is used to find the most
-                                 # popular time slots the original indexs should still be known
+                                   # popular time slots the original indexs should still be known
     __idx_most_popular_time_slot = 0  # The idx of the most poular time slot
     __rank_popularity_time_slots = []
     __time_step = 0
