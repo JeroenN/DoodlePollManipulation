@@ -78,6 +78,8 @@ class Environment:
             self.__time_slots.append(0)
             self.__initial_idx_time_slots.append(i)
 
+    # Reset all the time slots to zero votes, set the willingness of the agents
+    # rank the agents in terms of willingness and reset the utilities of the agents
     def reset_enviroment(self, agents):
         for idx in range(len(self.__time_slots)):
             self.__time_slots[idx] = 0
