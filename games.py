@@ -16,9 +16,9 @@ class Games:
         self._n_agents = 0
         self._n_standard_agents = 0
         self._n_popular_agents = 0
-        self._mean_utility = []
+        self._mean_utility_popular_agents = []
 
-        self._calculate_number_of_agents() # Determine how many agents there are of each type
+        self._calculate_number_of_agents()  # Determine how many agents there are of each type
 
     # Go through all the actions that have to be taken each round
     # 1. let the agents vote, 2. let the agents calculate the utility
@@ -48,9 +48,9 @@ class Games:
     # Calculate how much agents there are of each type, also caclulate the total number of agents
     def _calculate_number_of_agents(self):
         for agent in self._agents:
-            if agent.get_strategy == 'standard':
+            if agent.get_strategy() == "standard":
                 self._n_standard_agents += 1
-            if agent.get_strategy == 'popular':
+            if agent.get_strategy() == "popular":
                 self._n_popular_agents += 1
         self._n_agents = len(self._agents)
 
@@ -90,16 +90,13 @@ class Games:
         self._min_utility += welfares[0]
         self._max_utility += welfares[self._n_agents - 1]
 
-    # calculates the mean utility and then adds it to list mean_utility
-    def _create_list_mean_utility(self, n_runs):
-        print(f"agents: ", len(self._agents))
-        print(f"rounds: ", self._rounds)
+    # calculates the mean utility of the popular agents and then adds it to list mean_utility_popular_agents
+    def _create_list_mean_utility(self, utility_agents, n_agents, n_runs):
+        mean_utility = []
         for idx in range(n_runs):
-            print(f"welfare: ", self._social_welfare_scores[idx])
-            self._mean_utility.append(self._social_welfare_scores[idx] / self._n_agents / self._rounds)
+            mean_utility.append(utility_agents[idx] / n_agents / self._rounds)
 
-
-
+        return mean_utility
 
 
 class km(Games):
@@ -111,8 +108,8 @@ class km(Games):
         self.__list_k = []
         self.__list_m = []
         self.__n_runs = 0
+
         self.__calculate_number_of_runs()
-        print(f"n_runs: ", self.__n_runs)
         self.__play_game()
 
 
@@ -162,7 +159,11 @@ class km(Games):
         self.__list_m.append(m)
 
     # The function that goes through all the steps for a successful game, storing the results and then
-    # displaying the results either in the form of text or a nice graph or both
+    # displaying the results in the form of text and a nice graph.
+    #
+    # The number of slots the agents are going to vote on (k) and the number of slots taken into
+    # consideration (m) are changed each run. This results in a nice graph that show how k and m
+    # affect the mean utility of agents using the popular strategy
     def __play_game(self):
         for k in range(1, self.__max_k):
             for m in range(1, self.__max_m):
@@ -177,7 +178,8 @@ class km(Games):
 
         self._environment.rank_popularity_time_slots()
         self.__print_results()
-        self._create_list_mean_utility(self.__n_runs)
-        plots.plot_3d_graph_cutoff(self.__list_k, self.__list_m, self._mean_utility, self.__max_k-1, self.__max_m-1,
+        mean_utility_popular_agents = self._create_list_mean_utility(self.__popular_agent_utility,
+                                                                     self._n_popular_agents, self.__n_runs)
+        plots.plot_3d_graph_cutoff(self.__list_k, self.__list_m, mean_utility_popular_agents, self.__max_k-1, self.__max_m-1,
                                    'votes per agent', 'slots taken into consideration per agent', 'mean utility',
                                    'mean utility with popular strategy')
