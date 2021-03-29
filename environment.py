@@ -45,20 +45,16 @@ class Environment:
     def determine_most_popular_time_slot(self):
         max = 0
         idx = 0
-        #print(self.__time_slots)
         for i in range(len(self.__time_slots)):
             if self.__time_slots[i] > max:
                 max = self.__time_slots[i]
                 idx = self.__initial_idx_time_slots[i]
         self.__idx_most_popular_time_slot = idx
-        #print(f"most popular time slots: {idx}")
 
     # Using quick_sort to sort the time-slots based on popularity
     def rank_popularity_time_slots(self):
         n_elements = len(self.__time_slots)
         quick_sort.quick_sort(self.__time_slots, self.__initial_idx_time_slots, 0, n_elements - 1)
-        #print(self.__time_slots)
-        #print(self.__initial_idx_time_slots)
 
     def get_most_popular_time_slot(self):
         return self.__idx_most_popular_time_slot
@@ -104,6 +100,8 @@ class Environment:
         n_elements = len(self.__willingness_agents)
         quick_sort.quick_sort(self.__willingness_agents, self.__index_agents, 0, n_elements - 1)
 
+    # After this function is called another function removes the first element. Thus everytime this function is
+    # is called a new element will be given until the list is empty in which case it returns none.
     def get_index_agent_willingness(self):
         if self.__index_agents:
             return self.__index_agents[0]
