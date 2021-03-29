@@ -7,6 +7,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from progress.bar import IncrementalBar
 
+
 # Right now this function creates agents with the standard strategy
 # storing these agents might not be necessary anymore because it is stored in the environment now 
 def create_agents(n_agents, n_pop_agents, environment):
@@ -95,7 +96,7 @@ def play_normal_game(environment, agents, rounds):
         let_agents_vote(agents, environment)
         environment.determine_most_popular_time_slot()
         let_agents_calculate_utility(agents)
-        social_welfare += calculate_social_welfare(environment, agents, rounds)
+        social_welfare += calculate_social_welfare(agents)
         min, max = calculate_egalitarian_welfare(agents, rounds)
         min_utility += min
         max_utility += max
@@ -139,7 +140,7 @@ def play_agent_slot_game(environment, agents, rounds):
                 let_agents_vote(agents, environment)
                 environment.determine_most_popular_time_slot()
                 let_agents_calculate_utility(agents)
-                social_welfare += calculate_social_welfare(environment, agents, rounds)
+                social_welfare += calculate_social_welfare(agents)
                 min, max = calculate_egalitarian_welfare(agents, rounds)
                 min_utility += min
                 max_utility += max
@@ -160,33 +161,6 @@ def play_agent_slot_game(environment, agents, rounds):
     plots.plot_3d_graph(agents_per_run, slots_per_run, mean_utility, max_agents, max_slots, 'agents', 'slots',
                         'mean_utility', 'mean utility based on agents and time slots')
 
-def set_threshold_normal_agents(agents, threshold):
-    for agent in agents:
-        if agent.get_strategy() == "standard":
-            agent.set_threshold(threshold)
-
-def print_threshold_results(threshold_welfares_standard, threshold_welfares_popular, game_type):
-
-    if game_type == 1:
-        plt.plot(np.arange(0, 1.01, 0.01), threshold_welfares_standard)
-        plt.xlabel('Threshold')
-        plt.ylabel('Social welfare')
-        plt.title('Influence of threshold on social welfare')
-        plt.show()
-        plt.savefig('social_welfare_threshold.png')
-    elif game_type == 2:
-        price_of_anarchy=[]
-
-        for i in range(0, 11):
-            price_of_anarchy.append(threshold_welfares_standard[i]/threshold_welfares_popular[i])
-
-        plt.plot(np.arange(0, 1.1, 0.01), price_of_anarchy)
-        plt.xlabel('Threshold')
-        plt.ylabel('Price of Anarchy')
-        plt.title('Influence of threshold on price of anarchy')
-        plt.show()
-        plt.savefig('price_of_anarchy_threshold.png')
-
 def print_max_threshold(threshold_welfares_standard):
     max = 0
     index = 0
@@ -195,60 +169,6 @@ def print_max_threshold(threshold_welfares_standard):
             max = threshold_welfares_standard[idx]
             index = idx
     print(f"max welfare: ", max, "threshold: ", index/len(threshold_welfares_standard))
-
-
-def play_threshold_game(environment, agents, rounds):
-    social_welfare = 0
-    egalitarian_welfare = 0
-    threshold_welfares_standard = []
-    threshold_welfares_popular = []
-    threshold_egalitarian_standard = []
-    threshold_egalitarian_popular = []
-    game_type = 2  # 1 = social welfare,  2 = price of anarchy
-
-    if game_type == 1:
-        bar = IncrementalBar('Progress', max=11)
-    elif game_type == 2:
-        bar = IncrementalBar('Progress', max=22)
-
-    for threshold in np.arange(0, 1.1, 0.1):  # TODO: change to reflect useful
-        for _ in range(rounds):
-            set_threshold_normal_agents(agents, threshold)
-            let_agents_vote(agents, environment)
-            environment.determine_most_popular_time_slot()
-            let_agents_calculate_utility(agents)
-            social_welfare += calculate_social_welfare(agents)
-            egalitarian_welfare += calculate_egalitarian_welfare(agents, rounds)[0]
-            environment.reset_enviroment(agents)
-        threshold_welfares_standard.append(social_welfare / rounds)
-        threshold_egalitarian_standard.append(egalitarian_welfare / rounds)
-        social_welfare = 0  # reset social welfare between games
-        egalitarian_welfare = 0  # reset egalitarian welfare between games
-        bar.next()
-
-    if game_type == 2:
-        agents = create_agents(0, 10, environment)
-        environment.reset_enviroment(agents)
-        social_welfare = 0
-        for threshold in np.arange(0, 1.1, 0.1):  # TODO: change to reflect useful
-            for _ in range(rounds):
-                set_threshold_normal_agents(agents, threshold)
-                let_agents_vote(agents, environment)
-                environment.determine_most_popular_time_slot()
-                let_agents_calculate_utility(agents)
-                social_welfare += calculate_social_welfare(agents)
-                egalitarian_welfare += calculate_egalitarian_welfare(agents, rounds)[0]
-                environment.reset_enviroment(agents)
-            threshold_welfares_popular.append(social_welfare / rounds)
-            threshold_egalitarian_popular.append(egalitarian_welfare / rounds)
-            social_welfare = 0  # reset social welfare between games
-            egalitarian_welfare = 0  # reset egalitarian welfare between games
-            bar.next()
-
-    bar.finish()
-    plots.plot_threshold_results(threshold_welfares_standard, threshold_welfares_popular,
-                                 threshold_egalitarian_standard, threshold_egalitarian_popular, game_type)
-
 
 def play_type_of_agent_game(environment, rounds):
     n_of_agents = 100
@@ -279,7 +199,7 @@ def play_type_of_agent_game(environment, rounds):
     
 # Chooses which type of game is going to be played
 def play_game(environment, agents):
-    game_type = 1  # 0 = normal game, 1 = km game, 2 = threshold game
+    game_type = 2  # 0 = normal game, 1 = km game, 2 = threshold game. 3 = agent slot game, 4 = type of agent game 
     rounds = 50000
 
     print("Playing game...")
@@ -290,7 +210,8 @@ def play_game(environment, agents):
         games.km(agents, environment, 10, 10)
         #play_km_game(environment, agents, rounds)
     elif game_type == 2:
-        play_threshold_game(environment, agents, rounds)
+        games.threshold(agents, environment)
+        #play_threshold_game(environment, agents, rounds)
     elif game_type == 3:
         play_agent_slot_game(environment, agents, rounds)
     elif game_type == 4: 

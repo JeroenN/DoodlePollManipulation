@@ -47,48 +47,38 @@ def plot_3d_graph_cutoff(x, y, z, x_max, y_max, x_label, y_label, z_label, title
     ax.set_zlabel('mean utility')
     plt.show()
 
-def plot_threshold_results(threshold_welfares_standard, threshold_welfares_popular, threshold_egalitarian_standard, threshold_egalitarian_popular, game_type):
+def plot_threshold_results(threshold_welfares_standard, threshold_welfares_popular, min_standard, min_popular, max_standard, max_popular, game_type):
 
     if game_type == 1: 
-        plt.plot(np.arange(0, 1.1, 0.1), threshold_welfares_standard)
+        plt.plot(np.arange(0, 1.1, 0.1), threshold_welfares_standard, label="Mean utility")
+        plt.plot(np.arange(0, 1.1, 0.1), min_standard, label="Minimum utility")
+        plt.plot(np.arange(0, 1.1, 0.1), max_standard, label="Maximum utility")
         plt.xlabel('Threshold')
-        plt.ylabel('Social welfare')
-        plt.title('Influence of threshold on social welfare')
+        plt.ylabel('Utility')
+        plt.title('Influence of threshold on social and utilitarian welfare')
+        plt.legend(loc='upper right', bbox_to_anchor=(1, 0.875))
         plt.show()
-        plt.savefig('social_welfare_threshold.png')
-        plt.clf()
-        
-        plt.plot(np.arange(0, 1.1, 0.1), threshold_egalitarian_standard)
-        plt.xlabel('Threshold')
-        plt.ylabel('Egalitarian welfare')
-        plt.title('Influence of threshold on egalitarian')
-        plt.show()
-        plt.savefig('egalitarian_welfare_threshold.png')
+        plt.savefig('welfares_threshold.png')
+
     elif game_type == 2: 
         price_of_anarchy_social=[]
-        price_of_anarchy_egalitarian=[]
-
-        #TODO: Remove debugging statement 
-        print(threshold_welfares_popular[0])
+        price_of_anarchy_min=[]
+        price_of_anarchy_max=[]
 
         for i in range(0, 11):
             price_of_anarchy_social.append(threshold_welfares_standard[i]/threshold_welfares_popular[i])
-            price_of_anarchy_egalitarian.append(threshold_egalitarian_standard[i]/threshold_egalitarian_popular[i])
+            price_of_anarchy_min.append(min_standard[i]/min_popular[i])
+            price_of_anarchy_max.append(max_standard[i]/max_popular[i])
 
-        plt.plot(np.arange(0, 1.1, 0.1), price_of_anarchy_social)
+        plt.plot(np.arange(0, 1.1, 0.1), price_of_anarchy_social, label="Mean utility")
+        plt.plot(np.arange(0, 1.1, 0.1), price_of_anarchy_min, label="Minimum utility")
+        plt.plot(np.arange(0, 1.1, 0.1), price_of_anarchy_max, label="Maximum utility")
         plt.xlabel('Threshold')
         plt.ylabel('Price of Anarchy')
-        plt.title('Influence of threshold on price of anarchy in terms of social welfare')
+        plt.title('Influence of threshold on Price of Anarchy')
+        plt.legend()
         plt.show()
-        plt.savefig('price_of_anarchy_social_threshold.png')
-        plt.clf()
-
-        plt.plot(np.arange(0, 1.1, 0.1), price_of_anarchy_egalitarian)
-        plt.xlabel('Threshold')
-        plt.ylabel('Price of Anarchy')
-        plt.title('Influence of threshold on price of anarchy in terms of egalitarian welfare')
-        plt.show()
-        plt.savefig('price_of_anarchy_egalitarian_threshold.png')
+        plt.savefig('price_of_anarchy_welfares_threshold.png')
 
 def plot_agent_results(agent_welfares, agent_egalitarian, n_of_agents):
     plt.plot(range(0, n_of_agents+1), agent_welfares)
