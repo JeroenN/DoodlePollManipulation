@@ -1,5 +1,8 @@
 import quick_sort
 import plots
+from progress.bar import IncrementalBar
+import numpy as np 
+import strategies
 
 class Games:
     def __init__(self, agents, environment):
@@ -128,6 +131,25 @@ class Normal(Games):
         self._environment.rank_popularity_time_slots()
         self.__print_results()
 
+    # create new agents and reset the game to work with these new agents 
+    def _create_agents(self, n_agents, n_pop_agents):
+        self._agents.clear()
+
+        for i in range(n_agents):
+            agent = strategies.Standard(self._environment, i)
+            self._agents.append(agent)
+        for i in range(n_pop_agents):
+            self._agents.append(strategies.Popular(self._environment, i+n_agents))
+        
+        self._n_agents = 0
+        self._n_standard_agents = 0
+        self._n_popular_agents = 0
+        self._calculate_number_of_agents()
+        self._environment.reset_enviroment(self._agents)
+        self._social_welfare_scores.clear()
+        self._min_utility_scores.clear()
+        self._max_utility_scores.clear()
+
 class KM(Games):
     def __init__(self, agents, environment, max_k, max_m):
         Games.__init__(self, agents, environment)
@@ -212,3 +234,61 @@ class KM(Games):
         plots.plot_3d_graph_cutoff(self.__list_k, self.__list_m, mean_utility_popular_agents, self.__max_k-1, self.__max_m-1,
                                    'votes per agent', 'slots taken into consideration per agent', 'mean utility',
                                    'mean utility with popular strategy')
+
+class threshold(Games):
+    def __init__(self, agents, environment):
+        Games.__init__(self, agents, environment)
+        self.__game_type = 2 # 1 = social welfare, 2 = price of anarchy
+
+        self.__play_game()
+
+    # creates the correct progress bar depending on game type 
+    def __create_progress_bar(self):
+        if self.__game_type == 1:
+            bar = IncrementalBar('Progress', max=11)
+        elif self.__game_type == 2:
+            bar = IncrementalBar('Progress', max=22)
+
+        return bar 
+
+    # changes the agents' thresholds 
+    def __set_threshold_normal_agents(self, threshold):
+        for agent in self._agents:
+            if agent.get_strategy() == "standard":
+                agent.set_threshold(threshold)
+
+    # gets the mean of every social and utilitarian welfare of every round, to prepare for plotting 
+    def __prepare_for_plotting(self):
+        for idx in range(0,11):
+            self._social_welfare_scores[idx] = (self._social_welfare_scores[idx]/self._rounds) / self._n_agents
+            self._min_utility_scores[idx] = self._min_utility_scores[idx]/self._rounds 
+            self._max_utility_scores[idx] = self._max_utility_scores[idx]/self._rounds
+
+    def __play_game(self):
+        bar = self.__create_progress_bar()
+
+        for threshold in np.arange(0, 1.1, 0.1):  # TODO: change to reflect useful
+            self.__set_threshold_normal_agents(threshold)
+            self._go_through_rounds()
+            self._append_scores_per_run() # this is not divided by rounds yet 
+            self._reset_scores()
+            bar.next()
+        
+        self.__prepare_for_plotting()
+
+        social_welfare_normal = self._social_welfare_scores.copy()
+        min_normal = self._min_utility_scores.copy()
+        max_normal = self._max_utility_scores.copy()
+
+        if self.__game_type == 2:
+            self._create_agents(0, self._n_standard_agents) # reverse the number of agents 
+            for threshold in np.arange(0, 1.1, 0.1):
+                for _ in range(self._rounds):
+                    self._go_through_rounds()
+                self._append_scores_per_run()
+                self._reset_scores()
+                bar.next()
+            self.__prepare_for_plotting()
+
+        bar.finish()
+        plots.plot_threshold_results(social_welfare_normal, self._social_welfare_scores, min_normal, self._min_utility_scores, max_normal, self._max_utility_scores, self.__game_type)
