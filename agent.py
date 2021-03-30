@@ -1,4 +1,4 @@
-import random
+import random_number_generator
 import environment
 import numpy as np
 
@@ -52,18 +52,22 @@ class Agent:
     def get_total_utility(self):
         return self.__total_utility
 
+    # Returns the preference for a specific slot
+    def get_time_slot_preference(self, idx_slot):
+        return self._time_slot_preference[idx_slot]
+
     def reset_utility(self):
         self.__utility = 0
 
     def change_time_slot_preference(self):
         for i in range(self._n_time_slots):
             # creates random value between 0 and 1 and stores this in time_slot_preference
-            self._time_slot_preference[i] = random.uniform(0, 1)
+            self._time_slot_preference[i] = random_number_generator.generate_random_number_normal_distribution()
 
     def __create_time_slot_preference(self):
         for _ in range(self._n_time_slots):
             # creates normally distributed random value with mean 0 and sd 1 and stores this in time_slot_preference
-            self._time_slot_preference.append(random.uniform(0, 1))
+            self._time_slot_preference.append(random_number_generator.generate_random_number_normal_distribution())
 
     def __debug(self):
         print(f"agent {self.__ID}: {self._time_slot_preference}")

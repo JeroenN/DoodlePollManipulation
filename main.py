@@ -4,6 +4,7 @@ import strategies
 import quick_sort
 import games
 import numpy as np
+import normal_distribution
 from matplotlib import pyplot as plt
 from progress.bar import IncrementalBar
 
@@ -19,6 +20,17 @@ def create_agents(n_agents, n_pop_agents, environment):
         agents.append(strategies.Popular(environment, i+n_agents))
 
     return agents
+
+# Creates a list of all the preference from all the agents per time slot
+def create_lists_preference_per_slot(agents, n_slots):
+    preference_per_slot = []
+    preference = []
+    for idx_slot in range(n_slots):
+        for agent in agents:
+            preference.append(agent.get_time_slot_preference(idx_slot))
+        preference_per_slot.append(preference)
+        preference.clear()
+    return preference_per_slot
 
 def create_environment(n_time_slots):
     return Environment(n_time_slots)
@@ -172,16 +184,15 @@ def print_max_threshold(threshold_welfares_standard):
 
 # Chooses which type of game is going to be played
 def play_game(environment, agents):
-    game_type = 4  # 0 = normal game, 1 = km game, 2 = threshold game. 3 = agent slot game, 4 = type of agent game 
-    rounds = 50000
+    game_type = 0  # 0 = normal game, 1 = km game, 2 = threshold game
+    rounds = 100
 
     print("Playing game...")
 
     if game_type == 0:
-        play_normal_game(environment, agents, rounds)
+        games.Normal(agents, environment)
     elif game_type == 1:
-        games.km(agents, environment, 10, 10)
-        #play_km_game(environment, agents, rounds)
+        games.KM(agents, environment, 10, 10)
     elif game_type == 2:
         games.threshold(agents, environment)
         #play_threshold_game(environment, agents, rounds)
@@ -198,6 +209,11 @@ def main():
                            environment)  # create and store agents
     environment.determine_willingness(agents)
     environment.rank_willingness()
+    #arr = [85, 82, 88, 86, 85, 93, 98, 40, 73, 83]
+    #mean = normal_distribution.calculate_mean(arr)
+    #print(f"mean: ", mean)
+    #print(normal_distribution.calculate_standard_deviation(arr, mean))
+
     play_game(environment, agents)
 
 if __name__ == "__main__":

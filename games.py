@@ -101,6 +101,36 @@ class Games:
 
         return mean_utility
 
+    def _print_strategies(self):
+        for agent in self._agents:
+            print(agent, f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility() / self._rounds}")
+
+    def _print_social_welfare(self):
+        print(f'\nSocial welfare: ', self._social_welfare / self._rounds)
+        print(f'\nMean utility; ', (self._social_welfare / len(self._agents)) / self._rounds)
+
+    def _print_egalitarian_welfare(self):
+        print(f"\nMinimum utility ", self._min_utility / self._rounds)  # agent with smallest utility
+        print(f"\nMaximum utility: ", self._max_utility / self._rounds)  # agent with largest utility
+
+class Normal(Games):
+    def __init__(self, agents, environment):
+        Games.__init__(self, agents, environment)
+        self.__play_game()
+
+    def __print_results(self):
+        print("Game ended! \n")
+        self._print_strategies()
+        self._print_social_welfare()
+        self._print_egalitarian_welfare()
+
+    # If this is chosen the program is only run once, thus no parameters are changed
+    def __play_game(self):
+        self._go_through_rounds()
+
+        self._environment.rank_popularity_time_slots()
+        self.__print_results()
+
     # create new agents and reset the game to work with these new agents 
     def _create_agents(self, n_agents, n_pop_agents):
         self._agents.clear()
@@ -123,7 +153,7 @@ class Games:
             self._min_utility_scores[idx] = self._min_utility_scores[idx]/self._rounds 
             self._max_utility_scores[idx] = self._max_utility_scores[idx]/self._rounds
 
-class km(Games):
+class KM(Games):
     def __init__(self, agents, environment, max_k, max_m):
         Games.__init__(self, agents, environment)
         self.__max_k = max_k

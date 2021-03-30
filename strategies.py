@@ -1,8 +1,7 @@
 from agent import Agent
 import quick_sort
-import random
-from datetime import datetime
-import numpy as np
+import random_number_generator
+import normal_distribution
 
 # This is the standard strategy, agents with this strategy vote for all the time-slots for which the
 # agent has a preference above or equal to the specified threshold
@@ -12,7 +11,7 @@ class Standard(Agent):
         Agent.__init__(self, environment, ID)
         self.__threshold = 0.55  # TODO: change to normal distribution
         self.__ID = ID
-        self._willingness = random.uniform(0, 80)  # I wasn't sure what to set the mean and standard deviation to
+        self._willingness = random_number_generator.generate_random_number_normal_distribution(0.4, 0.2, 0, 1)
         self._strategy = "standard"
 
     # vote for a time slot if the time slot preference for that time slot is above the threshold
@@ -45,7 +44,7 @@ class Popular(Agent):
         self.__n_slots_consideration = 3  # The number of time slots that will be taken in consideration\
         self.__n_votes = 1  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
         environment.rank_popularity_time_slots()
-        self._willingness = random.randint(85, 100)
+        self._willingness = random_number_generator.generate_random_number_normal_distribution(0.8, 0.1, 0, 1)
         self._strategy = "popular"
         self.__ID = ID
 
@@ -67,18 +66,12 @@ class Popular(Agent):
     def __vote_for_slots_highest_preference(self):
         # Rank in terms of highest preference
         quick_sort.quick_sort(self.__popular_time_slots_preference, self.__popular_time_slots_idx, 0, self.__n_slots_consideration - 1)
-        #print(self.__popular_time_slots_preference)
-        #print(self.__popular_time_slots_idx)
         # Vote for n_votes time-slots with the highest preference from the n_slots_consideration most popular time slots
         for idx in range(self.__n_slots_consideration - self.__n_votes, self.__n_slots_consideration):
-            #print(f"voted for: {self.__popular_time_slots_idx[idx]}")
             self.environment.vote_time_slot(self.__popular_time_slots_idx[idx])
             self._time_slots_chosen.append(self.__popular_time_slots_idx[idx])
-        #print(f"number of votes: {self.environment.get_time_slots()}")
-        #print(f"idx: {self.environment.get_initial_idx_time_slots()}")
 
     def __debug(self):
-        #print(f"preference: {self._time_slot_preference}")
         print(f"popular time slots preference: {self.__popular_time_slots_preference} \n")
 
     def set_k(self, k):
@@ -95,3 +88,12 @@ class Popular(Agent):
         self.__popular_time_slots_idx.clear()
         self.environment.remove_agent_from_voting_list()
 
+class Popular_with_predictions():
+
+    def __init__(self, environment, ID):
+        Agent.__init__(self, environment, ID)
+        self.preference_per_slot = []
+
+
+    def __calculate_normal_distribution(self):
+        normal_distribution.calculate_standard_deviation()
