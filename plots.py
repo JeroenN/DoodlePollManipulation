@@ -80,17 +80,13 @@ def plot_threshold_results(threshold_welfares_standard, threshold_welfares_popul
         plt.show()
         plt.savefig('price_of_anarchy_welfares_threshold.png')
 
-def plot_agent_results(agent_welfares, agent_egalitarian, n_of_agents):
-    plt.plot(range(0, n_of_agents+1), agent_welfares)
-    plt.xlabel('Number of popular agents')
-    plt.ylabel('Mean utility')
-    plt.show()
-    plt.savefig(f'agents_social_welfare_{n_of_agents}.png')
-    plt.clf()
+def plot_agent_results(agent_welfares, agent_min, agent_max, n_of_agents):
 
-    plt.plot(range(0, n_of_agents+1), agent_egalitarian)
+    plt.plot(range(0, n_of_agents+1), agent_welfares, label="Mean utility")
+    plt.plot(range(0, n_of_agents+1), agent_min, label = "Minimum utility")
+    plt.plot(range(0, n_of_agents+1), agent_max, label="Maximum utility")
     plt.xlabel(f'Number of popular agents out of {n_of_agents}')
-    plt.ylabel('Egalitarian welfare')
+    plt.ylabel('Utility')
+    plt.title("Influence of type-of-agent ratio on social and utilitarian welfare")
     plt.show()
-    plt.savefig(f'agents_egalitarian_welfare_{n_of_agents}.png')
-
+    plt.savefig(f'agents_welfares_{n_of_agents}.png')

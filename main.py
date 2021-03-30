@@ -170,36 +170,9 @@ def print_max_threshold(threshold_welfares_standard):
             index = idx
     print(f"max welfare: ", max, "threshold: ", index/len(threshold_welfares_standard))
 
-def play_type_of_agent_game(environment, rounds):
-    n_of_agents = 100
-    social_welfare = 0
-    egalitarian_welfare = 0
-    agent_welfares = []
-    agent_egalitarian = []
-
-    bar = IncrementalBar('Progress', max=n_of_agents + 1)
-
-    for i in range(0, n_of_agents + 1):
-        agents = create_agents(n_of_agents - i, i, environment)  # create agents
-        environment.reset_enviroment(agents)
-        for _ in range(rounds):
-            let_agents_vote(agents, environment)
-            environment.determine_most_popular_time_slot()
-            let_agents_calculate_utility(agents)
-            social_welfare += calculate_social_welfare(agents)
-            egalitarian_welfare += calculate_egalitarian_welfare(agents, rounds)[0]
-            environment.reset_enviroment(agents)
-        agent_welfares.append((social_welfare / rounds) / n_of_agents)
-        agent_egalitarian.append(egalitarian_welfare / rounds)
-        social_welfare = 0  # reset social welfare between games
-        egalitarian_welfare = 0  # reset egalitarian welfare between games
-        bar.next()
-    bar.finish()
-    plots.plot_agent_results(agent_welfares, agent_egalitarian, n_of_agents)
-    
 # Chooses which type of game is going to be played
 def play_game(environment, agents):
-    game_type = 2  # 0 = normal game, 1 = km game, 2 = threshold game. 3 = agent slot game, 4 = type of agent game 
+    game_type = 4  # 0 = normal game, 1 = km game, 2 = threshold game. 3 = agent slot game, 4 = type of agent game 
     rounds = 50000
 
     print("Playing game...")
@@ -215,7 +188,8 @@ def play_game(environment, agents):
     elif game_type == 3:
         play_agent_slot_game(environment, agents, rounds)
     elif game_type == 4: 
-        play_type_of_agent_game(environment, rounds)
+        games.agent_type(agents, environment)
+        #play_type_of_agent_game(environment, rounds)
 
 def main():
     environment = create_environment(
