@@ -184,7 +184,7 @@ def print_max_threshold(threshold_welfares_standard):
 
 # Chooses which type of game is going to be played
 def play_game(environment, agents):
-    game_type = 0  # 0 = normal game, 1 = km game, 2 = threshold game
+    game_type = int(input("What type of game do you want to play?\n0 = normal game, 1 = km game, 2 = threshold game, 3 = agent slot game, 4 = agent type game \n"))  # 0 = normal game, 1 = km game, 2 = threshold game, 3 = agent slot game, 4 = type of agent game 
     rounds = 100
 
     print("Playing game...")
@@ -195,12 +195,10 @@ def play_game(environment, agents):
         games.KM(agents, environment, 10, 10)
     elif game_type == 2:
         games.threshold(agents, environment)
-        #play_threshold_game(environment, agents, rounds)
     elif game_type == 3:
         play_agent_slot_game(environment, agents, rounds)
     elif game_type == 4: 
         games.agent_type(agents, environment)
-        #play_type_of_agent_game(environment, rounds)
 
 def main():
     environment = create_environment(

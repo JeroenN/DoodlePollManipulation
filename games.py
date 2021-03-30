@@ -113,6 +113,28 @@ class Games:
         print(f"\nMinimum utility ", self._min_utility / self._rounds)  # agent with smallest utility
         print(f"\nMaximum utility: ", self._max_utility / self._rounds)  # agent with largest utility
 
+        # create new agents and reset the game to work with these new agents 
+    def _create_agents(self, n_agents, n_pop_agents):
+        self._agents.clear()
+
+        for i in range(n_agents):
+            agent = strategies.Standard(self._environment, i)
+            self._agents.append(agent)
+        for i in range(n_pop_agents):
+            self._agents.append(strategies.Popular(self._environment, i+n_agents))
+        
+        self._n_agents = 0
+        self._n_standard_agents = 0
+        self._n_popular_agents = 0
+        self._calculate_number_of_agents()
+        self._environment.reset_enviroment(self._agents)
+
+    def _prepare_for_plotting(self, runs):
+        for idx in range(0, runs):
+            self._social_welfare_scores[idx] = (self._social_welfare_scores[idx]/self._rounds) / self._n_agents
+            self._min_utility_scores[idx] = self._min_utility_scores[idx]/self._rounds 
+            self._max_utility_scores[idx] = self._max_utility_scores[idx]/self._rounds
+
 class Normal(Games):
     def __init__(self, agents, environment):
         Games.__init__(self, agents, environment)
@@ -241,7 +263,7 @@ class KM(Games):
 class threshold(Games):
     def __init__(self, agents, environment):
         Games.__init__(self, agents, environment)
-        self.__game_type = 2 # 1 = social welfare, 2 = price of anarchy
+        self.__game_type = int(input("What type of game do you want to play?\n1 = social welfare, 2 = price of anarchy\n")) # 1 = social welfare, 2 = price of anarchy
 
         self.__play_game()
 
