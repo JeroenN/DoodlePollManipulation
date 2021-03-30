@@ -88,12 +88,28 @@ class Popular(Agent):
         self.__popular_time_slots_idx.clear()
         self.environment.remove_agent_from_voting_list()
 
-class Popular_with_predictions():
+class Popular_prediction(Agent):
 
     def __init__(self, environment, ID):
         Agent.__init__(self, environment, ID)
-        self.preference_per_slot = []
+        self.__preference_per_slot = []
+        self.__means_per_slot = []
+        self.__standard_deviation_per_slot = []
+        self._strategy = 'popular_prediction'
+        self.__print_debug()
 
 
-    def __calculate_normal_distribution(self):
-        normal_distribution.calculate_standard_deviation()
+    def set_normal_distribution(self, means_per_slot, standard_deviation_per_slot):
+        self.__means_per_slot = means_per_slot
+        self.__standard_deviation_per_slot = standard_deviation_per_slot
+
+    def __print_debug(self):
+        print(f"means_per_slot: ", self.__means_per_slot)
+        print(f"standard deviation per slot: ", self.__standard_deviation_per_slot)
+
+    def vote(self):
+        for i in range(self._n_time_slots):
+            if self._time_slot_preference[i] >= 0.55:
+                self.environment.vote_time_slot(i)
+                self._time_slots_chosen.append(i)
+        self.environment.remove_agent_from_voting_list()

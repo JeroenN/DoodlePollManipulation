@@ -1,5 +1,6 @@
 import quick_sort
 import plots
+import normal_distribution
 from progress.bar import IncrementalBar
 import numpy as np 
 import strategies
@@ -19,6 +20,7 @@ class Games:
         self._n_agents = 0
         self._n_standard_agents = 0
         self._n_popular_agents = 0
+        self._n_popular_prediction_agents = 0
         self._mean_utility_popular_agents = []
 
         self._calculate_number_of_agents()  # Determine how many agents there are of each type
@@ -34,6 +36,46 @@ class Games:
             self.__calculate_social_welfare()
             self.__calculate_egalitarian_welfare()
             self._environment.reset_enviroment(self._agents)
+
+    # Creates a list of all the preference from all the agents per time slot
+    def __create_lists_preference_per_slot(self):
+        n_slots = self._environment.get_n_time_slots()
+        preferences_per_slot = []
+        preferences = []
+        for idx_slot in range(n_slots):
+            for agent in self._agents:
+                preferences.append(agent.get_time_slot_preference(idx_slot))
+            preferences_per_slot.append(preferences)
+            print(f"preferences_per_slot: ", preferences_per_slot)
+            preferences.clear()
+        print(f"preferences_per_slot: ", preferences_per_slot[0])
+        return preferences_per_slot
+
+    # Calculates the mean and the standard deviation with the functions from the file normal_distribution.py
+    def __calculate_normal_distribution(self, arr):
+        mean = normal_distribution.calculate_mean(arr)
+        standard_deviation = normal_distribution.calculate_standard_deviation(arr, mean)
+        return mean, standard_deviation
+
+    # When this function is called, if there are agents with the 'popular prediction' strategy, then these
+    # agents are given the normal distribution (the mean and the standard deviation) of the preference
+    # per slot
+    def _show_popular_prediction_agents_preferences(self):
+        means_per_slot = []
+        standard_deviations_per_slot = []
+        # check if there is at least one agents with the 'popular prediction' strategy
+        if self._n_popular_prediction_agents > 0:
+            preferences_per_slot = self.__create_lists_preference_per_slot()
+            for preferences in preferences_per_slot:
+                print(f"preferences: ", preferences)
+                mean, standard_deviation = self.__calculate_normal_distribution(preferences)
+                means_per_slot.append(mean)
+                standard_deviations_per_slot.append(standard_deviation)
+
+            for agent in self._agents:
+                if agent.get_strategy == 'popular_prediction':
+                    agent.set_normal_distribution(means_per_slot, standard_deviations_per_slot)
+
 
     # append the egalitarian and social welfare scores in lists, this is too keep track
     # of them over multiple runs
@@ -55,6 +97,9 @@ class Games:
                 self._n_standard_agents += 1
             if agent.get_strategy() == "popular":
                 self._n_popular_agents += 1
+            if agent.get_strategy() == "popular_prediction":
+                self._n_popular_prediction_agents += 1
+
         self._n_agents = len(self._agents)
 
     # Make the agents vote for their desired time slots
@@ -116,6 +161,7 @@ class Games:
 class Normal(Games):
     def __init__(self, agents, environment):
         Games.__init__(self, agents, environment)
+        self._show_popular_prediction_agents_preferences()
         self.__play_game()
 
     def __print_results(self):
@@ -178,7 +224,7 @@ class KM(Games):
                 agent.set_k(k)
                 agent.set_m(m)
 
-    # Prints all the different results that we have caluclated
+    # Prints all the different results that we have calculated
     def __print_results(self):
         print("Game ended! \n")
         # prints the strategy used by each agent and the average utility of each agent

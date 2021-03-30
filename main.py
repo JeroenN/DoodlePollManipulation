@@ -3,34 +3,23 @@ import plots
 import strategies
 import quick_sort
 import games
-import numpy as np
-import normal_distribution
-from matplotlib import pyplot as plt
 from progress.bar import IncrementalBar
 
 
 # Right now this function creates agents with the standard strategy
 # storing these agents might not be necessary anymore because it is stored in the environment now 
-def create_agents(n_agents, n_pop_agents, environment):
+def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, environment):
     agents = []
     for i in range(n_agents):
         agent = strategies.Standard(environment, i)
         agents.append(agent)
     for i in range(n_pop_agents):
         agents.append(strategies.Popular(environment, i+n_agents))
-
+    for i in range(n_pop_predic_agents):
+        agents.append(strategies.Popular_prediction(environment, i + n_agents + n_pop_agents))
     return agents
 
-# Creates a list of all the preference from all the agents per time slot
-def create_lists_preference_per_slot(agents, n_slots):
-    preference_per_slot = []
-    preference = []
-    for idx_slot in range(n_slots):
-        for agent in agents:
-            preference.append(agent.get_time_slot_preference(idx_slot))
-        preference_per_slot.append(preference)
-        preference.clear()
-    return preference_per_slot
+
 
 def create_environment(n_time_slots):
     return Environment(n_time_slots)
@@ -231,7 +220,9 @@ def play_game(environment, agents):
 def main():
     environment = create_environment(
         int(input("How many dates are in the Doodle poll?: ")))  # create and store environment
-    agents = create_agents(int(input("How many standard voters are in the Doodle poll?: ")), int(input("How many popular voters are in the Doodle poll?: ")),
+    agents = create_agents(int(input("How many standard voters are in the Doodle poll?: ")),
+                           int(input("How many popular voters are in the Doodle poll?: ")),
+                           int(input("How many popular prediction voters are in the Doodle poll?: ")),
                            environment)  # create and store agents
     environment.determine_willingness(agents)
     environment.rank_willingness()

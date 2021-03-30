@@ -2,6 +2,7 @@ import math
 # Calculates the mean of the elements in a list
 def calculate_mean(arr):
     mean = 0
+    print(f"length: ", len(arr))
     for element in arr:
         mean += element
 
