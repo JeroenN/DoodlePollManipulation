@@ -53,6 +53,11 @@ class Environment:
 
     # Using quick_sort to sort the time-slots based on popularity
     def rank_popularity_time_slots(self):
+        # TODO: make a boolean that keeps track of whether the time slots have already been ranked
+        # in terms of popularity. If this is not the case then this function should rank them
+        # if it is the case that the time slots have already been ranked in terms of popularity
+        # then this function should do nothing. When the order in the list is changed in some
+        # different function then the boolean should be set to false again.
         n_elements = len(self.__time_slots)
         quick_sort.quick_sort(self.__time_slots, self.__initial_idx_time_slots, 0, n_elements - 1)
 

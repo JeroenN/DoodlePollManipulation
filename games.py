@@ -44,11 +44,11 @@ class Games:
         preferences = []
         for idx_slot in range(n_slots):
             for agent in self._agents:
-                preferences.append(agent.get_time_slot_preference(idx_slot))
-            preferences_per_slot.append(preferences)
-            print(f"preferences_per_slot: ", preferences_per_slot)
+                time_slot_preference_agent = agent.get_time_slot_preference(idx_slot)
+                preferences.append(time_slot_preference_agent)
+            preferences_per_slot.append(preferences[:])
             preferences.clear()
-        print(f"preferences_per_slot: ", preferences_per_slot[0])
+
         return preferences_per_slot
 
     # Calculates the mean and the standard deviation with the functions from the file normal_distribution.py
@@ -73,7 +73,7 @@ class Games:
                 standard_deviations_per_slot.append(standard_deviation)
 
             for agent in self._agents:
-                if agent.get_strategy == 'popular_prediction':
+                if agent.get_strategy() == 'popular_prediction':
                     agent.set_normal_distribution(means_per_slot, standard_deviations_per_slot)
 
 

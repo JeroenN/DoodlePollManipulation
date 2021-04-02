@@ -43,28 +43,26 @@ class Popular(Agent):
         self.__popular_time_slots_preference = []
         self.__n_slots_consideration = 3  # The number of time slots that will be taken in consideration\
         self.__n_votes = 1  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
-        environment.rank_popularity_time_slots()
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.8, 0.1, 0, 1)
         self._strategy = "popular"
         self.__ID = ID
 
+
+    # Goes over the last n_slots_consideration and adds the index of those to the array idx_popular_time_slots
     def __create_list_popular_slots(self):
         self.environment.rank_popularity_time_slots()  # Ranks the time slots from least popular to most popular
-
-        # Goes over the last n_slots_consideration and adds the index of those to the array idx_popular_time_slots
         for idx in range(self._n_time_slots - self.__n_slots_consideration, self._n_time_slots):
             idx_time_slots = self.environment.get_initial_idx_time_slots()
             self.__popular_time_slots_idx.append(idx_time_slots[idx])
-            #self.__popular_time_slots_idx.append(idx)
 
+    # Makes a new list with the most popular time-slots
     def __create_list_preference_popular_slots(self):
-        # Makes a new list with the most popular time-slots
         for idx in self.__popular_time_slots_idx:
             preference = self._time_slot_preference[idx]
             self.__popular_time_slots_preference.append(preference)
 
+    # Rank in terms of highest preference
     def __vote_for_slots_highest_preference(self):
-        # Rank in terms of highest preference
         quick_sort.quick_sort(self.__popular_time_slots_preference, self.__popular_time_slots_idx, 0, self.__n_slots_consideration - 1)
         # Vote for n_votes time-slots with the highest preference from the n_slots_consideration most popular time slots
         for idx in range(self.__n_slots_consideration - self.__n_votes, self.__n_slots_consideration):
@@ -96,20 +94,51 @@ class Popular_prediction(Agent):
         self.__means_per_slot = []
         self.__standard_deviation_per_slot = []
         self._strategy = 'popular_prediction'
-        self.__print_debug()
+        self._willingness = random_number_generator.generate_random_number_normal_distribution(0.4, 0.2, 0, 1)
+        self.__n_slots_consideration = 3  # The number of time slots that will be taken in consideration\
+        self.__n_votes = 1  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
+        self.__popular_time_slots_idx = []
+        self.__popular_time_slots_preference = []
 
 
     def set_normal_distribution(self, means_per_slot, standard_deviation_per_slot):
         self.__means_per_slot = means_per_slot
         self.__standard_deviation_per_slot = standard_deviation_per_slot
 
+    # Goes over the last n_slots_consideration and adds the index of those to the array idx_popular_time_slots
+    def __create_list_popular_slots(self):
+        self.environment.rank_popularity_time_slots()  # Ranks the time slots from least popular to most popular
+        for idx in range(self._n_time_slots - self.__n_slots_consideration, self._n_time_slots):
+            idx_time_slots = self.environment.get_initial_idx_time_slots()
+            self.__popular_time_slots_idx.append(idx_time_slots[idx])
+
+    # Makes a new list with the most popular time-slots
+    def __create_list_preference_popular_slots(self):
+        for idx in self.__popular_time_slots_idx:
+            preference = self._time_slot_preference[idx]
+            self.__popular_time_slots_preference.append(preference)
+
+    # Rank in terms of highest preference
+    def __vote_for_slots_highest_preference(self):
+        quick_sort.quick_sort(self.__popular_time_slots_preference, self.__popular_time_slots_idx, 0, self.__n_slots_consideration - 1)
+        # Vote for n_votes time-slots with the highest preference from the n_slots_consideration most popular time slots
+        for idx in range(self.__n_slots_consideration - self.__n_votes, self.__n_slots_consideration):
+            self.environment.vote_time_slot(self.__popular_time_slots_idx[idx])
+            self._time_slots_chosen.append(self.__popular_time_slots_idx[idx])
+
+    # TODO: make a function that takes the standard deviation and the mean and uses this to calculate a certainty
+    # this could for example be done by standard_deviation / mean. The lower this number, the higher the certainty
+    # This number should then be used when evaluating what voters are going to vote on. How? No idea.
+
+    # Debug duh
     def __print_debug(self):
         print(f"means_per_slot: ", self.__means_per_slot)
         print(f"standard deviation per slot: ", self.__standard_deviation_per_slot)
 
     def vote(self):
-        for i in range(self._n_time_slots):
-            if self._time_slot_preference[i] >= 0.55:
-                self.environment.vote_time_slot(i)
-                self._time_slots_chosen.append(i)
+        self.__create_list_popular_slots()
+        self.__create_list_preference_popular_slots()
+        self.__vote_for_slots_highest_preference()
+        self.__popular_time_slots_preference.clear()
+        self.__popular_time_slots_idx.clear()
         self.environment.remove_agent_from_voting_list()
