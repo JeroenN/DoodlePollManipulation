@@ -13,7 +13,7 @@ class Games:
         self._social_welfare = 0
         self._min_utility = 0
         self._max_utility = 0
-        self._rounds = 100
+        self._rounds = 1000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -31,11 +31,12 @@ class Games:
     # their utility to 0 and set all the time slot votes to zero
     def _go_through_rounds(self):
         for _ in range(self._rounds):
+            self._show_popular_prediction_agents_preferences()
             self._agents_vote()
             self._agents_calculate_utility()
             self.__calculate_social_welfare()
             self.__calculate_egalitarian_welfare()
-            self._environment.reset_enviroment(self._agents)
+            self._environment.reset_environment(self._agents)
 
     # Creates a list of all the preference from all the agents per time slot
     def __create_lists_preference_per_slot(self):
@@ -67,7 +68,6 @@ class Games:
         if self._n_popular_prediction_agents > 0:
             preferences_per_slot = self.__create_lists_preference_per_slot()
             for preferences in preferences_per_slot:
-                print(f"preferences: ", preferences)
                 mean, standard_deviation = self.__calculate_normal_distribution(preferences)
                 means_per_slot.append(mean)
                 standard_deviations_per_slot.append(standard_deviation)
@@ -172,7 +172,7 @@ class Games:
         self._n_standard_agents = 0
         self._n_popular_agents = 0
         self._calculate_number_of_agents()
-        self._environment.reset_enviroment(self._agents)
+        self._environment.reset_environment(self._agents)
 
     def _prepare_for_plotting(self, runs):
         for idx in range(0, runs):
@@ -183,7 +183,6 @@ class Games:
 class Normal(Games):
     def __init__(self, agents, environment):
         Games.__init__(self, agents, environment)
-        self._show_popular_prediction_agents_preferences()
         self.__play_game()
 
     def __print_results(self):
@@ -213,7 +212,7 @@ class Normal(Games):
         self._n_standard_agents = 0
         self._n_popular_agents = 0
         self._calculate_number_of_agents()
-        self._environment.reset_enviroment(self._agents)
+        self._environment.reset_environment(self._agents)
 
     def _prepare_for_plotting(self, runs):
         for idx in range(0, runs):
