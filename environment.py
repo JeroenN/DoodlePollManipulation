@@ -3,18 +3,17 @@ import quick_sort
 # The class creates the time-slots and counts how often
 # a certain time slot is chosen
 class Environment:
-    __n_time_slots = 0  # number of time-slots
-    __time_slots_votes = []  # How often each time slot is chosen
-    __initial_idx_time_slots = []  # The initial index of the time slots, when quick sort is used to find the most
-                                   # popular time slots the original indexs should still be known
-    __idx_most_popular_time_slot = 0  # The idx of the most poular time slot
-    __rank_popularity_time_slots = []
-    __time_step = 0
-    __willingness_agents = []
-    __index_agents = []
 
     def __init__(self, number_of_slots=0):
-        self.__n_time_slots = number_of_slots
+        self.__n_time_slots = number_of_slots   # number of time slots 
+        self.__time_slots_votes = []  # how often each time slot is chosen
+        self.__initial_idx_time_slots = [] # the initial index of the time slots, when quick sort is used to find the most
+                                           # popular time slots the original indexes should still be known 
+        self.__idx_most_popular_time_slot = 0 # the idx of the most popular time slot 
+        self.__rank_popularity_time_slots = []
+        self.__time_step = 0
+        self.__willingness_agents = []
+        self.__index_agents = []
         self.__create_time_slots()
 
     def __str__(self):
@@ -23,7 +22,6 @@ class Environment:
     # This function can be called by an agent to vote for that particular time slot
     # it also removes the first element from the willingness_agents list
     def vote_time_slot(self, index_time_slot):
-
         for idx in range(len(self.__initial_idx_time_slots)):
             if index_time_slot == self.__initial_idx_time_slots[idx]:
                 self.__time_slots_votes[idx] += 1
@@ -90,6 +88,12 @@ class Environment:
         self.rank_willingness()
         self.reset_utilities(agents)
 
+    # clears the agent lists and resets environment 
+    def reset_agents(self, agents):
+        self.__willingness_agents.clear()
+        self.__index_agents.clear()
+        self.reset_environment(agents)
+
     # Get the willingness from each agent and put it in a list
     def determine_willingness(self, agents):
         for idx in range(len(agents)):
@@ -119,3 +123,9 @@ class Environment:
 
     def get_time(self):
         return self.__time_step
+
+    def get_number_of_agents(self):
+        return (len(self.__index_agents))
+
+    def get_number_of_willingness_agents(self):
+        return (len(self.__willingness_agents))

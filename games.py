@@ -4,6 +4,7 @@ import normal_distribution
 from progress.bar import IncrementalBar
 import numpy as np 
 import strategies
+from environment import Environment
 
 class Games:
     def __init__(self, agents, environment):
@@ -161,6 +162,7 @@ class Games:
         # create new agents and reset the game to work with these new agents 
     def _create_agents(self, n_agents, n_pop_agents):
         self._agents.clear()
+        print("We're creating", n_agents, " normal agents and ", n_pop_agents, " manipulators")
 
         for i in range(n_agents):
             agent = strategies.Standard(self._environment, i)
@@ -201,6 +203,7 @@ class Normal(Games):
     # create new agents and reset the game to work with these new agents 
     def _create_agents(self, n_agents, n_pop_agents):
         self._agents.clear()
+        self._environment = Environment(10)
 
         for i in range(n_agents):
             agent = strategies.Standard(self._environment, i)
@@ -336,7 +339,15 @@ class threshold(Games):
     def __play_game(self):
         bar = self.__create_progress_bar()
 
-        for threshold in np.arange(0, 1.1, 0.1):  # TODO: change to reflect useful
+        #TODO: remove debugging statement 
+        print(self._environment.get_initial_idx_time_slots())
+        print(self._environment.get_time())
+        print(self._environment.get_number_of_agents())
+        print(self._environment.get_number_of_willingness_agents())
+        print(len(self._agents))
+
+
+        for threshold in np.arange(0, 1.1, 0.1):
             self.__set_threshold_normal_agents(threshold)
             self._go_through_rounds()
             self._append_scores_per_run() # this is not divided by rounds yet 
@@ -345,6 +356,13 @@ class threshold(Games):
         
         self._prepare_for_plotting(11)
 
+        #TODO: remove debugging statement 
+        print(self._environment.get_initial_idx_time_slots())
+        print(self._environment.get_time())
+        print(self._environment.get_number_of_agents())
+        print(self._environment.get_number_of_willingness_agents())
+
+
         social_welfare_normal = self._social_welfare_scores.copy()
         min_normal = self._min_utility_scores.copy()
         max_normal = self._max_utility_scores.copy()
@@ -352,6 +370,15 @@ class threshold(Games):
         if self.__game_type == 2:
             self._create_agents(0, self._n_standard_agents) # reverse the number of agents 
             self.__clear_scores()
+
+            #TODO: remove debugging statement 
+            print("New agents")
+            print(self._environment.get_initial_idx_time_slots())
+            print(self._environment.get_time())
+            print(self._environment.get_number_of_agents())
+            print(self._environment.get_number_of_willingness_agents())
+            print(len(self._agents))
+
             for threshold in np.arange(0, 1.1, 0.1):
                 for _ in range(self._rounds):
                     self._go_through_rounds()
@@ -359,6 +386,13 @@ class threshold(Games):
                 self._reset_scores()
                 bar.next()
             self._prepare_for_plotting(11)
+
+        #TODO: remove debugging statement 
+        print(self._environment.get_initial_idx_time_slots())
+        print(self._environment.get_time())
+        print(self._environment.get_number_of_agents())
+        print(self._environment.get_number_of_willingness_agents())
+
 
         bar.finish()
         plots.plot_threshold_results(social_welfare_normal, self._social_welfare_scores, min_normal, self._min_utility_scores, max_normal, self._max_utility_scores, self.__game_type)
