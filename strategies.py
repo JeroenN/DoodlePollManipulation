@@ -7,8 +7,8 @@ import normal_distribution
 # agent has a preference above or equal to the specified threshold
 class Standard(Agent):
 
-    def __init__(self, environment, ID):
-        Agent.__init__(self, environment, ID)
+    def __init__(self, environment, n_agents, ID):
+        Agent.__init__(self, environment, n_agents, ID)
         self.__threshold = 0.55  # TODO: change to normal distribution
         self.__ID = ID
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.4, 0.2, 0, 1)
@@ -37,8 +37,8 @@ class Standard(Agent):
 # to the second, third ect. popular time slot on how much they differ. Then the agent could determine itself
 # which time slots it should take into consideration.
 class Popular(Agent):
-    def __init__(self, environment, ID):
-        Agent.__init__(self, environment, ID)
+    def __init__(self, environment, n_agents, ID):
+        Agent.__init__(self, environment, n_agents, ID)
         self.__popular_time_slots_idx = []
         self.__popular_time_slots_preference = []
         self.__n_slots_consideration = 3  # The number of time slots that will be taken in consideration\
@@ -95,8 +95,8 @@ class Popular(Agent):
 
 class Popular_prediction(Agent):
 
-    def __init__(self, environment, ID):
-        Agent.__init__(self, environment, ID)
+    def __init__(self, environment, n_agents, ID):
+        Agent.__init__(self, environment, n_agents, ID)
         self.__preference_per_slot = []
         self.__means_per_slot = []
         self.__standard_deviation_per_slot = []
@@ -112,7 +112,6 @@ class Popular_prediction(Agent):
         # computing how each slot should be ranked in terms of how likely agents are expected to vote for a
         # certain time slot. The higher this number, the more important the standard deviation gets in this calculation
         self.__importance_standard_deviation = 0.5
-
 
 
     def set_normal_distribution(self, means_per_slot, standard_deviation_per_slot):
@@ -136,13 +135,14 @@ class Popular_prediction(Agent):
     def __calculate_certainty_normal_distribution(self, mean, standard_deviation):
         return mean / standard_deviation
 
+
     # creates the list slots_preference_prediction. Here the function calculates how likely it is that agents
     # are going to vote for the time slots based on the normal distribution of the preferences
     def __create_slots_preference_prediction(self):
         # creates the list slots_preference_prediction
         for idx in range(self._n_time_slots):
             preference_prediction = self.__means_per_slot[idx] - self.__standard_deviation_per_slot[idx] * \
-                                    self.__importance_standard_deviation
+                                    self.__importance_standard_deviation + self.environment.get_time_slots() / self._n_agents
             self.__slots_preference_prediction.append(preference_prediction)
             self.__slots_preference_prediction_idx.append(idx)
 

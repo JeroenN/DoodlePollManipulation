@@ -10,13 +10,14 @@ from progress.bar import IncrementalBar
 # storing these agents might not be necessary anymore because it is stored in the environment now 
 def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, environment):
     agents = []
+    tot_agents = n_agents + n_pop_agents + n_pop_predic_agents
     for i in range(n_agents):
-        agent = strategies.Standard(environment, i)
+        agent = strategies.Standard(environment, i, tot_agents)
         agents.append(agent)
     for i in range(n_pop_agents):
-        agents.append(strategies.Popular(environment, i+n_agents))
+        agents.append(strategies.Popular(environment, i+n_agents, tot_agents))
     for i in range(n_pop_predic_agents):
-        agents.append(strategies.Popular_prediction(environment, i + n_agents + n_pop_agents))
+        agents.append(strategies.Popular_prediction(environment, i + n_agents + n_pop_agents, tot_agents))
     return agents
 
 
@@ -109,7 +110,7 @@ def play_normal_game(environment, agents, rounds):
 def set_number_of_agents(environment, agents, n_agents):
     agents.clear()  # TODO: make this more efficient, should not be cleared every time
     for i in range(n_agents):
-        agent = strategies.Standard(environment, i)
+        agent = strategies.Standard(environment, i, n_agents)
         agents.append(agent)
 
 def create_list_mean_utility_varying_agents_per_run(social_welfare_scores, agents_per_run, rounds):
