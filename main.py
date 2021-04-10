@@ -125,8 +125,8 @@ def play_agent_slot_game(environment, agents, rounds):
     min_utility = 0
     max_utility = 0
 
-    max_agents = 30
-    max_slots = 30
+    max_agents = 10
+    max_slots = 10
 
     social_welfare_scores = []
     min_utility_scores = []
@@ -184,9 +184,9 @@ def play_game(environment, agents):
     elif game_type == 1:
         games.KM(agents, environment, 10, 10)
     elif game_type == 2:
-        games.threshold(agents, environment)
+        games.Threshold(agents, environment)
     elif game_type == 3:
-        play_agent_slot_game(environment, agents, rounds)
+        games.Agent_slot(agents, environment, 10 , 10)
     elif game_type == 4: 
         games.agent_type(agents, environment)
 

@@ -59,6 +59,7 @@ class Environment:
         n_elements = len(self.__time_slots_votes)
         quick_sort.quick_sort(self.__time_slots_votes, self.__initial_idx_time_slots, 0, n_elements - 1)
 
+
     def get_most_popular_time_slot(self):
         return self.__idx_most_popular_time_slot
 
