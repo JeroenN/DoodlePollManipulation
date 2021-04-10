@@ -101,7 +101,7 @@ def play_normal_game(environment, agents, rounds):
         min, max = calculate_egalitarian_welfare(agents, rounds)
         min_utility += min
         max_utility += max
-        environment.reset_enviroment(agents)
+        environment.reset_environment(agents)
 
     environment.rank_popularity_time_slots()
     print_game_results(environment, agents, rounds, social_welfare, min_utility, max_utility)
@@ -145,7 +145,7 @@ def play_agent_slot_game(environment, agents, rounds):
                 min, max = calculate_egalitarian_welfare(agents, rounds)
                 min_utility += min
                 max_utility += max
-                environment.reset_enviroment(agents)
+                environment.reset_environment(agents)
 
             slots_per_run.append(n_slots)
             agents_per_run.append(n_agents)
