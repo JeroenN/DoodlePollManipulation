@@ -72,8 +72,8 @@ class Environment:
 
     def change_time_slots(self, n_time_slots):
         self.__n_time_slots = n_time_slots
-        self.__time_slots.clear()  # TODO: make this more efficient, should not be changed every time
-        self.__initial_idx_time_slots.clear()  # Probably not necessary
+        self.__time_slots.clear()
+        self.__initial_idx_time_slots.clear()
 
         for i in range(self.__n_time_slots):
             self.__time_slots.append(0)

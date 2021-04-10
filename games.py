@@ -2,8 +2,9 @@ import quick_sort
 import plots
 import normal_distribution
 from progress.bar import IncrementalBar
-import numpy as np 
+import numpy as np
 import strategies
+
 
 class Games:
     def __init__(self, agents, environment):
@@ -76,7 +77,6 @@ class Games:
                 if agent.get_strategy() == 'popular_prediction':
                     agent.set_normal_distribution(means_per_slot, standard_deviations_per_slot)
 
-
     # append the egalitarian and social welfare scores in lists, this is too keep track
     # of them over multiple runs
     def _append_scores_per_run(self):
@@ -92,6 +92,10 @@ class Games:
 
     # Calculate how much agents there are of each type, also caclulate the total number of agents
     def _calculate_number_of_agents(self):
+        # If this function is called multiple times then first the counts have to be reset
+        self._n_standard_agents = 0
+        self._n_popular_agents = 0
+        self._n_popular_prediction_agents = 0
         for agent in self._agents:
             if agent.get_strategy() == "standard":
                 self._n_standard_agents += 1
@@ -148,7 +152,8 @@ class Games:
 
     def _print_strategies(self):
         for agent in self._agents:
-            print(agent, f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility() / self._rounds}")
+            print(agent,
+                  f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility() / self._rounds}")
 
     def _print_social_welfare(self):
         print(f'\nSocial welfare: ', self._social_welfare / self._rounds)
@@ -159,6 +164,7 @@ class Games:
         print(f"\nMaximum utility: ", self._max_utility / self._rounds)  # agent with largest utility
 
         # create new agents and reset the game to work with these new agents 
+
     def _create_agents(self, n_agents, n_pop_agents):
         self._agents.clear()
 
@@ -166,8 +172,8 @@ class Games:
             agent = strategies.Standard(self._environment, i)
             self._agents.append(agent)
         for i in range(n_pop_agents):
-            self._agents.append(strategies.Popular(self._environment, i+n_agents))
-        
+            self._agents.append(strategies.Popular(self._environment, i + n_agents))
+
         self._n_agents = 0
         self._n_standard_agents = 0
         self._n_popular_agents = 0
@@ -176,9 +182,10 @@ class Games:
 
     def _prepare_for_plotting(self, runs):
         for idx in range(0, runs):
-            self._social_welfare_scores[idx] = (self._social_welfare_scores[idx]/self._rounds) / self._n_agents
-            self._min_utility_scores[idx] = self._min_utility_scores[idx]/self._rounds 
-            self._max_utility_scores[idx] = self._max_utility_scores[idx]/self._rounds
+            self._social_welfare_scores[idx] = (self._social_welfare_scores[idx] / self._rounds) / self._n_agents
+            self._min_utility_scores[idx] = self._min_utility_scores[idx] / self._rounds
+            self._max_utility_scores[idx] = self._max_utility_scores[idx] / self._rounds
+
 
 class Normal(Games):
     def __init__(self, agents, environment):
@@ -207,8 +214,8 @@ class Normal(Games):
             agent = strategies.Standard(self._environment, i)
             self._agents.append(agent)
         for i in range(n_pop_agents):
-            self._agents.append(strategies.Popular(self._environment, i+n_agents))
-        
+            self._agents.append(strategies.Popular(self._environment, i + n_agents))
+
         self._n_agents = 0
         self._n_standard_agents = 0
         self._n_popular_agents = 0
@@ -217,9 +224,10 @@ class Normal(Games):
 
     def _prepare_for_plotting(self, runs):
         for idx in range(0, runs):
-            self._social_welfare_scores[idx] = (self._social_welfare_scores[idx]/self._rounds) / self._n_agents
-            self._min_utility_scores[idx] = self._min_utility_scores[idx]/self._rounds 
-            self._max_utility_scores[idx] = self._max_utility_scores[idx]/self._rounds
+            self._social_welfare_scores[idx] = (self._social_welfare_scores[idx] / self._rounds) / self._n_agents
+            self._min_utility_scores[idx] = self._min_utility_scores[idx] / self._rounds
+            self._max_utility_scores[idx] = self._max_utility_scores[idx] / self._rounds
+
 
 class KM(Games):
     def __init__(self, agents, environment, max_k, max_m):
@@ -234,9 +242,8 @@ class KM(Games):
         self.__calculate_number_of_runs()
         self.__play_game()
 
-
     # The program loops through k and m both starting at 1, each loop is one run. This functions calculates
-    # and returns n_runs
+    # in how many runs this results and stores it in __n_runs
     def __calculate_number_of_runs(self):
         self.__n_runs = (self.__max_k - 1) * (self.__max_m - 1)
 
@@ -254,19 +261,19 @@ class KM(Games):
         print("Game ended! \n")
         # prints the strategy used by each agent and the average utility of each agent
         for agent in self._agents:
-            print(agent, f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility()/self._rounds}")
+            print(agent,
+                  f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility() / self._rounds}")
 
-        print("lengte social welfare scores: ", len(self._social_welfare_scores))
         for idx in range(self.__n_runs):
             print(f"n_votes: ", self.__list_k[idx])
             print(f"n_considerations: ", self.__list_m[idx])
-            print(f'Social welfare: ', self._social_welfare_scores[idx]/self._rounds)
-            print(f'Mean utility; ', self._social_welfare_scores[idx]/self._n_agents/self._rounds)
+            print(f'Social welfare: ', self._social_welfare_scores[idx] / self._rounds)
+            print(f'Mean utility; ', self._social_welfare_scores[idx] / self._n_agents / self._rounds)
 
-            print(f'Minimum utility ', self._min_utility_scores[idx]/self._rounds)  # agent with smallest utility
-            print(f"Maximum utility: ", self._max_utility_scores[idx]/self._rounds)  # agent with largest utility
+            print(f'Minimum utility ', self._min_utility_scores[idx] / self._rounds)  # agent with smallest utility
+            print(f"Maximum utility: ", self._max_utility_scores[idx] / self._rounds)  # agent with largest utility
 
-            print(f"popular agent utility: ", self.__popular_agent_utility[idx]/self._rounds, "\n")
+            print(f"popular agent utility: ", self.__popular_agent_utility[idx] / self._rounds, "\n")
 
     # Each run this functions appends the utility of the popular agents to the list
     def __append_list_popular_agent_utility(self):
@@ -302,14 +309,101 @@ class KM(Games):
         self.__print_results()
         mean_utility_popular_agents = self._create_list_mean_utility(self.__popular_agent_utility,
                                                                      self._n_popular_agents, self.__n_runs)
-        plots.plot_3d_graph_cutoff(self.__list_k, self.__list_m, mean_utility_popular_agents, self.__max_k-1, self.__max_m-1,
+        plots.plot_3d_graph_cutoff(self.__list_k, self.__list_m, mean_utility_popular_agents, self.__max_k - 1,
+                                   self.__max_m - 1,
                                    'votes per agent', 'slots taken into consideration per agent', 'mean utility',
                                    'mean utility with popular strategy')
 
-class threshold(Games):
+
+class Agent_slot(Games):
+    def __init__(self, agents, environment, max_agents, max_slots):
+        Games.__init__(self, agents, environment)
+        self.__max_agents = max_agents
+        self.__max_slots = max_slots
+        self.__popular_agent_utility = []
+        self.__list_slots = []
+        self.__list_agents = []
+        self.__n_runs = 0
+
+        self.__calculate_number_of_runs()
+        self.__play_game()
+
+    # The program loops through max_agents and max_slots both starting at 1, each loop is one run. This functions
+    # calculates in how many runs this results and stores it in __n_runs
+    def __calculate_number_of_runs(self):
+        self.__n_runs = (self.__max_agents) * (self.__max_slots)
+
+    def __set_number_of_agents(self):
+        current_n_agents = len(self._agents)
+        # If when the new number of agents is smaller than it currently is the agents are cleared and the new agents
+        # are created. Otherwise, one agent is added to the number of agents
+        if self._n_agents < current_n_agents:
+            self._agents.clear()
+            for i in range(self._n_agents):
+                agent = strategies.Standard(self._environment, i)
+                self._agents.append(agent)
+        else:
+            agent = strategies.Standard(self._environment, self._n_agents - 1)
+            self._agents.append(agent)
+
+        # DEBUG
+        if self._n_agents != len(self._agents):
+            print("ERROR: not enough agents were created in the agent_slot_game")
+    # Prints all the different results that we have calculated
+    def __print_results(self):
+        print("Game ended! \n")
+        # prints the strategy used by each agent and the average utility of each agent
+        for agent in self._agents:
+            print(agent,
+                  f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility() / self._rounds}")
+
+        for idx in range(self.__n_runs):
+            print(f"n_slots: ", self.__list_slots[idx])
+            print(f"n_agents: ", self.__list_agents[idx])
+            print(f'Social welfare: ', self._social_welfare_scores[idx] / self._rounds)
+            print(f'Mean utility; ', self._social_welfare_scores[idx] / self._n_agents / self._rounds)
+
+            print(f'Minimum utility ', self._min_utility_scores[idx] / self._rounds)  # agent with smallest utility
+            print(f"Maximum utility: ", self._max_utility_scores[idx] / self._rounds)  # agent with largest utility
+
+            print(f"popular agent utility: ", self.__popular_agent_utility[idx] / self._rounds, "\n")
+
+    # Keep track of the number of agents and time slots each run
+    def __append_parameters(self, n_slots, n_agents):
+        self.__list_slots.append(n_slots)
+        self.__list_agents.append(n_agents)
+
+    def __create_list_mean_utility_varying_agents_per_run(self):
+        mean_utility = []
+        for idx in range(len(self._social_welfare_scores)):
+            n_agents = self.__list_agents[idx]
+            mean_utility.append(self._social_welfare_scores[idx] / n_agents / self._rounds)
+        return mean_utility
+
+    def __play_game(self):
+        for n_agents in range(1, self.__max_agents + 1):
+            for n_slots in range(1, self.__max_slots + 1):
+                self.__set_number_of_agents()
+                self._environment.change_time_slots(n_slots)
+                self._calculate_number_of_agents()
+                self._go_through_rounds()
+
+                self._append_scores_per_run()
+                self.__append_parameters(n_slots, n_agents)
+                self._reset_scores()
+
+
+        self._environment.rank_popularity_time_slots()
+        self.__print_results()
+        mean_utility = self.__create_list_mean_utility_varying_agents_per_run()
+        plots.plot_3d_graph(self.__list_agents, self.__list_slots, mean_utility, self.__max_agents, self.__max_slots, 'agents', 'slots',
+                            'mean_utility', 'mean utility based on agents and time slots')
+
+class Threshold(Games):
     def __init__(self, agents, environment):
         Games.__init__(self, agents, environment)
-        self.__game_type = int(input("What type of game do you want to play?\n1 = social welfare, 2 = price of anarchy\n")) # 1 = social welfare, 2 = price of anarchy
+        self.__game_type = int(input(
+            "What type of game do you want to play?\n1 = social welfare, 2 = price of anarchy\n"))  # 1 = social welfare, 2 = price of anarchy
 
         self.__play_game()
 
@@ -320,9 +414,10 @@ class threshold(Games):
         elif self.__game_type == 2:
             bar = IncrementalBar('Progress', max=22)
 
-        return bar 
+        return bar
 
-    # changes the agents' thresholds 
+        # changes the agents' thresholds
+
     def __set_threshold_normal_agents(self, threshold):
         for agent in self._agents:
             if agent.get_strategy() == "standard":
@@ -340,10 +435,10 @@ class threshold(Games):
         for threshold in np.arange(0, 1.1, 0.1):  # TODO: change to reflect useful
             self.__set_threshold_normal_agents(threshold)
             self._go_through_rounds()
-            self._append_scores_per_run() # this is not divided by rounds yet 
+            self._append_scores_per_run()  # this is not divided by rounds yet
             self._reset_scores()
             bar.next()
-        
+
         self._prepare_for_plotting(11)
 
         social_welfare_normal = self._social_welfare_scores.copy()
@@ -351,7 +446,7 @@ class threshold(Games):
         max_normal = self._max_utility_scores.copy()
 
         if self.__game_type == 2:
-            self._create_agents(0, self._n_standard_agents) # reverse the number of agents 
+            self._create_agents(0, self._n_standard_agents)  # reverse the number of agents
             self.__clear_scores()
             for threshold in np.arange(0, 1.1, 0.1):
                 for _ in range(self._rounds):
@@ -362,7 +457,9 @@ class threshold(Games):
             self._prepare_for_plotting(11)
 
         bar.finish()
-        plots.plot_threshold_results(social_welfare_normal, self._social_welfare_scores, min_normal, self._min_utility_scores, max_normal, self._max_utility_scores, self.__game_type)
+        plots.plot_threshold_results(social_welfare_normal, self._social_welfare_scores, min_normal,
+                                     self._min_utility_scores, max_normal, self._max_utility_scores, self.__game_type)
+
 
 class agent_type(Games):
     def __init__(self, agents, environment):
@@ -377,10 +474,10 @@ class agent_type(Games):
             self._create_agents(self._n_agents - i, i)
             self._go_through_rounds()
             self._append_scores_per_run()
-            self._reset_scores()          
+            self._reset_scores()
             bar.next()
-        self._prepare_for_plotting(self._n_agents+1)
+        self._prepare_for_plotting(self._n_agents + 1)
         bar.finish()
 
-        plots.plot_agent_results(self._social_welfare_scores, self._min_utility_scores, self._max_utility_scores, self._n_agents)
-        
+        plots.plot_agent_results(self._social_welfare_scores, self._min_utility_scores, self._max_utility_scores,
+                                 self._n_agents)
