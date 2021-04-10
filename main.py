@@ -12,12 +12,12 @@ def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, environment):
     agents = []
     tot_agents = n_agents + n_pop_agents + n_pop_predic_agents
     for i in range(n_agents):
-        agent = strategies.Standard(environment, i, tot_agents)
+        agent = strategies.Standard(environment, tot_agents, i)
         agents.append(agent)
     for i in range(n_pop_agents):
-        agents.append(strategies.Popular(environment, i+n_agents, tot_agents))
+        agents.append(strategies.Popular(environment, tot_agents, i+n_agents))
     for i in range(n_pop_predic_agents):
-        agents.append(strategies.Popular_prediction(environment, i + n_agents + n_pop_agents, tot_agents))
+        agents.append(strategies.Popular_prediction(environment, tot_agents, i + n_agents + n_pop_agents))
     return agents
 
 

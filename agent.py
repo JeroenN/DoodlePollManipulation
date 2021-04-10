@@ -7,7 +7,7 @@ import numpy as np
 # From this class children classes can be made a use different strategies
 
 class Agent:
-    environment = environment.Environment()  # the environment that the agent is in
+
     def __init__(self, environment, n_agents, ID):
         self.__utility = 0  # The utility that is gained by having the time slots chosen by the environment
         self.__total_utility = 0 # the total utility of an agent 
@@ -19,8 +19,6 @@ class Agent:
         self.__ID = ID  # assign an ID
         self._willingness = 0
         self._strategy = ""
-        self._n_agents = n_agents
-        #self.__debug()
         
     def __str__(self):
         return f"Basic agent {self.__ID}"
