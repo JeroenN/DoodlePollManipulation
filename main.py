@@ -87,26 +87,6 @@ def print_agent_slot_game_results(agents, rounds, social_welfare_scores, min_uti
         print(f"Minimum utility ", min_utility_scores[idx]/rounds) # agent with smallest utility
         print(f"Maximum utility: ", max_utility_scores[idx]/rounds) # agent with largest utility
 
-
-# If this is chosen the program is only run once, thus no parameters are changed
-def play_normal_game(environment, agents, rounds):
-    social_welfare=0
-    min_utility=0
-    max_utility=0
-
-    for _ in range(rounds):
-        let_agents_vote(agents, environment)
-        environment.determine_most_popular_time_slot()
-        let_agents_calculate_utility(agents)
-        social_welfare += calculate_social_welfare(agents)
-        min, max = calculate_egalitarian_welfare(agents, rounds)
-        min_utility += min
-        max_utility += max
-        environment.reset_environment(agents)
-
-    environment.rank_popularity_time_slots()
-    print_game_results(environment, agents, rounds, social_welfare, min_utility, max_utility)
-
 def set_number_of_agents(environment, agents, n_agents):
     agents.clear()  # TODO: make this more efficient, should not be cleared every time
     for i in range(n_agents):

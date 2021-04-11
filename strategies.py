@@ -69,6 +69,10 @@ class Popular(Agent):
             preference = self._time_slot_preference[idx]
             self.__popular_time_slots_preference.append(preference)
 
+    def __debug(self):
+        votes = self.environment.get_time_slots()
+        initial_idx = self.environment
+
     # Rank in terms of highest preference
     def __vote_for_slots_highest_preference(self):
         # Quick sorts the n_slots_consideration most popular time slots in terms of the agents their preference, then
@@ -80,9 +84,6 @@ class Popular(Agent):
         for idx in range(self.__n_slots_consideration - self.__n_votes, self.__n_slots_consideration):
             self.environment.vote_time_slot(self.__popular_time_slots_idx[idx])
             self._time_slots_chosen.append(self.__popular_time_slots_idx[idx])
-
-    def __debug(self):
-        print(f"popular time slots preference: {self.__popular_time_slots_preference} \n")
 
     def set_k(self, k):
         self.__n_votes = k
