@@ -81,6 +81,7 @@ class Environment:
     # Reset all the time slots to zero votes, set the willingness of the agents
     # rank the agents in terms of willingness and reset the utilities of the agents
     def reset(self, agents):
+        print(self.__time_slots_votes)
         for idx in range(self.__n_time_slots):
             self.__time_slots_votes[idx] = 0
             self.__initial_idx_time_slots[idx] = idx
@@ -128,7 +129,7 @@ class Environment:
         return self.__initial_idx_time_slots
 
     def get_number_of_agents(self):
-        return (len(self.__index_agents))
+        return len(self.__index_agents)
 
     def get_number_of_willingness_agents(self):
-        return (len(self.__willingness_agents))
+        return len(self.__willingness_agents)
