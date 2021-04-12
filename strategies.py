@@ -7,8 +7,8 @@ import normal_distribution
 # agent has a preference above or equal to the specified threshold
 class Standard(Agent):
 
-    def __init__(self, environment, ID):
-        Agent.__init__(self, environment, ID)
+    def __init__(self, environment, ID, bonus_type):
+        Agent.__init__(self, environment, ID, bonus_type)
         self.__threshold = 0.55  # TODO: change to normal distribution
         self.__ID = ID
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.4, 0.2, 0, 1)
@@ -19,8 +19,13 @@ class Standard(Agent):
     def vote(self):
         for i in range(self._n_time_slots):
             if self._time_slot_preference[i] >= self.__threshold:
+                # only add social bonus when this agent is used for a social bonus game and when the cap hasn't been reached 
+                if (self._bonus_type == 1 and len(self._time_slots_chosen) < self._social_bonus_cap):
+                    self.increase_utility()
+
                 self.environment.vote_time_slot(i)
                 self._time_slots_chosen.append(i)
+             
         self.environment.remove_agent_from_voting_list()
 
     def set_threshold(self, threshold):
@@ -37,8 +42,8 @@ class Standard(Agent):
 # to the second, third ect. popular time slot on how much they differ. Then the agent could determine itself
 # which time slots it should take into consideration.
 class Popular(Agent):
-    def __init__(self, environment, ID):
-        Agent.__init__(self, environment, ID)
+    def __init__(self, environment, ID, bonus_type):
+        Agent.__init__(self, environment, ID, type)
         self.__popular_time_slots_idx = []
         self.__popular_time_slots_preference = []
         self.__n_slots_consideration = 3  # The number of time slots that will be taken in consideration\
@@ -73,6 +78,9 @@ class Popular(Agent):
                               self.__n_slots_consideration - 1)
         # Vote for n_votes time-slots with the highest preference from the n_slots_consideration most popular time slots
         for idx in range(self.__n_slots_consideration - self.__n_votes, self.__n_slots_consideration):
+             # only add social bonus when this agent is used for a social bonus game and when the cap hasn't been reached 
+            if (self._bonus_type == 1 and len(self._time_slots_chosen) < self._social_bonus_cap):
+                self.increase_utility()
             self.environment.vote_time_slot(self.__popular_time_slots_idx[idx])
             self._time_slots_chosen.append(self.__popular_time_slots_idx[idx])
 
@@ -95,8 +103,8 @@ class Popular(Agent):
 
 class Popular_prediction(Agent):
 
-    def __init__(self, environment, ID):
-        Agent.__init__(self, environment, ID)
+    def __init__(self, environment, ID, bonus_type):
+        Agent.__init__(self, environment, ID, bonus_type)
         self.__preference_per_slot = []
         self.__means_per_slot = []
         self.__standard_deviation_per_slot = []
@@ -171,6 +179,10 @@ class Popular_prediction(Agent):
                               self.__n_slots_consideration - 1)
         # Vote for n_votes time-slots with the highest preference from the n_slots_consideration most popular time slots
         for idx in range(self.__n_slots_consideration - self.__n_votes, self.__n_slots_consideration):
+            # only add social bonus when this agent is used for a social bonus game and when the cap hasn't been reached 
+            if (self._bonus_type == 1 and len(self._time_slots_chosen) < self._social_bonus_cap):
+                self.increase_utility()
+
             self.environment.vote_time_slot(self.__slots_preference_prediction_idx[idx])
             self._time_slots_chosen.append(self.__slots_preference_prediction_idx[idx])
 

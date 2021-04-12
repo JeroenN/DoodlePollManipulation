@@ -87,6 +87,7 @@ class Environment:
         self.determine_willingness(agents)
         self.rank_willingness()
         self.reset_utilities(agents)
+        self.reset_timeslots_chosen(agents)
 
     # clears the agent lists and resets environment 
     def reset_agents(self, agents):
@@ -104,6 +105,10 @@ class Environment:
     def reset_utilities(self, agents):
         for agent in agents: 
             agent.reset_utility()
+
+    def reset_timeslots_chosen(self, agents):
+        for agent in agents:
+            agent.reset_timeslots_chosen()
 
     # Quick-sort the willingness
     def rank_willingness(self):
