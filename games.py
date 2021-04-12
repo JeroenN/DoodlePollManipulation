@@ -15,7 +15,7 @@ class Games:
         self._social_welfare = 0
         self._min_utility = 0
         self._max_utility = 0
-        self._rounds = 1000
+        self._rounds = 10000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -38,7 +38,7 @@ class Games:
             self._agents_calculate_utility()
             self.__calculate_social_welfare()
             self.__calculate_egalitarian_welfare()
-            self._environment.reset_environment(self._agents)
+            self._environment.reset(self._agents)
 
     # Creates a list of all the preference from all the agents per time slot
     def __create_lists_preference_per_slot(self):
@@ -165,22 +165,21 @@ class Games:
         print(f"\nMaximum utility: ", self._max_utility / self._rounds)  # agent with largest utility
 
         # create new agents and reset the game to work with these new agents 
-
-    def _create_agents(self, n_agents, n_pop_agents):
+    def _create_agents(self, n_agents, n_pop_agents, n_pop_predic_agents, bonus_type):
         self._agents.clear()
-        self._environment = Environment(10)
+        self._environment.reset()
+        tot_agents = n_agents + n_pop_agents + n_pop_predic_agents
 
         for i in range(n_agents):
-            agent = strategies.Standard(self._environment, i)
+            agent = strategies.Standard(self._environment, tot_agents, i, bonus_type)
             self._agents.append(agent)
         for i in range(n_pop_agents):
-            self._agents.append(strategies.Popular(self._environment, i + n_agents))
-
+            self._agents.append(strategies.Popular(self._environment, tot_agents, i+n_agents, bonus_type))
+        
         self._n_agents = 0
         self._n_standard_agents = 0
         self._n_popular_agents = 0
         self._calculate_number_of_agents()
-        self._environment.reset_agents(self._agents)
 
     def _prepare_for_plotting(self, runs):
         for idx in range(0, runs):
@@ -206,23 +205,6 @@ class Normal(Games):
 
         self._environment.rank_popularity_time_slots()
         self.__print_results()
-
-    # create new agents and reset the game to work with these new agents 
-    def _create_agents(self, n_agents, n_pop_agents):
-        self._agents.clear()
-        self._environment = Environment(10)
-
-        for i in range(n_agents):
-            agent = strategies.Standard(self._environment, i)
-            self._agents.append(agent)
-        for i in range(n_pop_agents):
-            self._agents.append(strategies.Popular(self._environment, i + n_agents))
-
-        self._n_agents = 0
-        self._n_standard_agents = 0
-        self._n_popular_agents = 0
-        self._calculate_number_of_agents()
-        self._environment.reset_environment(self._agents)
 
     def _prepare_for_plotting(self, runs):
         for idx in range(0, runs):
@@ -318,7 +300,7 @@ class KM(Games):
 
 
 class Agent_slot(Games):
-    def __init__(self, agents, environment, max_agents, max_slots):
+    def __init__(self, agents, environment, max_agents, max_slots, bonus_type):
         Games.__init__(self, agents, environment)
         self.__max_agents = max_agents
         self.__max_slots = max_slots
@@ -326,6 +308,7 @@ class Agent_slot(Games):
         self.__list_slots = []
         self.__list_agents = []
         self.__n_runs = 0
+        self.__bonus_type = bonus_type
 
         self.__calculate_number_of_runs()
         self.__play_game()
@@ -335,17 +318,19 @@ class Agent_slot(Games):
     def __calculate_number_of_runs(self):
         self.__n_runs = (self.__max_agents) * (self.__max_slots)
 
-    def __set_number_of_agents(self):
+    # Changes the number of agents to fit with how many should be used in a particular run
+    def __set_number_of_agents(self, n_agents):
         current_n_agents = len(self._agents)
         # If when the new number of agents is smaller than it currently is the agents are cleared and the new agents
         # are created. Otherwise, one agent is added to the number of agents
+        #TODO: check if the n_agents is correct now
         if self._n_agents < current_n_agents:
             self._agents.clear()
             for i in range(self._n_agents):
-                agent = strategies.Standard(self._environment, i)
+                agent = strategies.Standard(self._environment, n_agents, i, self.__bonus_type)
                 self._agents.append(agent)
         else:
-            agent = strategies.Standard(self._environment, self._n_agents - 1)
+            agent = strategies.Standard(self._environment, n_agents, self._n_agents - 1, self.__bonus_type)
             self._agents.append(agent)
 
         # DEBUG
@@ -385,7 +370,7 @@ class Agent_slot(Games):
     def __play_game(self):
         for n_agents in range(1, self.__max_agents + 1):
             for n_slots in range(1, self.__max_slots + 1):
-                self.__set_number_of_agents()
+                self.__set_number_of_agents(n_agents)
                 self._environment.change_time_slots(n_slots)
                 self._calculate_number_of_agents()
                 self._go_through_rounds()
@@ -402,12 +387,10 @@ class Agent_slot(Games):
                             'mean_utility', 'mean utility based on agents and time slots')
 
 class Threshold(Games):
-    def __init__(self, agents, environment):
+    def __init__(self, agents, environment, bonus_type):
         Games.__init__(self, agents, environment)
-        self.__game_type = int(input(
-            "What type of game do you want to play?\n1 = social welfare, 2 = price of anarchy\n"))  # 1 = social welfare, 2 = price of anarchy
-
-        self.__play_game()
+        self.__game_type = int(input("What type of game do you want to play?\n1 = social welfare, 2 = price of anarchy\n")) # 1 = social welfare, 2 = price of anarchy
+        self.__bonus_type = bonus_type #keeps track of the bonus type for when new agents have to be created
 
     # creates the correct progress bar depending on game type 
     def __create_progress_bar(self):
@@ -448,12 +431,11 @@ class Threshold(Games):
         max_normal = self._max_utility_scores.copy()
 
         if self.__game_type == 2:
-            self._create_agents(0, self._n_standard_agents)  # reverse the number of agents
+            self._create_agents(0, self._n_standard_agents, 0, self.__bonus_type) # reverse the number of agents 
             self.__clear_scores()
 
             for threshold in np.arange(0, 1.1, 0.1):
-                for _ in range(self._rounds):
-                    self._go_through_rounds()
+                self._go_through_rounds()
                 self._append_scores_per_run()
                 self._reset_scores()
                 bar.next()
@@ -465,16 +447,16 @@ class Threshold(Games):
 
 
 class agent_type(Games):
-    def __init__(self, agents, environment):
+    def __init__(self, agents, environment, bonus_type):
         Games.__init__(self, agents, environment)
-
+        self.__bonus_type = bonus_type #keeps track of bonus type for when agents need to be created 
         self.__play_game()
 
     def __play_game(self):
         bar = IncrementalBar('Progress', max=self._n_agents + 1)
 
         for i in range(0, self._n_agents + 1):
-            self._create_agents(self._n_agents - i, i)
+            self._create_agents(self._n_agents - i, i, 0, self.__bonus_type)
             self._go_through_rounds()
             self._append_scores_per_run()
             self._reset_scores()

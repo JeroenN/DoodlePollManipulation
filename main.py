@@ -8,15 +8,16 @@ from progress.bar import IncrementalBar
 
 # Right now this function creates agents with the standard strategy
 # storing these agents might not be necessary anymore because it is stored in the environment now 
-def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, environment):
+def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, environment, bonus_type):
     agents = []
+    tot_agents = n_agents + n_pop_agents + n_pop_predic_agents
     for i in range(n_agents):
-        agent = strategies.Standard(environment, i)
+        agent = strategies.Standard(environment, tot_agents, i, bonus_type)
         agents.append(agent)
     for i in range(n_pop_agents):
-        agents.append(strategies.Popular(environment, i+n_agents))
+        agents.append(strategies.Popular(environment, tot_agents, i+n_agents, bonus_type))
     for i in range(n_pop_predic_agents):
-        agents.append(strategies.Popular_prediction(environment, i + n_agents + n_pop_agents))
+        agents.append(strategies.Popular_prediction(environment, tot_agents, i + n_agents + n_pop_agents, bonus_type))
     return agents
 
 
@@ -86,30 +87,10 @@ def print_agent_slot_game_results(agents, rounds, social_welfare_scores, min_uti
         print(f"Minimum utility ", min_utility_scores[idx]/rounds) # agent with smallest utility
         print(f"Maximum utility: ", max_utility_scores[idx]/rounds) # agent with largest utility
 
-
-# If this is chosen the program is only run once, thus no parameters are changed
-def play_normal_game(environment, agents, rounds):
-    social_welfare=0
-    min_utility=0
-    max_utility=0
-
-    for _ in range(rounds):
-        let_agents_vote(agents, environment)
-        environment.determine_most_popular_time_slot()
-        let_agents_calculate_utility(agents)
-        social_welfare += calculate_social_welfare(agents)
-        min, max = calculate_egalitarian_welfare(agents, rounds)
-        min_utility += min
-        max_utility += max
-        environment.reset_environment(agents)
-
-    environment.rank_popularity_time_slots()
-    print_game_results(environment, agents, rounds, social_welfare, min_utility, max_utility)
-
-def set_number_of_agents(environment, agents, n_agents):
+def set_number_of_agents(environment, agents, n_agents, bonus_type):
     agents.clear()  # TODO: make this more efficient, should not be cleared every time
     for i in range(n_agents):
-        agent = strategies.Standard(environment, i)
+        agent = strategies.Standard(environment, n_agents,i, bonus_type)
         agents.append(agent)
 
 def create_list_mean_utility_varying_agents_per_run(social_welfare_scores, agents_per_run, rounds):
@@ -119,7 +100,7 @@ def create_list_mean_utility_varying_agents_per_run(social_welfare_scores, agent
         mean_utility.append(social_welfare_scores[idx] / n_agents / rounds)
     return mean_utility
 
-def play_agent_slot_game(environment, agents, rounds):
+def play_agent_slot_game(environment, agents, rounds, bonus_type):
     social_welfare = 0
     min_utility = 0
     max_utility = 0
@@ -135,7 +116,7 @@ def play_agent_slot_game(environment, agents, rounds):
 
     for n_agents in range(1, max_agents + 1):
         for n_slots in range(1, max_slots + 1):
-            set_number_of_agents(environment, agents, n_agents)
+            set_number_of_agents(environment, agents, n_agents, bonus_type)
             environment.change_time_slots(n_slots)
             for _ in range(rounds):
                 let_agents_vote(agents, environment)
@@ -172,7 +153,7 @@ def print_max_threshold(threshold_welfares_standard):
     print(f"max welfare: ", max, "threshold: ", index/len(threshold_welfares_standard))
 
 # Chooses which type of game is going to be played
-def play_game(environment, agents):
+def play_game(environment, agents, bonus_type):
     game_type = int(input("What type of game do you want to play?\n0 = normal game, 1 = km game, 2 = threshold game, 3 = agent slot game, 4 = agent type game \n"))  # 0 = normal game, 1 = km game, 2 = threshold game, 3 = agent slot game, 4 = type of agent game 
     rounds = 100
 
@@ -183,19 +164,21 @@ def play_game(environment, agents):
     elif game_type == 1:
         games.KM(agents, environment, 10, 10)
     elif game_type == 2:
-        games.Threshold(agents, environment)
+        games.Threshold(agents, environment, bonus_type)
     elif game_type == 3:
-        games.Agent_slot(agents, environment, 10 , 10)
+        games.Agent_slot(agents, environment, 10 , 10, bonus_type)
     elif game_type == 4: 
-        games.agent_type(agents, environment)
+        games.agent_type(agents, environment, bonus_type)
 
 def main():
     environment = create_environment(
         int(input("How many dates are in the Doodle poll?: ")))  # create and store environment
+    bonus_type = int(input("Do you want the agents to use social bonus?\n 0 = no, 1 = yes\n"))
     agents = create_agents(int(input("How many standard voters are in the Doodle poll?: ")),
                            int(input("How many popular voters are in the Doodle poll?: ")),
                            int(input("How many popular prediction voters are in the Doodle poll?: ")),
-                           environment)  # create and store agents
+                           environment, 
+                           bonus_type)  # create and store agents
     environment.determine_willingness(agents)
     environment.rank_willingness()
     #arr = [85, 82, 88, 86, 85, 93, 98, 40, 73, 83]
@@ -203,7 +186,7 @@ def main():
     #print(f"mean: ", mean)
     #print(normal_distribution.calculate_standard_deviation(arr, mean))
 
-    play_game(environment, agents)
+    play_game(environment, agents, bonus_type)
 
 if __name__ == "__main__":
     main()

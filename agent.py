@@ -8,7 +8,7 @@ import numpy as np
 
 class Agent:
     environment = environment.Environment()  # the environment that the agent is in
-    def __init__(self, environment, ID):
+    def __init__(self, environment, n_agents, ID, bonus_type):
         self.__utility = 0  # The utility that is gained by having the time slots chosen by the environment
         self.__total_utility = 0 # the total utility of an agent 
         self._time_slot_preference = [] # the time slot preferences of an agent
@@ -19,7 +19,10 @@ class Agent:
         self.__ID = ID  # assign an ID
         self._willingness = 0
         self._strategy = ""
-        #self.__debug()
+        self._bonus_type = bonus_type # 0 = no social bonus, 1 = social bonus 
+        if self._bonus_type == 1: # type 1 is social bonus agent 
+            self._social_bonus = 0.05 # the social bonus an agent gets for each extra timeslot it picks
+            self._social_bonus_cap = round(self._n_time_slots/3) # the number of slots an agent can pick in order to get social bonus. Could also be in environment
         
     def __str__(self):
         return f"Basic agent {self.__ID}"
@@ -41,10 +44,22 @@ class Agent:
     # Calculate and return the total utility
     def calculate_utility(self):
         self.__utility += self._time_slot_preference[self.environment.get_most_popular_time_slot()]
+
+        #TODO: find a better way to fix that the social bonus can make the utility go above 1
+        if self.__utility > 1: 
+            self.__utility = 1
+
         self.__total_utility += self.__utility
 
     def reset_total_utility(self):
         self.__total_utility = 0
+
+    def increase_utility(self):
+        self.__utility += self._social_bonus
+
+        #TODO: find a better way to fix that the social bonus can make the utility go above 1
+        if self.__utility > 1: 
+            self.__utility = 1
 
     def get_utility(self):
         return self.__utility
@@ -58,6 +73,9 @@ class Agent:
 
     def reset_utility(self):
         self.__utility = 0
+
+    def reset_timeslots_chosen(self):
+        self._time_slots_chosen.clear()
 
     def change_time_slot_preference(self):
         for i in range(self._n_time_slots):

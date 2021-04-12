@@ -11,7 +11,6 @@ class Environment:
                                            # popular time slots the original indexes should still be known 
         self.__idx_most_popular_time_slot = 0 # the idx of the most popular time slot 
         self.__rank_popularity_time_slots = []
-        self.__time_step = 0
         self.__willingness_agents = []
         self.__index_agents = []
         self.__create_time_slots()
@@ -22,7 +21,7 @@ class Environment:
     # This function can be called by an agent to vote for that particular time slot
     # it also removes the first element from the willingness_agents list
     def vote_time_slot(self, index_time_slot):
-        for idx in range(len(self.__initial_idx_time_slots)):
+        for idx in range(self.__n_time_slots):
             if index_time_slot == self.__initial_idx_time_slots[idx]:
                 self.__time_slots_votes[idx] += 1
                 break
@@ -72,8 +71,8 @@ class Environment:
     # Changes the number of time slots in the agent slot game and then sets the votes to 0 again
     def change_time_slots(self, n_time_slots):
         self.__n_time_slots = n_time_slots
-        self.__time_slots_votes.clear()  # TODO: make this more efficient, should not be changed every time
-        self.__initial_idx_time_slots.clear()  # Probably not necessary
+        self.__time_slots_votes.clear()
+        self.__initial_idx_time_slots.clear()
 
         for i in range(self.__n_time_slots):
             self.__time_slots_votes.append(0)
@@ -81,19 +80,21 @@ class Environment:
 
     # Reset all the time slots to zero votes, set the willingness of the agents
     # rank the agents in terms of willingness and reset the utilities of the agents
-    def reset_environment(self, agents):
-        for idx in range(len(self.__time_slots_votes)):
+    def reset(self, agents):
+        for idx in range(self.__n_time_slots):
             self.__time_slots_votes[idx] = 0
-        # TODO: make the willingness change each round
+            self.__initial_idx_time_slots[idx] = idx
+
         self.determine_willingness(agents)
         self.rank_willingness()
         self.reset_utilities(agents)
+        self.reset_timeslots_chosen(agents)
 
     # clears the agent lists and resets environment 
     def reset_agents(self, agents):
         self.__willingness_agents.clear()
         self.__index_agents.clear()
-        self.reset_environment(agents)
+        self.reset(agents)
 
     # Get the willingness from each agent and put it in a list
     def determine_willingness(self, agents):
@@ -105,6 +106,10 @@ class Environment:
     def reset_utilities(self, agents):
         for agent in agents: 
             agent.reset_utility()
+
+    def reset_timeslots_chosen(self, agents):
+        for agent in agents:
+            agent.reset_timeslots_chosen()
 
     # Quick-sort the willingness
     def rank_willingness(self):
@@ -121,9 +126,6 @@ class Environment:
 
     def get_initial_idx_time_slots(self):
         return self.__initial_idx_time_slots
-
-    def get_time(self):
-        return self.__time_step
 
     def get_number_of_agents(self):
         return (len(self.__index_agents))
