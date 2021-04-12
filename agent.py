@@ -8,7 +8,7 @@ import numpy as np
 
 class Agent:
     environment = environment.Environment()  # the environment that the agent is in
-    def __init__(self, environment, ID, bonus_type):
+    def __init__(self, environment, n_agents, ID, bonus_type):
         self.__utility = 0  # The utility that is gained by having the time slots chosen by the environment
         self.__total_utility = 0 # the total utility of an agent 
         self._time_slot_preference = [] # the time slot preferences of an agent

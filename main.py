@@ -10,13 +10,14 @@ from progress.bar import IncrementalBar
 # storing these agents might not be necessary anymore because it is stored in the environment now 
 def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, environment, bonus_type):
     agents = []
+    tot_agents = n_agents + n_pop_agents + n_pop_predic_agents
     for i in range(n_agents):
-        agent = strategies.Standard(environment, i, bonus_type)
+        agent = strategies.Standard(environment, tot_agents, i, bonus_type)
         agents.append(agent)
     for i in range(n_pop_agents):
-        agents.append(strategies.Popular(environment, i+n_agents, bonus_type))
+        agents.append(strategies.Popular(environment, tot_agents, i+n_agents, bonus_type))
     for i in range(n_pop_predic_agents):
-        agents.append(strategies.Popular_prediction(environment, i + n_agents + n_pop_agents, bonus_type))
+        agents.append(strategies.Popular_prediction(environment, tot_agents, i + n_agents + n_pop_agents, bonus_type))
     return agents
 
 
@@ -86,30 +87,10 @@ def print_agent_slot_game_results(agents, rounds, social_welfare_scores, min_uti
         print(f"Minimum utility ", min_utility_scores[idx]/rounds) # agent with smallest utility
         print(f"Maximum utility: ", max_utility_scores[idx]/rounds) # agent with largest utility
 
-
-# If this is chosen the program is only run once, thus no parameters are changed
-def play_normal_game(environment, agents, rounds):
-    social_welfare=0
-    min_utility=0
-    max_utility=0
-
-    for _ in range(rounds):
-        let_agents_vote(agents, environment)
-        environment.determine_most_popular_time_slot()
-        let_agents_calculate_utility(agents)
-        social_welfare += calculate_social_welfare(agents)
-        min, max = calculate_egalitarian_welfare(agents, rounds)
-        min_utility += min
-        max_utility += max
-        environment.reset_environment(agents)
-
-    environment.rank_popularity_time_slots()
-    print_game_results(environment, agents, rounds, social_welfare, min_utility, max_utility)
-
 def set_number_of_agents(environment, agents, n_agents, bonus_type):
     agents.clear()  # TODO: make this more efficient, should not be cleared every time
     for i in range(n_agents):
-        agent = strategies.Standard(environment, i, bonus_type)
+        agent = strategies.Standard(environment, n_agents,i, bonus_type)
         agents.append(agent)
 
 def create_list_mean_utility_varying_agents_per_run(social_welfare_scores, agents_per_run, rounds):
@@ -124,8 +105,8 @@ def play_agent_slot_game(environment, agents, rounds, bonus_type):
     min_utility = 0
     max_utility = 0
 
-    max_agents = 30
-    max_slots = 30
+    max_agents = 10
+    max_slots = 10
 
     social_welfare_scores = []
     min_utility_scores = []
@@ -183,9 +164,9 @@ def play_game(environment, agents, bonus_type):
     elif game_type == 1:
         games.KM(agents, environment, 10, 10)
     elif game_type == 2:
-        games.threshold(agents, environment, bonus_type)
+        games.Threshold(agents, environment, bonus_type)
     elif game_type == 3:
-        play_agent_slot_game(environment, agents, rounds, bonus_type)
+        games.Agent_slot(agents, environment, 10 , 10, bonus_type)
     elif game_type == 4: 
         games.agent_type(agents, environment, bonus_type)
 
