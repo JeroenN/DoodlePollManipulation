@@ -167,7 +167,6 @@ class Games:
         # create new agents and reset the game to work with these new agents 
     def _create_agents(self, n_agents, n_pop_agents, n_pop_predic_agents, bonus_type):
         self._agents.clear()
-        self._environment.reset()
         tot_agents = n_agents + n_pop_agents + n_pop_predic_agents
 
         for i in range(n_agents):
@@ -180,6 +179,8 @@ class Games:
         self._n_standard_agents = 0
         self._n_popular_agents = 0
         self._calculate_number_of_agents()
+        self._environment.reset(self._agents)
+
 
     def _prepare_for_plotting(self, runs):
         for idx in range(0, runs):
@@ -392,6 +393,8 @@ class Threshold(Games):
         self.__game_type = int(input("What type of game do you want to play?\n1 = social welfare, 2 = price of anarchy\n")) # 1 = social welfare, 2 = price of anarchy
         self.__bonus_type = bonus_type #keeps track of the bonus type for when new agents have to be created
 
+        self.__play_game()
+        
     # creates the correct progress bar depending on game type 
     def __create_progress_bar(self):
         if self.__game_type == 1:
