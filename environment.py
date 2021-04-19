@@ -42,7 +42,8 @@ class Environment:
     def determine_most_popular_time_slot(self):
         max = 0
         idx = 0
-        for i in range(len(self.__time_slots_votes)):
+        for i in range(self.__n_time_slots):
+            #print("votes[", i, "]: ", self.__time_slots_votes[i])
             if self.__time_slots_votes[i] > max:
                 max = self.__time_slots_votes[i]
                 idx = self.__initial_idx_time_slots[i]
@@ -60,6 +61,7 @@ class Environment:
 
 
     def get_most_popular_time_slot(self):
+        #print("most popular time slot: ", self.__idx_most_popular_time_slot)
         return self.__idx_most_popular_time_slot
 
     # For each time slot the amount of times it is chosen is set to 0
@@ -81,7 +83,6 @@ class Environment:
     # Reset all the time slots to zero votes, set the willingness of the agents
     # rank the agents in terms of willingness and reset the utilities of the agents
     def reset(self, agents):
-        print(self.__time_slots_votes)
         for idx in range(self.__n_time_slots):
             self.__time_slots_votes[idx] = 0
             self.__initial_idx_time_slots[idx] = idx

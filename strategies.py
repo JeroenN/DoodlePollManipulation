@@ -21,7 +21,7 @@ class Standard(Agent):
         for i in range(self._n_time_slots):
             if self._time_slot_preference[i] >= self.__threshold:
                 # only add social bonus when this agent is used for a social bonus game and when the cap hasn't been reached 
-                if (self._bonus_type == 1 and len(self._time_slots_chosen) < self._social_bonus_cap):
+                if self._bonus_type == 1 and len(self._time_slots_chosen) < self._social_bonus_cap:
                     self.increase_utility()
 
                 self.environment.vote_time_slot(i)
@@ -115,7 +115,7 @@ class Popular_prediction(Agent):
         self.__means_per_slot = []
         self.__standard_deviation_per_slot = []
         self._strategy = 'popular_prediction'
-        self._willingness = random_number_generator.generate_random_number_normal_distribution(0.1, 0.2, 0, 1)
+        self._willingness = random_number_generator.generate_random_number_normal_distribution(0.2, 0.1, 0, 1)
         self.__n_slots_consideration = 5  # The number of time slots that will be taken in consideration\
         self.__n_votes = 3  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
         self.__popular_time_slots_idx = []

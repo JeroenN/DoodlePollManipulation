@@ -7,7 +7,7 @@ import numpy as np
 # From this class children classes can be made a use different strategies
 
 class Agent:
-    environment = environment.Environment()  # the environment that the agent is in
+
     def __init__(self, environment, n_agents, ID, bonus_type):
         self.__utility = 0  # The utility that is gained by having the time slots chosen by the environment
         self.__total_utility = 0 # the total utility of an agent 
@@ -15,7 +15,7 @@ class Agent:
         self._time_slots_chosen = []  # The index's of the time slots chosen
         self.environment = environment  # assign the environment class
         self._n_time_slots = environment.get_n_time_slots()
-        self.__create_time_slot_preference()
+        self.create_time_slot_preference()
         self.__ID = ID  # assign an ID
         self._willingness = 0
         self._strategy = ""
@@ -82,7 +82,11 @@ class Agent:
             # creates random value between 0 and 1 and stores this in time_slot_preference
             self._time_slot_preference[i] = random_number_generator.generate_random_number_normal_distribution()
 
-    def __create_time_slot_preference(self):
+    def set_n_time_slots(self, n_time_slots):
+        self._n_time_slots = n_time_slots
+
+    def create_time_slot_preference(self):
+        self._time_slot_preference.clear()
         for _ in range(self._n_time_slots):
             # creates normally distributed random value with mean 0 and sd 1 and stores this in time_slot_preference
             self._time_slot_preference.append(random_number_generator.generate_random_number_normal_distribution())

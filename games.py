@@ -15,7 +15,7 @@ class Games:
         self._social_welfare = 0
         self._min_utility = 0
         self._max_utility = 0
-        self._rounds = 1000
+        self._rounds = 5000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -206,12 +206,6 @@ class Normal(Games):
         self._environment.rank_popularity_time_slots()
         self.__print_results()
 
-    def _prepare_for_plotting(self, runs):
-        for idx in range(0, runs):
-            self._social_welfare_scores[idx] = (self._social_welfare_scores[idx] / self._rounds) / self._n_agents
-            self._min_utility_scores[idx] = self._min_utility_scores[idx] / self._rounds
-            self._max_utility_scores[idx] = self._max_utility_scores[idx] / self._rounds
-
 
 class KM(Games):
     def __init__(self, agents, environment, max_k, max_m):
@@ -316,26 +310,37 @@ class Agent_slot(Games):
     # The program loops through max_agents and max_slots both starting at 1, each loop is one run. This functions
     # calculates in how many runs this results and stores it in __n_runs
     def __calculate_number_of_runs(self):
-        self.__n_runs = (self.__max_agents) * (self.__max_slots)
+        self.__n_runs = self.__max_agents * self.__max_slots
 
     # Changes the number of agents to fit with how many should be used in a particular run
     def __set_number_of_agents(self, n_agents):
         current_n_agents = len(self._agents)
-        # If when the new number of agents is smaller than it currently is the agents are cleared and the new agents
+        self._n_agents = n_agents
+        # When the new number of agents that there are supposed to be is smaller than the current number of agents then
+        # the agents are cleared and the new agents
         # are created. Otherwise, one agent is added to the number of agents
-        #TODO: check if the n_agents is correct now
-        if self._n_agents < current_n_agents:
+        if n_agents < current_n_agents:
             self._agents.clear()
-            for i in range(self._n_agents):
+            for i in range(n_agents):
                 agent = strategies.Standard(self._environment, n_agents, i, self.__bonus_type)
                 self._agents.append(agent)
         else:
-            agent = strategies.Standard(self._environment, n_agents, self._n_agents - 1, self.__bonus_type)
-            self._agents.append(agent)
+            while n_agents != current_n_agents:
+                agent = strategies.Standard(self._environment, n_agents, n_agents - 1, self.__bonus_type)
+                self._agents.append(agent)
+                current_n_agents += 1
 
         # DEBUG
-        if self._n_agents != len(self._agents):
+        if n_agents != len(self._agents):
             print("ERROR: not enough agents were created in the agent_slot_game")
+
+    # TODO: change this to a name that better describes the function or split it in two
+    # Tell the agents how many time slots there are and change for how many slots the agent has a certain preference
+    def __inform_agents_n_slots(self, n_slots):
+        for agent in self._agents:
+            agent.set_n_time_slots(n_slots)
+            agent.create_time_slot_preference()
+
     # Prints all the different results that we have calculated
     def __print_results(self):
         print("Game ended! \n")
@@ -348,12 +353,11 @@ class Agent_slot(Games):
             print(f"n_slots: ", self.__list_slots[idx])
             print(f"n_agents: ", self.__list_agents[idx])
             print(f'Social welfare: ', self._social_welfare_scores[idx] / self._rounds)
-            print(f'Mean utility; ', self._social_welfare_scores[idx] / self._n_agents / self._rounds)
+            n_agents = self.__list_agents[idx]
+            print(f'Mean utility; ', (self._social_welfare_scores[idx] / n_agents / self._rounds))
 
             print(f'Minimum utility ', self._min_utility_scores[idx] / self._rounds)  # agent with smallest utility
             print(f"Maximum utility: ", self._max_utility_scores[idx] / self._rounds)  # agent with largest utility
-
-            print(f"popular agent utility: ", self.__popular_agent_utility[idx] / self._rounds, "\n")
 
     # Keep track of the number of agents and time slots each run
     def __append_parameters(self, n_slots, n_agents):
@@ -370,14 +374,16 @@ class Agent_slot(Games):
     def __play_game(self):
         for n_agents in range(1, self.__max_agents + 1):
             for n_slots in range(1, self.__max_slots + 1):
-                self.__set_number_of_agents(n_agents)
                 self._environment.change_time_slots(n_slots)
+                self.__set_number_of_agents(n_agents)
+                self.__inform_agents_n_slots(n_slots)
                 self._calculate_number_of_agents()
                 self._go_through_rounds()
 
                 self._append_scores_per_run()
                 self.__append_parameters(n_slots, n_agents)
                 self._reset_scores()
+                self._environment.reset(self._agents)
 
 
         self._environment.rank_popularity_time_slots()
