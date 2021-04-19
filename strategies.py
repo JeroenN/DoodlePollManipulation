@@ -117,7 +117,7 @@ class Popular_prediction(Agent):
         self._strategy = 'popular_prediction'
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.2, 0.1, 0, 1)
         self.__n_slots_consideration = 5  # The number of time slots that will be taken in consideration\
-        self.__n_votes = 3  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
+        self.__n_votes = 2  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
         self.__popular_time_slots_idx = []
         self.__popular_time_slots_preference = []
         self.__slots_preference_prediction = []
@@ -163,9 +163,10 @@ class Popular_prediction(Agent):
             # this last part doesn't matter, however when this strategy is used later in the game and thus many
             # agents have already voted then this becomes more important than the prediction of the mean minus
             # the standard deviation
-            preference_prediction = self.__means_per_slot[idx] - self.__standard_deviation_per_slot[idx] * \
-                                    self.__importance_standard_deviation + self.environment.get_time_slots()[idx] \
-                                    / (self.__n_agents - 1)
+            preference_prediction = self.__means_per_slot[idx]\
+                                    #- self.__standard_deviation_per_slot[idx] * \
+                                    #self.__importance_standard_deviation + self.environment.get_time_slots()[idx] \
+                                    #/ (self.__n_agents - 1)
 
             self.__slots_preference_prediction.append(preference_prediction)
             self.__slots_preference_prediction_idx.append(idx)
