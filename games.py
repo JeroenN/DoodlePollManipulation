@@ -15,7 +15,7 @@ class Games:
         self._social_welfare = 0
         self._min_utility = 0
         self._max_utility = 0
-        self._rounds = 10
+        self._rounds = 1000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -300,7 +300,11 @@ class Agent_slot(Games):
         self.__percentage_strategic_agents = percentage_strategic_agents
         self.__n_sincere_voters = 0
         self.__n_strategic_voters = 0
-        self.__starting_n_agents_slots = 0
+        # Set to four since if you have 25% strategic voters, the first game you can play with this is with 1
+        # strategic voter and 3 sincere voters. If for each condition they are set to four the graphs can be more
+        # easily compared
+        self.__starting_n_agents = 4
+        self.__starting_n_slots = 3
         self.__max_agents = max_agents
         self.__max_slots = max_slots
         self.__popular_agent_utility = []
@@ -309,19 +313,18 @@ class Agent_slot(Games):
         self.__n_runs = 0
         self.__bonus_type = bonus_type
 
+        #self.__calculate_n_agent_per_type()
         self.__play_game()
 
     # The program loops through max_agents and max_slots both starting at 1, each loop is one run. This functions
     # calculates in how many runs this results and stores it in __n_runs
     def __calculate_number_of_runs(self):
-        self.__n_runs = (self.__max_agents - self.__starting_n_agents_slots + 1) * \
-                        (self.__max_slots - self.__starting_n_agents_slots + 1)
+        self.__n_runs = (self.__max_agents - self.__starting_n_agents + 1) * (self.__max_slots - self.__starting_n_slots + 1)
 
     # calculates how many sincere and strategic voters should be created
     def __calculate_n_agent_per_type(self, n_agents):
         self.__n_sincere_voters = round(n_agents * (1 - self.__percentage_strategic_agents / 100))
         self.__n_strategic_voters = n_agents - self.__n_sincere_voters
-        self.__starting_n_agents_slots = self.__n_sincere_voters + self.__n_strategic_voters
         self.__calculate_number_of_runs()
 
     # Changes the number of agents to fit with how many should be used in a particular run
@@ -345,8 +348,7 @@ class Agent_slot(Games):
         if n_agents != len(self._agents):
             print("ERROR: not enough agents were created in the agent_slot_game")
 
-    # self.__sincere_voters_per_strategic_voter
-    # self.__starting_n_agents_slots
+
     def __set_number_of_agents_different_types(self, n_agents):
         self._n_agents = n_agents
         # Clears all the agents, then it create the number of sincere voters that have to created and next
@@ -362,6 +364,11 @@ class Agent_slot(Games):
             agent = strategies.Popular(self._environment, n_agents, i + self.__n_sincere_voters, self.__bonus_type)
             self._agents.append(agent)
 
+        #print("n_agents:", n_agents)
+        #for agent in self._agents:
+        #    print("strategy: ", agent.get_strategy())
+
+        #print("")
         if n_agents != len(self._agents):
             print("ERROR: not enough agents were created in the agent_slot_game")
 
@@ -406,13 +413,13 @@ class Agent_slot(Games):
         pass
 
     def __play_game(self):
-        for n_agents in range(self.__starting_n_agents_slots, self.__max_agents + 1):
-            for n_slots in range(self.__starting_n_agents_slots, self.__max_slots + 1):
+        for n_agents in range(self.__starting_n_agents, self.__max_agents + 1):
+            if self.__percentage_strategic_agents == 0:
+                self.__set_number_of_agents(n_agents)
+            else:
+                self.__set_number_of_agents_different_types(n_agents)
+            for n_slots in range(self.__starting_n_slots, self.__max_slots + 1):
                 self._environment.change_time_slots(n_slots)
-                if self.__percentage_strategic_agents == 0:
-                    self.__set_number_of_agents(n_agents)
-                else:
-                    self.__set_number_of_agents_different_types(n_agents)
                 self.__inform_agents_n_slots(n_slots)
                 self._calculate_number_of_agents()
                 self._go_through_rounds()
@@ -427,7 +434,7 @@ class Agent_slot(Games):
         self.__print_results()
         mean_utility = self.__create_list_mean_utility_varying_agents_per_run()
         plots.plot_3d_graph(self.__list_agents, self.__list_slots, mean_utility, self.__max_agents
-                            - self.__starting_n_agents_slots + 1, self.__max_slots - self.__starting_n_agents_slots + 1,
+                            - self.__starting_n_agents + 1, self.__max_slots - self.__starting_n_slots + 1,
                             'agents', 'slots', 'mean_utility', 'mean utility based on agents and time slots')
 
 class Threshold(Games):

@@ -44,7 +44,7 @@ class Standard(Agent):
 # which time slots it should take into consideration.
 class Popular(Agent):
     def __init__(self, environment, n_agents, ID, bonus_type):
-        Agent.__init__(self, environment, n_agents, ID, type)
+        Agent.__init__(self, environment, n_agents, ID, bonus_type)
         self.__popular_time_slots_idx = []
         self.__popular_time_slots_preference = []
         self.__n_slots_consideration = 3  # The number of time slots that will be taken in consideration\
@@ -53,7 +53,23 @@ class Popular(Agent):
         self._strategy = "popular"
         self.__ID = ID
         self.__n_agents = n_agents
+        self.__set_n_considerations_to_n_slots()
+        self.__set_n_votes_to_n_slots()
 
+
+    # Makes sure that if there are less time slots available than the amount of slots the agent wants to take into
+    # consideration, then the amount of time slots taken into consideration is set to the amount of time slots there
+    # are
+    def __set_n_considerations_to_n_slots(self):
+        if self.environment.get_n_time_slots() < self.__n_slots_consideration:
+            self.__n_slots_consideration = self.environment.get_n_time_slots()
+
+    # Makes sure that if there are less time slots available than the amount of slots the agent wants to vote on
+    # , then the amount of time slots voted on is set to the amount of time slots there
+    # are
+    def __set_n_votes_to_n_slots(self):
+        if self.environment.get_n_time_slots() < self.__n_votes:
+            self.__n_votes = self.environment.get_n_time_slots()
 
     # Goes over the last n_slots_consideration and adds the index of those to the array idx_popular_time_slots
     def __create_list_popular_slots(self):
@@ -61,7 +77,11 @@ class Popular(Agent):
 
         # Takes the indexes from the last n_slots_consideration time slots (they are ranked from least to most popular,
         # thus the n_slots_consideration most popular time slots) and puts to indexes in the list popular_time_slots_idx
-        for idx in range(self._n_time_slots - self.__n_slots_consideration, self._n_time_slots):
+        starting_idx_most_popular_slots = self._n_time_slots - self.__n_slots_consideration
+        if starting_idx_most_popular_slots < 0:
+            starting_idx_most_popular_slots = 0
+
+        for idx in range(starting_idx_most_popular_slots, self._n_time_slots):
             idx_time_slots = self.environment.get_initial_idx_time_slots()
             self.__popular_time_slots_idx.append(idx_time_slots[idx])
 
