@@ -404,8 +404,7 @@ class Threshold(Games):
 
         return bar
 
-        # changes the agents' thresholds
-
+    # changes the agents' thresholds
     def __set_threshold_normal_agents(self, threshold):
         for agent in self._agents:
             if agent.get_strategy() == "standard":
