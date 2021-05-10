@@ -15,7 +15,8 @@ class Games:
         self._social_welfare = 0
         self._min_utility = 0
         self._max_utility = 0
-        self._rounds = 1000
+
+        self._rounds = 20000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -456,8 +457,7 @@ class Threshold(Games):
 
         return bar
 
-        # changes the agents' thresholds
-
+    # changes the agents' thresholds
     def __set_threshold_normal_agents(self, threshold):
         for agent in self._agents:
             if agent.get_strategy() == "standard":

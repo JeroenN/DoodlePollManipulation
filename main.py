@@ -8,7 +8,7 @@ from progress.bar import IncrementalBar
 
 # Right now this function creates agents with the standard strategy
 # storing these agents might not be necessary anymore because it is stored in the environment now 
-def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, environment, bonus_type):
+def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, environment, bonus_type, n_social_agents = 0, n_social_pop_agents = 0, n_social_pop_predic_agents = 0):
     agents = []
     tot_agents = n_agents + n_pop_agents + n_pop_predic_agents
     for i in range(n_agents):
@@ -18,9 +18,16 @@ def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, environment, bonu
         agents.append(strategies.Popular(environment, tot_agents, i+n_agents, bonus_type))
     for i in range(n_pop_predic_agents):
         agents.append(strategies.Popular_prediction(environment, tot_agents, i + n_agents + n_pop_agents, bonus_type))
+
+    if bonus_type == 1:
+        for i in range(n_social_agents):
+            agents.append(strategies.Standard_social(environment, tot_agents, i+n_agents+n_pop_agents+n_pop_predic_agents, bonus_type))
+        for i in range(n_social_pop_agents):
+                agents.append(strategies.Popular_social(environment, tot_agents, i+n_agents+n_pop_agents+n_pop_predic_agents+n_social_agents, bonus_type))
+        for i in range(n_social_pop_predic_agents):
+                agents.append(strategies.Popular_prediction_social(environment, tot_agents, i+n_agents+n_pop_agents+n_pop_predic_agents+n_social_agents+n_social_pop_agents, bonus_type))
+    
     return agents
-
-
 
 def create_environment(n_time_slots):
     return Environment(n_time_slots)
@@ -173,11 +180,24 @@ def main():
     environment = create_environment(
         int(input("How many dates are in the Doodle poll?: ")))  # create and store environment
     bonus_type = int(input("Do you want the agents to use social bonus?\n 0 = no, 1 = yes\n"))
-    agents = create_agents(int(input("How many standard voters are in the Doodle poll?: ")),
-                           int(input("How many popular voters are in the Doodle poll?: ")),
-                           int(input("How many popular prediction voters are in the Doodle poll?: ")),
-                           environment, 
-                           bonus_type)  # create and store agents
+    
+    if bonus_type == 0:
+        agents = create_agents(int(input("How many standard voters are in the Doodle poll?: ")),
+                            int(input("How many popular voters are in the Doodle poll?: ")),
+                            int(input("How many popular prediction voters are in the Doodle poll?: ")), 
+                            environment,
+                            bonus_type)  # create and store agents
+        
+    elif bonus_type == 1:
+        agents = create_agents(int(input("How many standard voters are in the Doodle poll?: ")),
+                            int(input("How many popular voters are in the Doodle poll?: ")),
+                            int(input("How many popular prediction voters are in the Doodle poll?: ")), 
+                            environment,
+                            bonus_type,
+                            int(input("How many standard social bonus voters are in the Doodle poll?: ")), 
+                            int(input("How many popular social bonus voters are in the Doodle poll?: ")), 
+                            int(input("How many popular prediction social bonus voters are in the Doodle poll?: ")))
+
     environment.determine_willingness(agents)
     environment.rank_willingness()
 
