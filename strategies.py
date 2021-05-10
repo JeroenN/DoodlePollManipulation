@@ -53,14 +53,15 @@ class Popular(Agent):
         self._strategy = "popular"
         self.__ID = ID
         self.__n_agents = n_agents
-        self.__set_n_considerations_to_n_slots()
-        self.__set_n_votes_to_n_slots()
+        #self.__set_n_considerations_to_n_slots()
+        #self.__set_n_votes_to_n_slots()
 
 
     # Makes sure that if there are less time slots available than the amount of slots the agent wants to take into
     # consideration, then the amount of time slots taken into consideration is set to the amount of time slots there
     # are
     def __set_n_considerations_to_n_slots(self):
+        print("dskljfsdlk", self.environment.get_time_slots())
         if self.environment.get_n_time_slots() < self.__n_slots_consideration:
             self.__n_slots_consideration = self.environment.get_n_time_slots()
 
