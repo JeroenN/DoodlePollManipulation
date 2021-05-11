@@ -16,7 +16,7 @@ class Games:
         self._min_utility = 0
         self._max_utility = 0
 
-        self._rounds = 20000
+        self._rounds = 1000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -436,7 +436,7 @@ class Agent_slot(Games):
         mean_utility = self.__create_list_mean_utility_varying_agents_per_run()
         plots.plot_3d_graph(self.__list_agents, self.__list_slots, mean_utility, self.__max_agents
                             - self.__starting_n_agents + 1, self.__max_slots - self.__starting_n_slots + 1,
-                            'agents', 'slots', 'mean_utility', 'mean utility based on agents and time slots')
+                            'agents', 'time slots', 'mean utility', 'mean utility based on agents and time slots')
 
 class Threshold(Games):
     def __init__(self, agents, environment, bonus_type):
