@@ -19,7 +19,8 @@ class Agent:
         self.__ID = ID  # assign an ID
         self._willingness = 0
         self._strategy = ""
-        self._bonus_type = bonus_type # 0 = no social bonus, 1 = social bonus 
+        self._bonus_type = bonus_type # 0 = no social bonus, 1 = social bonus
+        self._social_utility = 0 # This is the total utility that has been earned from social bonus  
         if self._bonus_type == 1: # type 1 is social bonus agent 
             self._social_bonus = 0.05 # the social bonus an agent gets for each extra timeslot it picks
             self._social_bonus_cap = round(self._n_time_slots/3) # the number of slots an agent can pick in order to get social bonus. Could also be in environment
@@ -29,6 +30,9 @@ class Agent:
 
     def get_willingness(self):
         return self._willingness
+    
+    def set_willingness(self, mean, sd):
+        self._willingness = random_number_generator.generate_random_number_normal_distribution(mean, sd, 0, 1)
 
     def get_strategy(self):
         return self._strategy
@@ -56,6 +60,7 @@ class Agent:
 
     def increase_utility(self):
         self.__utility += self._social_bonus
+        self._social_utility += self._social_bonus
 
         #TODO: find a better way to fix that the social bonus can make the utility go above 1
         if self.__utility > 1: 
@@ -71,8 +76,12 @@ class Agent:
     def get_time_slot_preference(self, idx_slot):
         return self._time_slot_preference[idx_slot]
 
+    def get_social_utility(self):
+        return self._social_utility
+
     def reset_utility(self):
         self.__utility = 0
+        self._social_utility = 0
 
     def reset_timeslots_chosen(self):
         self._time_slots_chosen.clear()

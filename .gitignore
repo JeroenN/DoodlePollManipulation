@@ -12,3 +12,9 @@ price_of_anarchy_welfares_threshold.png
 agents_welfares_10.png
 __pycache__/normal_distribution.cpython-38.pyc
 __pycache__/random_number_generator.cpython-38.pyc
+plots/
+welfares_willingness_{'popular', 'standard'}.png
+welfares_willingness.png
+welfares_willingness_set().png
+welfares_willingness_['standard', 'popular'].png
+welfares_willingness_['standard', 'popular'].png

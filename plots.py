@@ -90,3 +90,14 @@ def plot_agent_results(agent_welfares, agent_min, agent_max, n_of_agents):
     plt.title("Influence of type-of-agent ratio on social and utilitarian welfare")
     plt.show()
     plt.savefig(f'agents_welfares_{n_of_agents}.png')
+
+def plot_willingness_results(welfares, min_utility, max_utility, strategies):
+    plt.plot(np.arange(0, 1.1, 0.1), welfares, label="Mean utility")
+    plt.plot(np.arange(0, 1.1, 0.1), min_utility, label="Minimum utility")
+    plt.plot(np.arange(0, 1.1, 0.1), max_utility, label="Maximum utility")
+    plt.xlabel('Willingness')
+    plt.ylabel('Utility')
+    plt.title('Influence of willingness on social and utilitarian welfare')
+    plt.legend(loc='upper right', bbox_to_anchor=(1, 0.875))
+    plt.show()
+    plt.savefig(f'welfares_willingness_{list(strategies)}.png')
