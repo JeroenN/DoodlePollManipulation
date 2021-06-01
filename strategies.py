@@ -42,7 +42,7 @@ class Standard_social(Agent):
         self.__available_time_slots_preference = []
         self.__ID = ID
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.4, 0.2, 0, 1)
-        self._strategy = "standard"
+        self._strategy = "standard_social"
         self.__n_agents = n_agents
         self.__n_unpopular = 2 # the number of unpopular slots that this agent will vote for 
         self.__p = self._social_bonus_cap - self.__n_unpopular# the number of high utility slots that this agent will vote for, might need to be changed to only include timeslots above threshold. d 
@@ -206,7 +206,7 @@ class Popular_social(Agent):
         self.__n_slots_consideration = 5 # The number of time slots that will be taken in consideration\
         self.__n_votes = 3  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.8, 0.1, 0, 1)
-        self._strategy = "popular"
+        self._strategy = "popular_social"
         self.__ID = ID
         self.__n_agents = n_agents
         self.__n_unpopular = 1
@@ -410,7 +410,7 @@ class Popular_prediction_social(Agent):
         self.__preference_per_slot = []
         self.__means_per_slot = []
         self.__standard_deviation_per_slot = []
-        self._strategy = 'popular_prediction'
+        self._strategy = 'popular_prediction_social'
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.1, 0.2, 0, 1)
         self.__n_slots_consideration = 5  # The number of time slots that will be taken in consideration\
         self.__n_votes = 3  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration

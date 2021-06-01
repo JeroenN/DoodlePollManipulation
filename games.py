@@ -12,6 +12,7 @@ class Games:
         self._environment = environment
 
         self._social_welfare = 0
+        self._social_bonus_utility = 0 # keeps track of the total utility that is gained from social bonus 
         self._min_utility = 0
         self._max_utility = 0
 
@@ -31,13 +32,15 @@ class Games:
     # 1. let the agents vote, 2. let the agents calculate the utility
     # 3. calculate social welfare and egalitarian welfare, 4. reset all the agents
     # their utility to 0 and set all the time slot votes to zero
-    def _go_through_rounds(self):
+    def _go_through_rounds(self, bonus_type=0):
         for _ in range(self._rounds):
             self._show_popular_prediction_agents_preferences()
             self._agents_vote()
             self._agents_calculate_utility()
             self.__calculate_social_welfare()
             self.__calculate_egalitarian_welfare()
+            if bonus_type == 1:
+                self.__calculate_social_bonus_utility()
             self._environment.reset(self._agents)
 
     # Creates a list of all the preference from all the agents per time slot
@@ -128,6 +131,11 @@ class Games:
         for agent in self._agents:
             self._social_welfare += agent.get_utility()
 
+    # calculates the total utility that has been earned from social bonus 
+    def __calculate_social_bonus_utility(self):
+        for agent in self._agents:
+            self._social_bonus_utility += agent.get_social_utility()
+
     # FIXME: using quicksort is rather in efficient for this problem, just use the standard method for
     # finding min and max
     def __calculate_egalitarian_welfare(self):
@@ -160,6 +168,10 @@ class Games:
         print('\nSocial welfare: ', self._social_welfare / self._rounds)
         print('\nMean utility; ', (self._social_welfare / len(self._agents)) / self._rounds)
 
+    def _print_social_utility(self):
+        print(f'\nSocial welfare without social bonus:', (self._social_welfare- self._social_bonus_utility) / self._rounds)
+        print(f'\nMean social bonus:', self._social_bonus_utility / self._rounds)
+
     def _print_egalitarian_welfare(self):
         print("\nMinimum utility ", self._min_utility / self._rounds)  # agent with smallest utility
         print("\nMaximum utility: ", self._max_utility / self._rounds)  # agent with largest utility
@@ -190,8 +202,9 @@ class Games:
 
 
 class Normal(Games):
-    def __init__(self, agents, environment):
+    def __init__(self, agents, environment, bonus_type):
         Games.__init__(self, agents, environment)
+        self.__bonus_type = bonus_type 
         self.__play_game()
 
     def __print_results(self):
@@ -199,11 +212,14 @@ class Normal(Games):
         self._print_strategies()
         self._print_social_welfare()
         self._print_egalitarian_welfare()
+        
+        # if the bonus type is 1, also print the utility without social bonus 
+        if self.__bonus_type == 1: 
+            self._print_social_utility()
 
     # If this is chosen the program is only run once, thus no parameters are changed
     def __play_game(self):
-        self._go_through_rounds()
-
+        self._go_through_rounds(self.__bonus_type)
         self._environment.rank_popularity_time_slots()
         self.__print_results()
 
@@ -462,7 +478,7 @@ class Threshold(Games):
     # changes the agents' thresholds
     def __set_threshold_normal_agents(self, threshold):
         for agent in self._agents:
-            if agent.get_strategy() == "standard":
+            if agent.get_strategy() == "standard" or agent.get_strategy() == "standard_social":
                 agent.set_threshold(threshold)
 
     # clear welfare scores
@@ -523,3 +539,45 @@ class agent_type(Games):
 
         plots.plot_agent_results(self._social_welfare_scores, self._min_utility_scores, self._max_utility_scores,
                                  self._n_agents)
+
+class willingness(Games):
+    def __init__(self, agents, environment, bonus_type):
+        Games.__init__(self, agents, environment)
+        self.__bonus_type = bonus_type #keeps track of the bonus type for when new agents have to be created
+        self.__strategies = set()
+        self.__play_game()
+
+    # creates the correct progress bar depending on game type 
+    def __create_progress_bar(self):
+        bar = IncrementalBar('Progress', max=11)
+        return bar
+
+    # changes the agents' willingness
+    def __set_willingess(self, willingness):
+        for agent in self._agents:
+            if agent.get_strategy() == "standard" or agent.get_strategy() == "standard_social":
+                agent.set_willingness(willingness, 0.1)
+            else: 
+                agent.set_willingness(willingness, 0.2)
+    
+    # figure out agent types
+    def __agent_types(self):
+        for agent in self._agents: 
+            self.__strategies.add(agent.get_strategy())
+            
+    
+    def __play_game(self):       
+        self.__agent_types() 
+        bar = self.__create_progress_bar()
+
+        for willingness in np.arange(0, 1.1, 0.1):
+            self.__set_willingess(willingness)
+            self._go_through_rounds()
+            self._append_scores_per_run()  # this is not divided by rounds yet
+            self._reset_scores()
+            bar.next()
+
+        self._prepare_for_plotting(11)
+
+        bar.finish()
+        plots.plot_willingness_results(self._social_welfare_scores, self._min_utility_scores, self._max_utility_scores, self.__strategies)
