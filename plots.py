@@ -1,6 +1,8 @@
 #from mpl_toolkits import mplot3d
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 
 def plot_3d_graph(x, y, z, x_max, y_max, x_label, y_label, z_label, title):
     X = np.reshape(x, (x_max, y_max))
@@ -41,10 +43,18 @@ def plot_3d_graph_cutoff(x, y, z, x_max, y_max, x_label, y_label, z_label, title
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_zlabel(z_label)
-    ax.set_title('effect of number of agents and slots on mean utility')
-    ax.set_xlabel('number of agents')
-    ax.set_ylabel('number of slots')
-    ax.set_zlabel('mean utility')
+    plt.show()
+
+def plot_heatmap(x, y, z, x_label, y_label, z_label, title):
+    for idx in range(len(z)):
+        if z[idx] == 0:
+            z[idx] = np.nan
+
+    df = pd.DataFrame.from_dict(np.array([x, y, z]).T)
+    df.columns = [x_label, y_label, z_label]
+    pivotted = df.pivot(y_label, x_label, z_label)
+    sns.heatmap(pivotted, annot = True, cbar_kws={'label': z_label})
+    plt.title(title)
     plt.show()
 
 def plot_threshold_results(threshold_welfares_standard, threshold_welfares_popular, min_standard, min_popular, max_standard, max_popular, game_type):

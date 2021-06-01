@@ -3,7 +3,6 @@ import plots
 import strategies
 import quick_sort
 import games
-from progress.bar import IncrementalBar
 
 
 # Right now this function creates agents with the standard strategy
@@ -69,30 +68,30 @@ def calculate_egalitarian_welfare(agents, rounds):
 def print_game_results(environment, agents, rounds, social_welfare, min_utility, max_utility):
     print("Game ended! \n")
     for agent in agents:
-        print(agent, f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility()/rounds}")
+        print(agent, ", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility()/rounds}")
 
-    print(f'\nSocial welfare: ', social_welfare/rounds)
-    print(f'\nMean utility; ', (social_welfare/len(agents))/rounds)
+    print('\nSocial welfare: ', social_welfare/rounds)
+    print('\nMean utility; ', (social_welfare/len(agents))/rounds)
 
-    print(f"\nMinimum utility ", min_utility/rounds) # agent with smallest utility
-    print(f"\nMaximum utility: ", max_utility/rounds) # agent with largest utility
+    print("\nMinimum utility ", min_utility/rounds) # agent with smallest utility
+    print("\nMaximum utility: ", max_utility/rounds) # agent with largest utility
 
 
 def print_agent_slot_game_results(agents, rounds, social_welfare_scores, min_utility_scores, max_utility_scores,
                                   agents_per_run, slots_per_run):
     print("Game ended! \n")
     for agent in agents:
-        print(agent, f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility()/rounds}")
+        print(agent, ", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility()/rounds}")
 
     for idx in range(len(social_welfare_scores)):
-        print(f"n_agents: ", agents_per_run[idx])
-        print(f"n_slots: ", slots_per_run[idx])
-        print(f'Social welfare: ', social_welfare_scores[idx]/rounds)
+        print("n_agents: ", agents_per_run[idx])
+        print("n_slots: ", slots_per_run[idx])
+        print('Social welfare: ', social_welfare_scores[idx]/rounds)
         n_agents = agents_per_run[idx]
-        print(f'Mean utility; ', (social_welfare_scores[idx] / n_agents / rounds))
+        print('Mean utility; ', (social_welfare_scores[idx] / n_agents / rounds))
 
-        print(f"Minimum utility ", min_utility_scores[idx]/rounds) # agent with smallest utility
-        print(f"Maximum utility: ", max_utility_scores[idx]/rounds) # agent with largest utility
+        print("Minimum utility ", min_utility_scores[idx]/rounds) # agent with smallest utility
+        print("Maximum utility: ", max_utility_scores[idx]/rounds) # agent with largest utility
 
 def set_number_of_agents(environment, agents, n_agents, bonus_type):
     agents.clear()  # TODO: make this more efficient, should not be cleared every time
@@ -157,7 +156,7 @@ def print_max_threshold(threshold_welfares_standard):
         if max < threshold_welfares_standard[idx]:
             max = threshold_welfares_standard[idx]
             index = idx
-    print(f"max welfare: ", max, "threshold: ", index/len(threshold_welfares_standard))
+    print("max welfare: ", max, "threshold: ", index/len(threshold_welfares_standard))
 
 # Chooses which type of game is going to be played
 def play_game(environment, agents, bonus_type):
@@ -172,7 +171,7 @@ def play_game(environment, agents, bonus_type):
     elif game_type == 2:
         games.Threshold(agents, environment, bonus_type)
     elif game_type == 3:
-        games.Agent_slot(agents, environment, 20, 20, 100, bonus_type)
+        games.Agent_slot(agents, environment, 20, 20, 50, bonus_type)
     elif game_type == 4: 
         games.agent_type(agents, environment, bonus_type)
 

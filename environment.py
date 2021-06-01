@@ -16,7 +16,7 @@ class Environment:
         self.__create_time_slots()
 
     def __str__(self):
-        return f"Environment with {self.__n_time_slots} time slots"
+        return "Environment with {self.__n_time_slots} time slots"
 
     # This function can be called by an agent to vote for that particular time slot
     # it also removes the first element from the willingness_agents list

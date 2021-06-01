@@ -1,7 +1,6 @@
 import quick_sort
 import plots
 import normal_distribution
-from progress.bar import IncrementalBar
 import numpy as np
 import strategies
 from environment import Environment
@@ -16,7 +15,7 @@ class Games:
         self._min_utility = 0
         self._max_utility = 0
 
-        self._rounds = 1000
+        self._rounds = 3000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -155,7 +154,7 @@ class Games:
     def _print_strategies(self):
         for agent in self._agents:
             print(agent,
-                  f", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility() / self._rounds}")
+                  ", Strategy: ", agent.get_strategy(), ", Total utility: ", agent.get_total_utility() / self._rounds)
 
     def _print_social_welfare(self):
         print('\nSocial welfare: ', self._social_welfare / self._rounds)
@@ -212,8 +211,8 @@ class Normal(Games):
 class KM(Games):
     def __init__(self, agents, environment, max_k, max_m):
         Games.__init__(self, agents, environment)
-        self.__max_k = max_k
-        self.__max_m = max_m
+        self.__max_k = environment.get_n_time_slots() + 1
+        self.__max_m = environment.get_n_time_slots() + 1
         self.__popular_agent_utility = []
         self.__list_k = []
         self.__list_m = []
@@ -289,10 +288,13 @@ class KM(Games):
         self.__print_results()
         mean_utility_popular_agents = self._create_list_mean_utility(self.__popular_agent_utility,
                                                                      self._n_popular_agents, self.__n_runs)
-        plots.plot_3d_graph_cutoff(self.__list_k, self.__list_m, mean_utility_popular_agents, self.__max_k - 1,
-                                   self.__max_m - 1,
-                                   'votes per agent', 'slots taken into consideration per agent', 'mean utility',
-                                   'mean utility with popular strategy')
+        print(mean_utility_popular_agents)
+        #plots.plot_3d_graph_cutoff(self.__list_m, self.__list_k, mean_utility_popular_agents, self.__max_m - 1,
+        #                           self.__max_k - 1, 'slots taken into consideration per agent',
+        #                           'votes per agent',  'mean utility', 'mean utility with popular strategy')
+        plots.plot_heatmap(self.__list_m, self.__list_k, mean_utility_popular_agents,
+                           'slots taken into consideration per agent', 'votes per agent',
+                           'mean utility', 'mean utility with popular strategy')
 
 
 class Agent_slot(Games):
