@@ -16,6 +16,7 @@ def plot_3d_graph(x, y, z, x_max, y_max, x_label, y_label, z_label, title):
     ax.set_xlabel(x_label)
     ax.set_ylabel(y_label)
     ax.set_zlabel(z_label)
+    ax.set_zbound(lower=0.54, upper=0.68)
     plt.show()
 
 

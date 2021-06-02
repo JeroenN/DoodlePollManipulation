@@ -115,8 +115,8 @@ class Popular(Agent):
         Agent.__init__(self, environment, n_agents, ID, bonus_type)
         self.__popular_time_slots_idx = []
         self.__popular_time_slots_preference = []
-        self.__n_slots_consideration = 10  # The number of time slots that will be taken in consideration\
-        self.__n_votes = 6  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
+        self.__n_slots_consideration = 4  # The number of time slots that will be taken in consideration\
+        self.__n_votes = 1  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.8, 0.1, 0, 1)
         self._strategy = "popular"
         self.__ID = ID

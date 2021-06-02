@@ -16,7 +16,7 @@ class Games:
         self._min_utility = 0
         self._max_utility = 0
 
-        self._rounds = 3000
+        self._rounds = 100
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -319,11 +319,12 @@ class Agent_slot(Games):
         self.__percentage_strategic_agents = percentage_strategic_agents
         self.__n_sincere_voters = 0
         self.__n_strategic_voters = 0
-        # Set to four since if you have 25% strategic voters, the first game you can play with this is with 1
+        # Set to 4 since if you have 25% strategic voters, the first game you can play with this is with 1
         # strategic voter and 3 sincere voters. If for each condition they are set to four the graphs can be more
         # easily compared
         self.__starting_n_agents = 4
-        self.__starting_n_slots = 3
+        # Set to 4 since the popular strategy works best when it considers 4 slots and then votes on 1
+        self.__starting_n_slots = 4
         self.__max_agents = max_agents
         self.__max_slots = max_slots
         self.__popular_agent_utility = []
@@ -432,11 +433,14 @@ class Agent_slot(Games):
         pass
 
     def __play_game(self):
+        # Loop over the the agents
         for n_agents in range(self.__starting_n_agents, self.__max_agents + 1):
+            # Set the number of agents, if the percentage of strategic voter is 0 a special function has to be used
             if self.__percentage_strategic_agents == 0:
                 self.__set_number_of_agents(n_agents)
             else:
                 self.__set_number_of_agents_different_types(n_agents)
+            # Loop over the slots
             for n_slots in range(self.__starting_n_slots, self.__max_slots + 1):
                 self._environment.change_time_slots(n_slots)
                 self.__inform_agents_n_slots(n_slots)
