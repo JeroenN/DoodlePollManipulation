@@ -9,7 +9,7 @@ class Standard(Agent):
 
     def __init__(self, environment, n_agents, ID, bonus_type):
         Agent.__init__(self, environment, n_agents, ID, bonus_type)
-        self.__threshold = 0.55  # TODO: change to normal distribution
+        self.__threshold = 0.6
         self.__ID = ID
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.4, 0.2, 0, 1)
         self._strategy = "standard"
@@ -115,8 +115,8 @@ class Popular(Agent):
         Agent.__init__(self, environment, n_agents, ID, bonus_type)
         self.__popular_time_slots_idx = []
         self.__popular_time_slots_preference = []
-        self.__n_slots_consideration = 3  # The number of time slots that will be taken in consideration\
-        self.__n_votes = 1  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
+        self.__n_slots_consideration = 10  # The number of time slots that will be taken in consideration\
+        self.__n_votes = 6  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.8, 0.1, 0, 1)
         self._strategy = "popular"
         self.__ID = ID
@@ -129,7 +129,6 @@ class Popular(Agent):
     # consideration, then the amount of time slots taken into consideration is set to the amount of time slots there
     # are
     def __set_n_considerations_to_n_slots(self):
-        print("dskljfsdlk", self.environment.get_time_slots())
         if self.environment.get_n_time_slots() < self.__n_slots_consideration:
             self.__n_slots_consideration = self.environment.get_n_time_slots()
 
