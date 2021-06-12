@@ -16,7 +16,7 @@ class Games:
         self._min_utility = 0
         self._max_utility = 0
 
-        self._rounds = 100
+        self._rounds = 10000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []

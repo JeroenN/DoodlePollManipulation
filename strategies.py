@@ -9,7 +9,7 @@ class Standard(Agent):
 
     def __init__(self, environment, n_agents, ID, bonus_type):
         Agent.__init__(self, environment, n_agents, ID, bonus_type)
-        self.__threshold = 0.6
+        self.__threshold = 0.55
         self.__ID = ID
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.4, 0.2, 0, 1)
         self._strategy = "standard"
@@ -429,21 +429,6 @@ class Popular_prediction_social(Agent):
         self.__means_per_slot = means_per_slot
         self.__standard_deviation_per_slot = standard_deviation_per_slot
 
-
-    # TODO: make a function that takes the standard deviation and the mean and uses this to calculate a certainty
-    # this could for example be done by standard_deviation / mean. The lower this number, the higher the certainty
-    # This number should then be used when evaluating what voters are going to vote on. You could for example
-    # break it down into three groups, high certainty (certainty < 0.25), normal certainty (certainty ranging 0.25, 0.5)
-    # low certainty (certainty >0.5). These numbers should be parameters that can be changed. This would be rather
-    # complicated because you would then need to take this certainty level into account when ranking the predictions
-    # in terms of highest to lowest. Additionally it would lead to a lot more parameters
-
-    # We could also use the certainty as a multiplier. For example you could preference_prediction = mean * (1-certainty). The
-    # less certain you are, the higher the certainty thus the lower the preference level is.
-    # Or you could use preference_prediction = mean - standard_deviation * parameter_x. Where x describes how much
-    # the standard_devation matters (a number between 0 and 1)
-    # Another idea would be preference_prediction = mean - (standard_deviation * certainty * parameter_x). This would make
-    # the agent give a higher preference_prediction of slot, to slots that are more certain to be around that mean.
     def __calculate_certainty_normal_distribution(self, mean, standard_deviation):
         return mean / standard_deviation
 
@@ -460,9 +445,10 @@ class Popular_prediction_social(Agent):
             # this last part doesn't matter, however when this strategy is used later in the game and thus many
             # agents have already voted then this becomes more important than the prediction of the mean minus
             # the standard deviation
-            preference_prediction = self.__means_per_slot[idx] - self.__standard_deviation_per_slot[idx] * \
-                                    self.__importance_standard_deviation + self.environment.get_time_slots()[idx] \
-                                    / (self.__n_agents - 1)
+            # It looks like mean - stdev. works better than only mean and just as good as mean + stdev. + predict
+            preference_prediction = self.__means_per_slot[idx] - self.__standard_deviation_per_slot[idx] #* \
+                                    #self.__importance_standard_deviation + self.environment.get_time_slots()[idx] \
+                                    #/ (self.__n_agents - 1)
 
             self.__slots_preference_prediction.append(preference_prediction)
             self.__slots_preference_prediction_idx.append(idx)
@@ -545,3 +531,99 @@ class Popular_prediction_social(Agent):
 
         # TODO: make it so that preference for the slots changes per round
         # TODO: take into account how many votes each slot already has
+
+# Take the mean of the utility preferences from the time slots and vote for every time slot that has an higher utility
+# than the mean.
+class Above_average_utility(Agent):
+
+    def __init__(self, environment, n_agents, ID, bonus_type):
+        Agent.__init__(self, environment, n_agents, ID, bonus_type)
+        self.__ID = ID
+        self._willingness = random_number_generator.generate_random_number_normal_distribution(0.4, 0.2, 0, 1)
+        self._strategy = "above_average_utility"
+        self.__n_agents = n_agents
+
+    def __mean_utility_preference_time_slots(self):
+        mean = 0
+        for i in range(self._n_time_slots):
+            mean += self._time_slot_preference[i]
+        return mean / self._n_time_slots
+
+    # vote for a time slot if the time slot preference for that time slot is above the threshold
+    # Update also for the particular object that it voted on that specific time slot
+    def vote(self):
+        mean_utility_preference = self.__mean_utility_preference_time_slots()
+        print("\n mean utility preference: ", mean_utility_preference)
+        for i in range(self._n_time_slots):
+            if self._time_slot_preference[i] >= mean_utility_preference:
+                print("voted on: ", self._time_slot_preference[i])
+                self.environment.vote_time_slot(i)
+                self._time_slots_chosen.append(i)
+
+        self.environment.remove_agent_from_voting_list()
+
+# Vote for the time slots that have a above median utility
+class Median_utility(Agent):
+
+    def __init__(self, environment, n_agents, ID, bonus_type):
+        Agent.__init__(self, environment, n_agents, ID, bonus_type)
+        self.__ID = ID
+        self._willingness = random_number_generator.generate_random_number_normal_distribution(0.4, 0.2, 0, 1)
+        self._strategy = "median_utility"
+        self.__n_agents = n_agents
+
+    def __quick_sort(self):
+        list_idx = []
+        # Create a list with index's this list is not used but it is required to use the quick_sort function
+        for i in range(self._n_time_slots):
+            list_idx.append(0)
+
+        quick_sort.quick_sort(self._time_slot_preference, list_idx, 0, self._n_time_slots - 1)
+
+
+    # vote for a time slot if the time slot preference for that time slot is above the threshold
+    # Update also for the particular object that it voted on that specific time slot
+    def vote(self):
+        self.__quick_sort()
+
+        for i in range(self._n_time_slots):
+            print(self._time_slot_preference[i])
+        print("\n")
+        for i in range(int(self._n_time_slots / 2), self._n_time_slots):
+            print(self._time_slot_preference[i])
+        print("\n")
+        # Vote for the above median (top half or the list) time slots
+        for i in range(int(self._n_time_slots / 2), self._n_time_slots):
+            #print("voted on: ", self._time_slot_preference[i])
+            self.environment.vote_time_slot(i)
+            self._time_slots_chosen.append(i)
+
+        self.environment.remove_agent_from_voting_list()
+
+# Vote for the time slot with the highest_utility
+class Highest_utility(Agent):
+
+    def __init__(self, environment, n_agents, ID, bonus_type):
+        Agent.__init__(self, environment, n_agents, ID, bonus_type)
+        self.__ID = ID
+        self._willingness = random_number_generator.generate_random_number_normal_distribution(0.4, 0.2, 0, 1)
+        self._strategy = "highest_utility"
+        self.__n_agents = n_agents
+
+    def __idx_highest_utility(self):
+        max = 0
+        max_idx = 0
+        for i in range(self._n_time_slots):
+            if max < self._time_slot_preference[i]:
+                max = self._time_slot_preference[i]
+                max_idx = i
+        return max_idx
+
+    # vote for a time slot if the time slot preference for that time slot is above the threshold
+    # Update also for the particular object that it voted on that specific time slot
+    def vote(self):
+        idx = self.__idx_highest_utility()
+        self.environment.vote_time_slot(idx)
+        self._time_slots_chosen.append(idx)
+
+        self.environment.remove_agent_from_voting_list()
