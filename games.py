@@ -16,7 +16,7 @@ class Games:
         self._min_utility = 0
         self._max_utility = 0
 
-        self._rounds = 10000
+        self._rounds = 3000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -577,7 +577,7 @@ class willingness(Games):
         for willingness in np.arange(0, 1.1, 0.1):
             self.__set_willingess(willingness)
             self._go_through_rounds()
-            self._append_scores_per_run()  # this is not divided by rounds yet
+            self._append_scores_per_run()
             self._reset_scores()
             bar.next()
 

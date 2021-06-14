@@ -5,15 +5,15 @@ import quick_sort
 class Environment:
 
     def __init__(self, number_of_slots=0):
-        self.__n_time_slots = number_of_slots   # number of time slots 
+        self.__n_time_slots = number_of_slots   # number of time slots
         self.__time_slots_votes = []  # how often each time slot is chosen
         self.__initial_idx_time_slots = [] # the initial index of the time slots, when quick sort is used to find the most
-                                           # popular time slots the original indexes should still be known 
-        self.__idx_most_popular_time_slot = 0 # the idx of the most popular time slot 
-        self.__rank_popularity_time_slots = []
+                                           # popular time slots the original indexes should still be known
+        self.__idx_most_popular_time_slot = 0 # the idx of the most popular time slot
         self.__willingness_agents = []
         self.__index_agents = []
         self.__create_time_slots()
+        self.__popular_idx = 0
 
     def __str__(self):
         return "Environment with {self.__n_time_slots} time slots"
@@ -38,15 +38,17 @@ class Environment:
     def get_n_time_slots(self):
         return self.__n_time_slots
 
+    #def popular_voted_for_idx(self, idx):
+
     # Determines the most popular time slot based on which time slots is most often chosen
     def determine_most_popular_time_slot(self):
         max = 0
         idx = 0
         for i in range(self.__n_time_slots):
-            #print("votes[", i, "]: ", self.__time_slots_votes[i])
             if self.__time_slots_votes[i] > max:
                 max = self.__time_slots_votes[i]
                 idx = self.__initial_idx_time_slots[i]
+
         self.__idx_most_popular_time_slot = idx
 
     # Using quick_sort to sort the time-slots based on popularity
@@ -92,7 +94,7 @@ class Environment:
         self.reset_utilities(agents)
         self.reset_timeslots_chosen(agents)
 
-    # clears the agent lists and resets environment 
+    # clears the agent lists and resets environment
     def reset_agents(self, agents):
         self.__willingness_agents.clear()
         self.__index_agents.clear()
@@ -104,9 +106,9 @@ class Environment:
             agent = agents[idx]
             self.__willingness_agents.append(agent.get_willingness())
             self.__index_agents.append(idx)
-    
+
     def reset_utilities(self, agents):
-        for agent in agents: 
+        for agent in agents:
             agent.reset_utility()
 
     def reset_timeslots_chosen(self, agents):
@@ -134,3 +136,6 @@ class Environment:
 
     def get_number_of_willingness_agents(self):
         return len(self.__willingness_agents)
+
+    def get_time_slot_votes(self):
+        return self.__time_slots_votes

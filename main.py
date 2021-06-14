@@ -15,7 +15,7 @@ def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, n_above_average_u
         agent = strategies.Standard(environment, tot_agents, i, bonus_type)
         agents.append(agent)
     for i in range(n_pop_agents):
-        agents.append(strategies.Popular(environment, tot_agents, i+n_agents, bonus_type))
+        agents.append(strategies.Popular_improved(environment, tot_agents, i+n_agents, bonus_type))
     for i in range(n_pop_predic_agents):
         agents.append(strategies.Popular_prediction(environment, tot_agents, i + n_agents + n_pop_agents, bonus_type))
     for i in range(n_above_average_utility):
@@ -28,14 +28,6 @@ def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, n_above_average_u
         agent = strategies.Median_utility(environment, tot_agents, i + n_agents + n_pop_agents + n_pop_predic_agents + n_above_average_utility + n_highest_utility, bonus_type)
         agents.append(agent)
 
-    if bonus_type == 1:
-        for i in range(n_social_agents):
-            agents.append(strategies.Standard_social(environment, tot_agents, i+n_agents+n_pop_agents+n_pop_predic_agents, bonus_type))
-        for i in range(n_social_pop_agents):
-                agents.append(strategies.Popular_social(environment, tot_agents, i+n_agents+n_pop_agents+n_pop_predic_agents+n_social_agents, bonus_type))
-        for i in range(n_social_pop_predic_agents):
-                agents.append(strategies.Popular_prediction_social(environment, tot_agents, i+n_agents+n_pop_agents+n_pop_predic_agents+n_social_agents+n_social_pop_agents, bonus_type))
-    
     return agents
 
 def create_environment(n_time_slots):
@@ -115,49 +107,6 @@ def create_list_mean_utility_varying_agents_per_run(social_welfare_scores, agent
         n_agents = agents_per_run[idx]
         mean_utility.append(social_welfare_scores[idx] / n_agents / rounds)
     return mean_utility
-
-def play_agent_slot_game(environment, agents, rounds, bonus_type):
-    social_welfare = 0
-    min_utility = 0
-    max_utility = 0
-
-    max_agents = 10
-    max_slots = 10
-
-    social_welfare_scores = []
-    min_utility_scores = []
-    max_utility_scores = []
-    slots_per_run = []
-    agents_per_run = []
-
-    for n_agents in range(1, max_agents + 1):
-        for n_slots in range(1, max_slots + 1):
-            set_number_of_agents(environment, agents, n_agents, bonus_type)
-            environment.change_time_slots(n_slots)
-            for _ in range(rounds):
-                let_agents_vote(agents, environment)
-                environment.determine_most_popular_time_slot()
-                let_agents_calculate_utility(agents)
-                social_welfare += calculate_social_welfare(agents)
-                min, max = calculate_egalitarian_welfare(agents, rounds)
-                min_utility += min
-                max_utility += max
-                environment.reset_environment(agents)
-
-            slots_per_run.append(n_slots)
-            agents_per_run.append(n_agents)
-            social_welfare_scores.append(social_welfare)
-            min_utility_scores.append(min_utility)
-            max_utility_scores.append(max_utility)
-            social_welfare = 0
-            min_utility = 0
-            max_utility = 0
-
-    environment.rank_popularity_time_slots()
-    print_agent_slot_game_results(agents, rounds, social_welfare_scores, min_utility_scores, max_utility_scores, agents_per_run, slots_per_run)
-    mean_utility = create_list_mean_utility_varying_agents_per_run(social_welfare_scores, agents_per_run, rounds)
-    plots.plot_3d_graph(agents_per_run, slots_per_run, mean_utility, max_agents, max_slots, 'agents', 'slots',
-                        'mean_utility', 'mean utility based on agents and time slots')
 
 def print_max_threshold(threshold_welfares_standard):
     max = 0
