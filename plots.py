@@ -3,6 +3,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+SMALL_SIZE = 9
+MEDIUM_SIZE = 12
+BIGGER_SIZE = 15
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=MEDIUM_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=MEDIUM_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=MEDIUM_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=MEDIUM_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 def plot_3d_graph(x, y, z, x_max, y_max, x_label, y_label, z_label, title):
     X = np.reshape(x, (x_max, y_max))

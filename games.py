@@ -16,7 +16,7 @@ class Games:
         self._min_utility = 0
         self._max_utility = 0
 
-        self._rounds = 3000
+        self._rounds = 10000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -165,12 +165,12 @@ class Games:
                   ", Strategy: ", agent.get_strategy(), ", Total utility: ", agent.get_total_utility() / self._rounds)
 
     def _print_social_welfare(self):
-        print('\nSocial welfare: ', self._social_welfare / self._rounds)
-        print('\nMean utility; ', (self._social_welfare / len(self._agents)) / self._rounds)
+        print("\nSocial welfare: ", self._social_welfare / self._rounds)
+        print("\nMean utility; ", (self._social_welfare / len(self._agents)) / self._rounds)
 
     def _print_social_utility(self):
-        print(f'\nSocial welfare without social bonus:', (self._social_welfare- self._social_bonus_utility) / self._rounds)
-        print(f'\nMean social bonus:', self._social_bonus_utility / self._rounds)
+        print("\nSocial welfare without social bonus:", (self._social_welfare- self._social_bonus_utility) / self._rounds)
+        print("\nMean social bonus:", self._social_bonus_utility / self._rounds)
 
     def _print_egalitarian_welfare(self):
         print("\nMinimum utility ", self._min_utility / self._rounds)  # agent with smallest utility
