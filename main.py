@@ -171,7 +171,7 @@ def play_game(environment, agents, bonus_type):
     elif game_type == 2:
         games.Threshold(agents, environment, bonus_type)
     elif game_type == 3:
-        games.Agent_slot(agents, environment, 20, 20, 50, bonus_type)
+        games.Agent_slot(agents, environment, 20, 20, 100, bonus_type)
     elif game_type == 4: 
         games.agent_type(agents, environment, bonus_type)
     elif game_type == 5:
