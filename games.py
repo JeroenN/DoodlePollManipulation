@@ -3,6 +3,8 @@ import plots
 import normal_distribution
 import numpy as np
 import strategies
+import csv
+import pandas as pd
 from environment import Environment
 
 
@@ -16,7 +18,7 @@ class Games:
         self._min_utility = 0
         self._max_utility = 0
 
-        self._rounds = 3000
+        self._rounds = 10000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -26,7 +28,23 @@ class Games:
         self._n_popular_prediction_agents = 0
         self._mean_utility_popular_agents = []
 
+        self._mean_of_mean_utilities_sincere_per_round = []
+
         self._calculate_number_of_agents()  # Determine how many agents there are of each type
+
+    def __append_scores_per_round(self):
+        # calculate the mean of the mean utilities of the sincere agents, then append this for every round. Nex
+        # a function should be made that export this list to an .csv file.
+        mean_of_mean_utilities_sincere = 0
+        n_sincere = 0 #number of sincere agents
+        for agent in self._agents:
+            if agent.get_strategy() == "standard":
+                n_sincere += 1
+                mean_of_mean_utilities_sincere += agent.get_utility()
+
+        mean_of_mean_utilities_sincere /= n_sincere
+        self._mean_of_mean_utilities_sincere_per_round.append(mean_of_mean_utilities_sincere)
+
 
     # Go through all the actions that have to be taken each round
     # 1. let the agents vote, 2. let the agents calculate the utility
@@ -37,6 +55,7 @@ class Games:
             self._show_popular_prediction_agents_preferences()
             self._agents_vote()
             self._agents_calculate_utility()
+            #self.__append_scores_per_round()
             self.__calculate_social_welfare()
             self.__calculate_egalitarian_welfare()
             if bonus_type == 1:
@@ -161,16 +180,16 @@ class Games:
 
     def _print_strategies(self):
         for agent in self._agents:
-            print(agent,
-                  ", Strategy: ", agent.get_strategy(), ", Total utility: ", agent.get_total_utility() / self._rounds)
+            print(agent, ", Strategy: ", agent.get_strategy(), ", Total utility: ", agent.get_total_utility() / self._rounds)
+            #print(agent.get_total_utility() / self._rounds)
 
     def _print_social_welfare(self):
         print('\nSocial welfare: ', self._social_welfare / self._rounds)
         print('\nMean utility; ', (self._social_welfare / len(self._agents)) / self._rounds)
 
     def _print_social_utility(self):
-        print(f'\nSocial welfare without social bonus:', (self._social_welfare- self._social_bonus_utility) / self._rounds)
-        print(f'\nMean social bonus:', self._social_bonus_utility / self._rounds)
+        print('\nSocial welfare without social bonus:', (self._social_welfare- self._social_bonus_utility) / self._rounds)
+        print('\nMean social bonus:', self._social_bonus_utility / self._rounds)
 
     def _print_egalitarian_welfare(self):
         print("\nMinimum utility ", self._min_utility / self._rounds)  # agent with smallest utility
@@ -207,6 +226,10 @@ class Normal(Games):
         self.__bonus_type = bonus_type 
         self.__play_game()
 
+    def __create_csv_file(self):
+        df = pd.DataFrame(self._mean_of_mean_utilities_sincere_per_round)
+        df.to_csv("nine_sincere_mean_utilities.csv", index=False)
+
     def __print_results(self):
         print("Game ended! \n")
         self._print_strategies()
@@ -222,6 +245,7 @@ class Normal(Games):
         self._go_through_rounds(self.__bonus_type)
         self._environment.rank_popularity_time_slots()
         self.__print_results()
+        #self.__create_csv_file()
 
 
 class KM(Games):
@@ -460,7 +484,7 @@ class Agent_slot(Games):
         mean_utility = self.__create_list_mean_utility_varying_agents_per_run()
         plots.plot_3d_graph(self.__list_agents, self.__list_slots, mean_utility, self.__max_agents
                             - self.__starting_n_agents + 1, self.__max_slots - self.__starting_n_slots + 1,
-                            'agents', 'time slots', 'mean utility', 'mean utility based on agents and time slots')
+                            'number of agents', 'number of time slots', 'mean utility', 'mean utility based on the number of agents and time slots')
 
 class Threshold(Games):
     def __init__(self, agents, environment, bonus_type):

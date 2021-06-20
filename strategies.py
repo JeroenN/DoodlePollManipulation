@@ -33,7 +33,7 @@ class Standard(Agent):
         self.__threshold = threshold
 
 
-class Popular_improved(Agent):
+class Popular_adaptive(Agent):
     def __init__(self, environment, n_agents, ID, bonus_type):
         Agent.__init__(self, environment, n_agents, ID, bonus_type)
         self.__popular_time_slots_idx = []
@@ -41,7 +41,7 @@ class Popular_improved(Agent):
         self.__n_slots_consideration = 0 # The number of time slots that will be taken in consideration\
         self.__n_votes = 1  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
         self._willingness = random_number_generator.generate_random_number_normal_distribution(1, 0.1, 0, 1)
-        self._strategy = "popular"
+        self._strategy = "adaptable popular"
         self.__ID = ID
         self.__n_agents = n_agents
         #self.__set_n_considerations_to_n_slots()
@@ -65,7 +65,7 @@ class Popular_improved(Agent):
     def __count_n_slot_consideration(self, time_slot_votes, max):
         n_slot_consideration = 0
         for element in time_slot_votes:
-            if element >= max-1:
+            if element >= max - 1:
                 n_slot_consideration += 1
         return n_slot_consideration
 
@@ -119,8 +119,8 @@ class Popular_improved(Agent):
         quick_sort.quick_sort(self.__popular_time_slots_preference, self.__popular_time_slots_idx, 0,
                               self.__n_slots_consideration - 1)
 
-        self.__n_votes = self.__count_n_votes()
-        print(self.__n_votes)
+        #self.__n_votes = self.__count_n_votes()
+        #print(self.__n_votes)
         # Vote for n_votes time-slots with the highest preference from the n_slots_consideration most popular time slots
         for idx in range(self.__n_slots_consideration - self.__n_votes, self.__n_slots_consideration):
             #print("voted for slot: ", self.__popular_time_slots_idx[idx])
@@ -378,10 +378,10 @@ class Above_average_utility(Agent):
     # Update also for the particular object that it voted on that specific time slot
     def vote(self):
         mean_utility_preference = self.__mean_utility_preference_time_slots()
-        print("\n mean utility preference: ", mean_utility_preference)
+        #print("\n mean utility preference: ", mean_utility_preference)
         for i in range(self._n_time_slots):
             if self._time_slot_preference[i] >= mean_utility_preference:
-                print("voted on: ", self._time_slot_preference[i])
+                #print("voted on: ", self._time_slot_preference[i])
                 self.environment.vote_time_slot(i)
                 self._time_slots_chosen.append(i)
 
@@ -410,13 +410,6 @@ class Median_utility(Agent):
     # Update also for the particular object that it voted on that specific time slot
     def vote(self):
         self.__quick_sort()
-
-        for i in range(self._n_time_slots):
-            print(self._time_slot_preference[i])
-        print("\n")
-        for i in range(int(self._n_time_slots / 2), self._n_time_slots):
-            print(self._time_slot_preference[i])
-        print("\n")
         # Vote for the above median (top half or the list) time slots
         for i in range(int(self._n_time_slots / 2), self._n_time_slots):
             #print("voted on: ", self._time_slot_preference[i])

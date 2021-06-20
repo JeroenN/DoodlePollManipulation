@@ -1,0 +1,56 @@
+setwd("C:/Users/Jeroen/PycharmProjects/DoodlePoolManipulation")
+
+nine_sincere <- read.csv(file="nine_sincere_mean_utilities.csv")
+ten_sincere <- read.csv(file="ten_sincere_mean_utilities.csv")
+
+t.test(nine_sincere[,1], ten_sincere[,1])
+
+
+
+/******* Example Code *******/
+setwd("C:/Users/mathi/QTProjects/build-BlackJack_V7-Desktop_Qt_5_15_2_MinGW_64_bit-Debug/data")
+
+q_tot_wins_eps <- read.csv(file="q_tot_wins_eps.csv")
+s_tot_wins_eps <- read.csv(file="s_tot_wins_eps.csv")
+q_tot_wins_bol <- read.csv(file="q_tot_wins_bol.csv")
+s_tot_wins_bol <- read.csv(file="s_tot_wins_bol.csv")
+q_tot_wins_ucb <- read.csv(file="q_tot_wins_ucb.csv")
+s_tot_wins_ucb <- read.csv(file="s_tot_wins_ucb.csv")
+
+q_eps <- q_tot_wins_eps[,2]
+s_eps <- s_tot_wins_eps[,2]
+q_bol <- q_tot_wins_bol[,2]
+s_bol <- s_tot_wins_bol[,2]
+q_ucb <- q_tot_wins_ucb[,2]
+s_ucb <- s_tot_wins_ucb[,2]
+
+df <- data.frame(q_eps, s_eps, q_bol, s_bol, q_ucb, s_ucb)
+mydata <-stack(df)
+
+res.aov <- aov(values~ ind , data = mydata)
+
+summary(res.aov)
+TukeyHSD(res.aov)
+
+mean(q_eps)
+mean(s_eps)
+mean(q_bol)
+mean(s_bol)
+mean(q_ucb)
+mean(s_ucb)
+
+sd(q_eps)
+sd(s_eps)
+sd(q_bol)
+sd(s_bol)
+sd(q_ucb)
+sd(s_ucb)
+std <- function(x) sd(x)/sqrt(length(x))
+
+std(q_eps)
+std(s_eps)
+std(q_bol)
+std(s_bol)
+std(q_ucb)
+std(s_ucb)
+
