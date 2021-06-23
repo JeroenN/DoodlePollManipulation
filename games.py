@@ -14,11 +14,12 @@ class Games:
         self._environment = environment
 
         self._social_welfare = 0
-        self._social_bonus_utility = 0 # keeps track of the total utility that is gained from social bonus 
+        self._social_bonus_utility = 0 # keeps track of the total utility that is gained from social bonus
         self._min_utility = 0
+        self._min_indexes = []
         self._max_utility = 0
 
-        self._rounds = 10000
+        self._rounds = 100
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -28,23 +29,35 @@ class Games:
         self._n_popular_prediction_agents = 0
         self._mean_utility_popular_agents = []
 
+        self._mean_of_mean_utilities_sincere = 0
+        self._mean_of_mean_utilities_popular = 0
         self._mean_of_mean_utilities_sincere_per_round = []
 
         self._calculate_number_of_agents()  # Determine how many agents there are of each type
+
+    def __mean_of_mean_utilities(self):
+        for agent in self._agents:
+            if agent.get_strategy() == "standard":
+                self._mean_of_mean_utilities_sincere += agent.get_utility()
+        for agent in self._agents:
+            if agent.get_strategy() == "popular":
+                self._mean_of_mean_utilities_popular += agent.get_utility()
 
     def __append_scores_per_round(self):
         # calculate the mean of the mean utilities of the sincere agents, then append this for every round. Nex
         # a function should be made that export this list to an .csv file.
         mean_of_mean_utilities_sincere = 0
-        n_sincere = 0 #number of sincere agents
         for agent in self._agents:
             if agent.get_strategy() == "standard":
-                n_sincere += 1
                 mean_of_mean_utilities_sincere += agent.get_utility()
 
-        mean_of_mean_utilities_sincere /= n_sincere
+
+        mean_of_mean_utilities_sincere /= self._n_standard_agents
         self._mean_of_mean_utilities_sincere_per_round.append(mean_of_mean_utilities_sincere)
 
+    def __reset_willingness(self):
+        for agent in self._agents:
+            agent.set_willingness(agent.willingness_mean, agent.willingness_sd)
 
     # Go through all the actions that have to be taken each round
     # 1. let the agents vote, 2. let the agents calculate the utility
@@ -55,9 +68,11 @@ class Games:
             self._show_popular_prediction_agents_preferences()
             self._agents_vote()
             self._agents_calculate_utility()
+            self.__mean_of_mean_utilities()
             #self.__append_scores_per_round()
             self.__calculate_social_welfare()
             self.__calculate_egalitarian_welfare()
+            self.__reset_willingness()
             if bonus_type == 1:
                 self.__calculate_social_bonus_utility()
             self._environment.reset(self._agents)
@@ -150,7 +165,7 @@ class Games:
         for agent in self._agents:
             self._social_welfare += agent.get_utility()
 
-    # calculates the total utility that has been earned from social bonus 
+    # calculates the total utility that has been earned from social bonus
     def __calculate_social_bonus_utility(self):
         for agent in self._agents:
             self._social_bonus_utility += agent.get_social_utility()
@@ -168,8 +183,16 @@ class Games:
         quick_sort.quick_sort(welfares, welfare_idx, 0, self._n_agents - 1)
 
         self._min_utility += welfares[0]
+        self._min_indexes.append(welfare_idx[0])
         self._max_utility += welfares[self._n_agents - 1]
 
+    # Counts for each agent how often they were the agent that got the lowest welfare
+    def __histogram_idx_min_utility(self):
+        histogram_idx_min_utility = [0] * self._n_agents
+        for element in self._min_indexes:
+            histogram_idx_min_utility[element] += 1
+
+        return histogram_idx_min_utility
     # calculates the mean utility of the popular agents and then adds it to list mean_utility_popular_agents
     def _create_list_mean_utility(self, utility_agents, n_agents, n_runs):
         mean_utility = []
@@ -187,15 +210,22 @@ class Games:
         print('\nSocial welfare: ', self._social_welfare / self._rounds)
         print('\nMean utility; ', (self._social_welfare / len(self._agents)) / self._rounds)
 
+    def _print_mean_of_mean_utilities(self):
+        if self._n_standard_agents > 0:
+            print("\nMean of mean utility sincere", self._mean_of_mean_utilities_sincere / self._n_standard_agents / self._rounds)
+        if self._n_popular_agents > 0:
+            print("\nMean of mean utility popular",self._mean_of_mean_utilities_popular / self._n_popular_agents / self._rounds)
+
     def _print_social_utility(self):
         print('\nSocial welfare without social bonus:', (self._social_welfare- self._social_bonus_utility) / self._rounds)
         print('\nMean social bonus:', self._social_bonus_utility / self._rounds)
 
     def _print_egalitarian_welfare(self):
         print("\nMinimum utility ", self._min_utility / self._rounds)  # agent with smallest utility
+        print(self.__histogram_idx_min_utility())
         print("\nMaximum utility: ", self._max_utility / self._rounds)  # agent with largest utility
 
-        # create new agents and reset the game to work with these new agents 
+        # create new agents and reset the game to work with these new agents
     def _create_agents(self, n_agents, n_pop_agents, n_pop_predic_agents, bonus_type):
         self._agents.clear()
         tot_agents = n_agents + n_pop_agents + n_pop_predic_agents
@@ -205,7 +235,7 @@ class Games:
             self._agents.append(agent)
         for i in range(n_pop_agents):
             self._agents.append(strategies.Popular(self._environment, tot_agents, i+n_agents, bonus_type))
-        
+
         self._n_agents = 0
         self._n_standard_agents = 0
         self._n_popular_agents = 0
@@ -223,7 +253,7 @@ class Games:
 class Normal(Games):
     def __init__(self, agents, environment, bonus_type):
         Games.__init__(self, agents, environment)
-        self.__bonus_type = bonus_type 
+        self.__bonus_type = bonus_type
         self.__play_game()
 
     def __create_csv_file(self):
@@ -234,10 +264,11 @@ class Normal(Games):
         print("Game ended! \n")
         self._print_strategies()
         self._print_social_welfare()
+        self._print_mean_of_mean_utilities()
         self._print_egalitarian_welfare()
-        
-        # if the bonus type is 1, also print the utility without social bonus 
-        if self.__bonus_type == 1: 
+
+        # if the bonus type is 1, also print the utility without social bonus
+        if self.__bonus_type == 1:
             self._print_social_utility()
 
     # If this is chosen the program is only run once, thus no parameters are changed
@@ -247,6 +278,68 @@ class Normal(Games):
         self.__print_results()
         #self.__create_csv_file()
 
+
+class Distribution(Games):
+    def __init__(self, agents, environment, tot_agents):
+        Games.__init__(self, agents, environment)
+        self.__bonus_type = 0
+        self.__tot_agents = tot_agents
+        self.__play_game()
+
+    def __create_csv_file(self):
+        df = pd.DataFrame(self._mean_of_mean_utilities_sincere_per_round)
+        df.to_csv("nine_sincere_mean_utilities.csv", index=False)
+
+    def __print_results(self):
+        print("Game ended! \n")
+        self._print_strategies()
+        self._print_social_welfare()
+        self._print_mean_of_mean_utilities()
+        self._print_egalitarian_welfare()
+
+        # if the bonus type is 1, also print the utility without social bonus
+        if self.__bonus_type == 1:
+            self._print_social_utility()
+
+    def __reset_scores(self):
+        self._social_welfare_scores.clear()
+        self._min_utility_scores.clear()
+        self._max_utility_scores.clear()
+        self._mean_of_mean_utilities_sincere = 0
+        self._mean_of_mean_utilities_popular = 0
+        self._mean_of_mean_utilities_sincere_per_round.clear()
+        self._social_welfare = 0
+        self._social_bonus_utility = 0 # keeps track of the total utility that is gained from social bonus
+        self._min_utility = 0
+        self._min_indexes.clear()
+        self._max_utility = 0
+
+    def __create_agents(self, n_sincere, n_pop):
+        self._n_agents = n_sincere + n_pop
+        self._n_standard_agents = n_sincere
+        self._n_popular_agents = n_pop
+        self._agents.clear()
+        for i in range(n_sincere):
+            agent = strategies.Standard(self._environment, self._n_agents, i, self.__bonus_type)
+            self._agents.append(agent)
+        for i in range(n_pop):
+            agent = strategies.Popular(self._environment, self._n_agents, i+n_sincere, self.__bonus_type)
+            self._agents.append(agent)
+
+
+
+    # If this is chosen the program is only run once, thus no parameters are changed
+    def __play_game(self):
+        for n_pop in range(0, self.__tot_agents + 1):
+            n_sincere = self.__tot_agents - n_pop
+            self.__create_agents(n_sincere, n_pop)
+            print("n_pop: ", n_pop)
+            print("n_sincere", n_sincere)
+            self._go_through_rounds(self.__bonus_type)
+            self._environment.rank_popularity_time_slots()
+            self.__print_results()
+            self.__reset_scores()
+            # self.__create_csv_file()
 
 class KM(Games):
     def __init__(self, agents, environment, max_k, max_m):
@@ -493,8 +586,8 @@ class Threshold(Games):
         self.__bonus_type = bonus_type #keeps track of the bonus type for when new agents have to be created
 
         self.__play_game()
-        
-    # creates the correct progress bar depending on game type 
+
+    # creates the correct progress bar depending on game type
     def __create_progress_bar(self):
         if self.__game_type == 1:
             bar = IncrementalBar('Progress', max=11)
@@ -532,7 +625,7 @@ class Threshold(Games):
         max_normal = self._max_utility_scores.copy()
 
         if self.__game_type == 2:
-            self._create_agents(0, self._n_standard_agents, 0, self.__bonus_type) # reverse the number of agents 
+            self._create_agents(0, self._n_standard_agents, 0, self.__bonus_type) # reverse the number of agents
             self.__clear_scores()
 
             for threshold in np.arange(0, 1.1, 0.1):
@@ -550,7 +643,7 @@ class Threshold(Games):
 class agent_type(Games):
     def __init__(self, agents, environment, bonus_type):
         Games.__init__(self, agents, environment)
-        self.__bonus_type = bonus_type #keeps track of bonus type for when agents need to be created 
+        self.__bonus_type = bonus_type #keeps track of bonus type for when agents need to be created
         self.__play_game()
 
     def __play_game(self):
@@ -575,7 +668,7 @@ class willingness(Games):
         self.__strategies = set()
         self.__play_game()
 
-    # creates the correct progress bar depending on game type 
+    # creates the correct progress bar depending on game type
     def __create_progress_bar(self):
         bar = IncrementalBar('Progress', max=11)
         return bar
@@ -585,17 +678,17 @@ class willingness(Games):
         for agent in self._agents:
             if agent.get_strategy() == "standard" or agent.get_strategy() == "standard_social":
                 agent.set_willingness(willingness, 0.1)
-            else: 
+            else:
                 agent.set_willingness(willingness, 0.2)
-    
+
     # figure out agent types
     def __agent_types(self):
-        for agent in self._agents: 
+        for agent in self._agents:
             self.__strategies.add(agent.get_strategy())
-            
-    
-    def __play_game(self):       
-        self.__agent_types() 
+
+
+    def __play_game(self):
+        self.__agent_types()
         bar = self.__create_progress_bar()
 
         for willingness in np.arange(0, 1.1, 0.1):
