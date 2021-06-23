@@ -1,4 +1,4 @@
-setwd("C:/Users/Jeroen/PycharmProjects/DoodlePoolManipulation")
+setwd("C:/Users/mathi/PycharmProjects/DoodlePoolManipulation")
 
 nine_sincere <- read.csv(file="nine_sincere_mean_utilities.csv")
 ten_sincere <- read.csv(file="ten_sincere_mean_utilities.csv")

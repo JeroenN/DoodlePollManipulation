@@ -11,7 +11,9 @@ class Standard(Agent):
         Agent.__init__(self, environment, n_agents, ID, bonus_type)
         self.__threshold = 0.55
         self.__ID = ID
-        self._willingness = random_number_generator.generate_random_number_normal_distribution(0.4, 0.2, 0, 1)
+        self.willingness_mean = 0.4
+        self.willingness_sd = 0.2
+        self._willingness = random_number_generator.generate_random_number_normal_distribution(self.willingness_mean, self.willingness_sd, 0, 1)
         self._strategy = "standard"
         self.__n_agents = n_agents
 
@@ -44,8 +46,6 @@ class Popular_adaptive(Agent):
         self._strategy = "adaptable popular"
         self.__ID = ID
         self.__n_agents = n_agents
-        #self.__set_n_considerations_to_n_slots()
-        #self.__set_n_votes_to_n_slots()
 
 
     # Makes sure that if there are less time slots available than the amount of slots the agent wants to take into
@@ -159,12 +159,13 @@ class Popular(Agent):
         self.__popular_time_slots_preference = []
         self.__n_slots_consideration = 4 # The number of time slots that will be taken in consideration\
         self.__n_votes = 1  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
-        self._willingness = random_number_generator.generate_random_number_normal_distribution(1, 0.1, 0, 1)
+        self.willingness_mean = 1
+        self.willingness_sd = 0.1
+        self._willingness = random_number_generator.generate_random_number_normal_distribution(self.willingness_mean, self.willingness_sd, 0, 1)
         self._strategy = "popular"
         self.__ID = ID
         self.__n_agents = n_agents
-        #self.__set_n_considerations_to_n_slots()
-        #self.__set_n_votes_to_n_slots()
+
 
 
     # Makes sure that if there are less time slots available than the amount of slots the agent wants to take into
