@@ -20,7 +20,7 @@ class Games:
         self._min_indexes = []
         self._max_utility = 0
 
-        self._rounds = 50000
+        self._rounds = 10000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -459,6 +459,97 @@ class KM(Games):
         for agent in self._agents:
             if agent.get_strategy() == "mix_adaptable_popular":
                 if agent.get_pop_adapt() == 0:          #Checks whether it is the normal or popular strategy
+                    self.__popular_agent_utility.append(agent.get_total_utility())
+                    agent.reset_total_utility()
+
+    # keeps track what k and m were each run
+    def __append_list_km(self, k, m):
+        self.__list_k.append(k)
+        self.__list_m.append(m)
+
+    # The function that goes through all the steps for a successful game, storing the results and then
+    # displaying the results in the form of text and a nice graph.
+    #
+    # The number of slots the agents are going to vote on (k) and the number of slots taken into
+    # consideration (m) are changed each run. This results in a nice graph that show how k and m
+    # affect the mean utility of agents using the popular strategy
+    def __play_game(self):
+        for k in range(1, self.__max_k):
+            for m in range(1, self.__max_m):
+                if not k > m:
+                    print("k: ", k, "m: ", m)
+                    self.__set_km_popular_agents(k, m)
+                    self._go_through_rounds()
+
+                self._append_scores_per_run()
+                self.__append_list_popular_agent_utility()
+                self.__append_list_km(k, m)
+                self._reset_scores()
+
+        self._environment.rank_popularity_time_slots()
+        self.__print_results()
+        mean_utility_popular_agents = self._create_list_mean_utility(self.__popular_agent_utility,
+                                                                     1, #self._n_popular_agents,
+                                                                     self.__n_runs)
+        print(mean_utility_popular_agents)
+        #plots.plot_3d_graph_cutoff(self.__list_m, self.__list_k, mean_utility_popular_agents, self.__max_m - 1,
+        #                           self.__max_k - 1, 'slots taken into consideration per agent',
+        #                           'votes per agent',  'mean utility', 'mean utility with popular strategy')
+        plots.plot_heatmap(self.__list_m, self.__list_k, mean_utility_popular_agents,
+                           'slots taken into consideration per agent', 'votes per agent',
+                           'mean utility', 'mean utility with popular strategy')
+
+
+class KM_predict(Games):
+    def __init__(self, agents, environment):
+        Games.__init__(self, agents, environment)
+        self.__max_k = environment.get_n_time_slots() + 1
+        self.__max_m = environment.get_n_time_slots() + 1
+        self.__popular_agent_utility = []
+        self.__list_k = []
+        self.__list_m = []
+        self.__n_runs = 0
+
+        self.__calculate_number_of_runs()
+        self.__play_game()
+
+    # The program loops through k and m both starting at 1, each loop is one run. This functions calculates
+    # in how many runs this results and stores it in __n_runs
+    def __calculate_number_of_runs(self):
+        self.__n_runs = (self.__max_k - 1) * (self.__max_m - 1)
+
+    # Set the number of slots the agents are going to vote on (k) and the number of slots taken into
+    # consideration (m). k always has to be equal or smaller than m. m is the number of most
+    # popular slots that the popular agent looks at.
+    def __set_km_popular_agents(self, k, m):
+        for agent in self._agents:
+            if agent.get_strategy() == "popular_prediction":
+                    agent.set_k(k)
+                    agent.set_m(m)
+
+    # Prints all the different results that we have calculated
+    def __print_results(self):
+        print("Game ended! \n")
+        # prints the strategy used by each agent and the average utility of each agent
+        for agent in self._agents:
+            print(agent,
+                  ", Strategy: {agent.get_strategy()}, Total utility: {agent.get_total_utility() / self._rounds}")
+
+        for idx in range(self.__n_runs):
+            print("n_votes: ", self.__list_k[idx])
+            print("n_considerations: ", self.__list_m[idx])
+            print('Social welfare: ', self._social_welfare_scores[idx] / self._rounds)
+            print('Mean utility; ', self._social_welfare_scores[idx] / self._n_agents / self._rounds)
+
+            print('Minimum utility ', self._min_utility_scores[idx] / self._rounds)  # agent with smallest utility
+            print("Maximum utility: ", self._max_utility_scores[idx] / self._rounds)  # agent with largest utility
+
+            print("popular agent utility: ", self.__popular_agent_utility[idx] / self._rounds, "\n")
+
+    # Each run this functions appends the utility of the popular agents to the list
+    def __append_list_popular_agent_utility(self):
+        for agent in self._agents:
+            if agent.get_strategy() == "popular_prediction":
                     self.__popular_agent_utility.append(agent.get_total_utility())
                     agent.reset_total_utility()
 

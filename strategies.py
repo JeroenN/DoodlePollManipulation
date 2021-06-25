@@ -343,8 +343,8 @@ class Popular_prediction(Agent):
         self.__standard_deviation_per_slot = []
         self._strategy = 'popular_prediction'
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.2, 0.1, 0, 1)
-        self.__n_slots_consideration = 5  # The number of time slots that will be taken in consideration\
-        self.__n_votes = 2  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
+        self.__n_slots_consideration = 0  # The number of time slots that will be taken in consideration\
+        self.__n_votes = 0  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
         self.__popular_time_slots_idx = []
         self.__popular_time_slots_preference = []
         self.__slots_preference_prediction = []
@@ -442,6 +442,12 @@ class Popular_prediction(Agent):
             print(f"environment.get_time_slots()[", idx, "] /  _n_agents: ", self.environment.get_time_slots()[idx], "/"
               , self.__n_agents, " = ", self.environment.get_time_slots()[idx] / self.__n_agents)
             print(f"preference prediction: ", preference_prediction)
+
+    def set_k(self, k):
+        self.__n_votes = k
+
+    def set_m(self, m):
+        self.__n_slots_consideration = m
 
     def vote(self):
         self.__create_slots_preference_prediction()

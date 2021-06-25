@@ -131,7 +131,7 @@ def play_game(environment, agents, bonus_type):
     if game_type == 0:
         games.Normal(agents, environment, bonus_type)
     elif game_type == 1:
-        games.KM(agents, environment)
+        games.KM_predict(agents, environment)
     elif game_type == 2:
         games.Threshold(agents, environment, bonus_type)
     elif game_type == 3:
@@ -150,11 +150,11 @@ def main():
     bonus_type = 0 # int(input("Do you want the agents to use social bonus?\n 0 = no, 1 = yes\n"))
     
     if bonus_type == 0:
-        agents = create_agents(8, #int(input("How many standard voters are in the Doodle poll?: ")),
-                               2, #int(input("How many mix adaptable popular are in the Doodle poll?: ")),
+        agents = create_agents(9, #int(input("How many standard voters are in the Doodle poll?: ")),
+                               0, #int(input("How many mix adaptable popular are in the Doodle poll?: ")),
                             0, #int(input("How many popular voters are in the Doodle poll?: ")),
                             0, #int(input("How many adaptive popular voters are in the Doodle poll?: ")),
-                            0, #int(input("How many popular prediction voters are in the Doodle poll?: ")),
+                            1, #int(input("How many popular prediction voters are in the Doodle poll?: ")),
                             0, #int(input("How many above average utility voters are in the Doodle poll?: ")),
                             0, #int(input("How many highest utility voters are in the Doodle poll?: ")),
                             0, #int(input("How many median utility voters are in the Doodle poll?: ")),
