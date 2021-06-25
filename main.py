@@ -7,10 +7,12 @@ import games
 
 # Right now this function creates agents with the standard strategy
 # storing these agents might not be necessary anymore because it is stored in the environment now 
-def create_agents(n_agents, n_pop_agents, n_pop_adapt, n_pop_predic_agents, n_above_average_utility, n_highest_utility, n_median_utility, environment,
+def create_agents(n_agents, n_mix_pop_adapt, n_pop_agents, n_pop_adapt, n_pop_predic_agents, n_above_average_utility,
+                  n_highest_utility, n_median_utility, environment,
                   bonus_type, n_social_agents = 0, n_social_pop_agents = 0, n_social_pop_predic_agents = 0):
     agents = []
-    tot_agents = n_agents + n_pop_agents, n_pop_adapt + n_pop_predic_agents + n_above_average_utility + n_highest_utility
+    tot_agents = n_agents +n_mix_pop_adapt + n_pop_agents + n_pop_adapt + n_pop_predic_agents +\
+                 n_above_average_utility + n_highest_utility
     for i in range(n_agents):
         agent = strategies.Standard(environment, tot_agents, i, bonus_type)
         agents.append(agent)
@@ -29,7 +31,8 @@ def create_agents(n_agents, n_pop_agents, n_pop_adapt, n_pop_predic_agents, n_ab
         agents.append(agent)
     for i in range(n_pop_adapt):
         agents.append(strategies.Popular_adaptive(environment, tot_agents, i + n_agents + n_pop_agents + n_pop_predic_agents + n_above_average_utility + n_highest_utility, bonus_type))
-
+    for i in range(n_mix_pop_adapt):
+        agents.append(strategies.Mix_popular_adapt(environment, tot_agents, i + n_agents + n_pop_agents + n_pop_predic_agents + n_above_average_utility + n_highest_utility + n_pop_adapt, bonus_type))
     return agents
 
 def create_environment(n_time_slots):
@@ -128,7 +131,7 @@ def play_game(environment, agents, bonus_type):
     if game_type == 0:
         games.Normal(agents, environment, bonus_type)
     elif game_type == 1:
-        games.KM(agents, environment, 10, 10)
+        games.KM(agents, environment)
     elif game_type == 2:
         games.Threshold(agents, environment, bonus_type)
     elif game_type == 3:
@@ -138,7 +141,7 @@ def play_game(environment, agents, bonus_type):
     elif game_type == 5:
         games.willingness(agents, environment, bonus_type)
     elif game_type == 6:
-        games.Distribution(agents, environment, 5)
+        games.Distribution_50(agents, environment, 20)
 
 def main():
     environment = create_environment(
@@ -147,7 +150,8 @@ def main():
     bonus_type = 0 # int(input("Do you want the agents to use social bonus?\n 0 = no, 1 = yes\n"))
     
     if bonus_type == 0:
-        agents = create_agents(0,#int(input("How many standard voters are in the Doodle poll?: ")),
+        agents = create_agents(8, #int(input("How many standard voters are in the Doodle poll?: ")),
+                               2, #int(input("How many mix adaptable popular are in the Doodle poll?: ")),
                             0, #int(input("How many popular voters are in the Doodle poll?: ")),
                             0, #int(input("How many adaptive popular voters are in the Doodle poll?: ")),
                             0, #int(input("How many popular prediction voters are in the Doodle poll?: ")),

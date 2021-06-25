@@ -5,6 +5,7 @@ import numpy as np
 import strategies
 import csv
 import pandas as pd
+import math
 from environment import Environment
 
 
@@ -19,7 +20,7 @@ class Games:
         self._min_indexes = []
         self._max_utility = 0
 
-        self._rounds = 10000
+        self._rounds = 50000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -72,7 +73,7 @@ class Games:
             #self.__append_scores_per_round()
             self.__calculate_social_welfare()
             self.__calculate_egalitarian_welfare()
-            self.__reset_willingness()
+            #self.__reset_willingness()
             if bonus_type == 1:
                 self.__calculate_social_bonus_utility()
             self._environment.reset(self._agents)
@@ -193,6 +194,7 @@ class Games:
             histogram_idx_min_utility[element] += 1
 
         return histogram_idx_min_utility
+
     # calculates the mean utility of the popular agents and then adds it to list mean_utility_popular_agents
     def _create_list_mean_utility(self, utility_agents, n_agents, n_runs):
         mean_utility = []
@@ -341,8 +343,72 @@ class Distribution(Games):
             self.__reset_scores()
             # self.__create_csv_file()
 
+class Distribution_50(Games):
+    def __init__(self, agents, environment, tot_agents):
+        Games.__init__(self, agents, environment)
+        self.__bonus_type = 0
+        self.__tot_agents = tot_agents
+        self.__play_game()
+
+    def __create_csv_file(self):
+        df = pd.DataFrame(self._mean_of_mean_utilities_sincere_per_round)
+        df.to_csv("nine_sincere_mean_utilities.csv", index=False)
+
+    def __print_results(self):
+        max = 0
+        for agent in self._agents:
+            if agent.get_strategy() == "popular":
+                utility = agent.get_total_utility() / self._rounds
+                if utility > max:
+                    max = utility
+        print("popular agent utility: ", max)
+        self._print_mean_of_mean_utilities()
+
+
+    def __reset_scores(self):
+        self._social_welfare_scores.clear()
+        self._min_utility_scores.clear()
+        self._max_utility_scores.clear()
+        self._mean_of_mean_utilities_sincere = 0
+        self._mean_of_mean_utilities_popular = 0
+        self._mean_of_mean_utilities_sincere_per_round.clear()
+        self._social_welfare = 0
+        self._social_bonus_utility = 0 # keeps track of the total utility that is gained from social bonus
+        self._min_utility = 0
+        self._min_indexes.clear()
+        self._max_utility = 0
+
+    def __create_agents(self, n_tot):
+        n_pop = math.floor(n_tot * 0.7) # 70% or less of the agents are popular, by rounding it down it is never
+                                        # more than 70%
+        n_sincere = n_tot - n_pop
+        self._n_agents = n_sincere + n_pop
+        self._n_standard_agents = n_sincere
+        self._n_popular_agents = n_pop
+        self._agents.clear()
+        for i in range(n_sincere):
+            agent = strategies.Standard(self._environment, self._n_agents, i, self.__bonus_type)
+            self._agents.append(agent)
+        for i in range(n_pop):
+            agent = strategies.Popular(self._environment, self._n_agents, i+n_sincere, self.__bonus_type)
+            self._agents.append(agent)
+
+
+
+    # If this is chosen the program is only run once, thus no parameters are changed
+    def __play_game(self):
+        for n_tot in range(4, self.__tot_agents + 1, 2):
+            self.__create_agents(n_tot)
+            print("n_pop: ", self._n_standard_agents)
+            print("n_sincere", self._n_popular_agents)
+            self._go_through_rounds(self.__bonus_type)
+            self._environment.rank_popularity_time_slots()
+            self.__print_results()
+            self.__reset_scores()
+            # self.__create_csv_file()
+
 class KM(Games):
-    def __init__(self, agents, environment, max_k, max_m):
+    def __init__(self, agents, environment):
         Games.__init__(self, agents, environment)
         self.__max_k = environment.get_n_time_slots() + 1
         self.__max_m = environment.get_n_time_slots() + 1
@@ -364,9 +430,10 @@ class KM(Games):
     # popular slots that the popular agent looks at.
     def __set_km_popular_agents(self, k, m):
         for agent in self._agents:
-            if agent.get_strategy() == "popular":
-                agent.set_k(k)
-                agent.set_m(m)
+            if agent.get_strategy() == "mix_adaptable_popular":
+                if agent.get_pop_adapt() == 0:  # Checks whether it is the normal or popular strategy
+                    agent.set_k(k)
+                    agent.set_m(m)
 
     # Prints all the different results that we have calculated
     def __print_results(self):
@@ -390,9 +457,10 @@ class KM(Games):
     # Each run this functions appends the utility of the popular agents to the list
     def __append_list_popular_agent_utility(self):
         for agent in self._agents:
-            if agent.get_strategy() == "popular":
-                self.__popular_agent_utility.append(agent.get_total_utility())
-                agent.reset_total_utility()
+            if agent.get_strategy() == "mix_adaptable_popular":
+                if agent.get_pop_adapt() == 0:          #Checks whether it is the normal or popular strategy
+                    self.__popular_agent_utility.append(agent.get_total_utility())
+                    agent.reset_total_utility()
 
     # keeps track what k and m were each run
     def __append_list_km(self, k, m):
@@ -409,6 +477,7 @@ class KM(Games):
         for k in range(1, self.__max_k):
             for m in range(1, self.__max_m):
                 if not k > m:
+                    print("k: ", k, "m: ", m)
                     self.__set_km_popular_agents(k, m)
                     self._go_through_rounds()
 
@@ -420,7 +489,8 @@ class KM(Games):
         self._environment.rank_popularity_time_slots()
         self.__print_results()
         mean_utility_popular_agents = self._create_list_mean_utility(self.__popular_agent_utility,
-                                                                     self._n_popular_agents, self.__n_runs)
+                                                                     1, #self._n_popular_agents,
+                                                                     self.__n_runs)
         print(mean_utility_popular_agents)
         #plots.plot_3d_graph_cutoff(self.__list_m, self.__list_k, mean_utility_popular_agents, self.__max_m - 1,
         #                           self.__max_k - 1, 'slots taken into consideration per agent',

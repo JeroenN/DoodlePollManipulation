@@ -73,7 +73,7 @@ class Popular_adaptive(Agent):
     def __create_list_popular_slots(self):
         self.environment.rank_popularity_time_slots()  # Ranks the time slots from least popular to most popular
         time_slot_votes = self.environment.get_time_slot_votes()
-        max = time_slot_votes[9]
+        max = time_slot_votes[self.environment.get_n_time_slots()-1]
         self.__n_slots_consideration = self.__count_n_slot_consideration(time_slot_votes, max)
         #print(self.__n_slots_consideration)
 
@@ -157,16 +157,14 @@ class Popular(Agent):
         Agent.__init__(self, environment, n_agents, ID, bonus_type)
         self.__popular_time_slots_idx = []
         self.__popular_time_slots_preference = []
-        self.__n_slots_consideration = 4 # The number of time slots that will be taken in consideration\
-        self.__n_votes = 1  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
+        self.__n_slots_consideration = 7 # The number of time slots that will be taken in consideration
+        self.__n_votes = 3 # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
         self.willingness_mean = 1
         self.willingness_sd = 0.1
         self._willingness = random_number_generator.generate_random_number_normal_distribution(self.willingness_mean, self.willingness_sd, 0, 1)
         self._strategy = "popular"
         self.__ID = ID
         self.__n_agents = n_agents
-
-
 
     # Makes sure that if there are less time slots available than the amount of slots the agent wants to take into
     # consideration, then the amount of time slots taken into consideration is set to the amount of time slots there
@@ -221,6 +219,106 @@ class Popular(Agent):
             #print("voted for slot: ", self.__popular_time_slots_idx[idx])
             self.environment.vote_time_slot(self.__popular_time_slots_idx[idx])
             self._time_slots_chosen.append(self.__popular_time_slots_idx[idx])
+
+    def set_k(self, k):
+        self.__n_votes = k
+
+    def set_m(self, m):
+        self.__n_slots_consideration = m
+
+    def vote(self):
+        self.__create_list_popular_slots()
+        self.__create_list_preference_popular_slots()
+        self.__vote_for_slots_highest_preference()
+        self.__popular_time_slots_preference.clear()
+        self.__popular_time_slots_idx.clear()
+        self.environment.remove_agent_from_voting_list()
+
+class Mix_popular_adapt(Agent):
+    def __init__(self, environment, n_agents, ID, bonus_type):
+        Agent.__init__(self, environment, n_agents, ID, bonus_type)
+        self.__popular_time_slots_idx = []
+        self.__popular_time_slots_preference = []
+        self.__n_slots_consideration = 7  # The number of time slots that will be taken in consideration\
+        self.__n_votes = 3  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
+        self._willingness = random_number_generator.generate_random_number_normal_distribution(1, 0.1, 0, 1)
+        self._strategy = "mix_adaptable_popular"
+        self.__ID = ID
+        self.__popular_adaptive = 0
+        self.__n_agents = n_agents
+
+    # Makes sure that if there are less time slots available than the amount of slots the agent wants to take into
+    # consideration, then the amount of time slots taken into consideration is set to the amount of time slots there
+    # are
+    def __set_n_considerations_to_n_slots(self):
+        if self.environment.get_n_time_slots() < self.__n_slots_consideration:
+            self.__n_slots_consideration = self.environment.get_n_time_slots()
+
+    # Makes sure that if there are less time slots available than the amount of slots the agent wants to vote on
+    # , then the amount of time slots voted on is set to the amount of time slots there
+    # are
+    def __set_n_votes_to_n_slots(self):
+        if self.environment.get_n_time_slots() < self.__n_votes:
+            self.__n_votes = self.environment.get_n_time_slots()
+
+    def __count_n_slot_consideration(self, time_slot_votes, max):
+        n_slot_consideration = 0
+        for element in time_slot_votes:
+            if element >= max - 1:
+                n_slot_consideration += 1
+        return n_slot_consideration
+
+    # Determines whether the agent is the last voter, if that is the case then the popular adaptive strategy is
+    # set to true
+    def __determine_popular_adaptive(self):
+        if self.environment.get_n_agents_waiting_to_vote() == 1:
+            self.__popular_adaptive = 1
+            self.__n_votes = 1
+
+    # Goes over the last n_slots_consideration and adds the index of those to the array idx_popular_time_slots
+    def __create_list_popular_slots(self):
+        self.environment.rank_popularity_time_slots()  # Ranks the time slots from least popular to most popular
+        self.__determine_popular_adaptive()
+        if self.__popular_adaptive == 1:
+            time_slot_votes = self.environment.get_time_slot_votes()
+            max = time_slot_votes[self.environment.get_n_time_slots()-1] # The number of votes on the highest voted time slot
+            self.__n_slots_consideration = self.__count_n_slot_consideration(time_slot_votes, max)
+
+        # Takes the indexes from the last n_slots_consideration time slots (they are ranked from least to most popular,
+        # thus the n_slots_consideration most popular time slots) and puts to indexes in the list popular_time_slots_idx
+        starting_idx_most_popular_slots = self._n_time_slots - self.__n_slots_consideration
+        if starting_idx_most_popular_slots < 0:
+            starting_idx_most_popular_slots = 0
+
+        for idx in range(starting_idx_most_popular_slots, self._n_time_slots):
+            idx_time_slots = self.environment.get_initial_idx_time_slots()
+            self.__popular_time_slots_idx.append(idx_time_slots[idx])
+
+    # Makes a new list with the preference for each popular time slot, starting from the least popular to the most
+    # popular. This is realized by taking the list __popular_time_slot_idx which contains the indexes of the slots
+    # starting with the idx of the least popular and moving up idx of the time slot which is the most popular
+    def __create_list_preference_popular_slots(self):
+        for idx in self.__popular_time_slots_idx:
+            preference = self._time_slot_preference[idx]
+            self.__popular_time_slots_preference.append(preference)
+
+
+    # Rank in terms of highest preference
+    def __vote_for_slots_highest_preference(self):
+        # Quick sorts the n_slots_consideration most popular time slots in terms of the agents their preference, then
+        # the list popular_time_slots_idx can be used to vote for the right time slots.
+
+        quick_sort.quick_sort(self.__popular_time_slots_preference, self.__popular_time_slots_idx, 0,
+                              self.__n_slots_consideration - 1)
+
+        # Vote for n_votes time-slots with the highest preference from the n_slots_consideration most popular time slots
+        for idx in range(self.__n_slots_consideration - self.__n_votes, self.__n_slots_consideration):
+            # print("voted for slot: ", self.__popular_time_slots_idx[idx])
+            self.environment.vote_time_slot(self.__popular_time_slots_idx[idx])
+            self._time_slots_chosen.append(self.__popular_time_slots_idx[idx])
+
+    def get_pop_adapt(self):
+        return self.__popular_adaptive
 
     def set_k(self, k):
         self.__n_votes = k
