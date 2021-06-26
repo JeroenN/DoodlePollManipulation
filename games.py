@@ -20,7 +20,7 @@ class Games:
         self._min_indexes = []
         self._max_utility = 0
 
-        self._rounds = 10000
+        self._rounds = 100000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -73,7 +73,7 @@ class Games:
             #self.__append_scores_per_round()
             self.__calculate_social_welfare()
             self.__calculate_egalitarian_welfare()
-            #self.__reset_willingness()
+            self.__reset_willingness()
             if bonus_type == 1:
                 self.__calculate_social_bonus_utility()
             self._environment.reset(self._agents)
@@ -203,9 +203,21 @@ class Games:
 
         return mean_utility
 
+    # Takes the idx of the voter in question, compares this with the list 'voter_order' this list
+    # starts with the idx of the agent that votes first and goes up from there. This comparison
+    # can be counted, how many element have to be cycled through to find the matching idx, and this tells
+    # us what the voting place is of that particular agent (when that agent votes in comparison to the others).
+    def _determine_voter_place(self, idx):
+        voter_place = 0
+        voter_order = self._environment.get_index_agents()
+        while idx != voter_order[voter_place]:
+            voter_place += 1
+        return voter_place
+
     def _print_strategies(self):
-        for agent in self._agents:
-            print(agent, ", Strategy: ", agent.get_strategy(), ", Total utility: ", agent.get_total_utility() / self._rounds)
+        for idx in range(len(self._agents)):
+            print(self._agents[idx], ", Strategy: ", self._agents[idx].get_strategy(), ", Total utility: ",
+                  self._agents[idx].get_total_utility() / self._rounds) #, "voter: ", self._determine_voter_place(idx))
             #print(agent.get_total_utility() / self._rounds)
 
     def _print_social_welfare(self):
@@ -280,6 +292,44 @@ class Normal(Games):
         self.__print_results()
         #self.__create_csv_file()
 
+    class Normal_position(Games):
+        def __init__(self, agents, environment, bonus_type):
+            Games.__init__(self, agents, environment)
+            self.__bonus_type = bonus_type
+            self.__play_game()
+
+        def __create_csv_file(self):
+            df = pd.DataFrame(self._mean_of_mean_utilities_sincere_per_round)
+            df.to_csv("nine_sincere_mean_utilities.csv", index=False)
+
+        def __print_results(self):
+            print("Game ended! \n")
+            self._print_strategies()
+            self._print_social_welfare()
+            self._print_mean_of_mean_utilities()
+            self._print_egalitarian_welfare()
+
+            # if the bonus type is 1, also print the utility without social bonus
+            if self.__bonus_type == 1:
+                self._print_social_utility()
+
+        def __create_agent_certain_position(self):
+            #tot_agents = 10
+
+            # for i in range(3):
+            #    agents.append(strategies.Standard(environment, tot_agents, i, bonus_type))
+            # agents.append(strategies.Popular(environment, tot_agents, 8, bonus_type))
+            # for i in range(6):
+            #    agents.append(strategies.Standard(environment, tot_agents, 9, bonus_type))
+            pass
+
+        # If this is chosen the program is only run once, thus no parameters are changed
+        def __play_game(self):
+            self._go_through_rounds(self.__bonus_type)
+            self._environment.rank_popularity_time_slots()
+            self.__print_results()
+            # self.__create_csv_file()
+
 
 class Distribution(Games):
     def __init__(self, agents, environment, tot_agents):
@@ -325,7 +375,7 @@ class Distribution(Games):
             agent = strategies.Standard(self._environment, self._n_agents, i, self.__bonus_type)
             self._agents.append(agent)
         for i in range(n_pop):
-            agent = strategies.Popular(self._environment, self._n_agents, i+n_sincere, self.__bonus_type)
+            agent = strategies.Popular_prediction(self._environment, self._n_agents, i+n_sincere, self.__bonus_type)
             self._agents.append(agent)
 
 
@@ -430,8 +480,8 @@ class KM(Games):
     # popular slots that the popular agent looks at.
     def __set_km_popular_agents(self, k, m):
         for agent in self._agents:
-            if agent.get_strategy() == "mix_adaptable_popular":
-                if agent.get_pop_adapt() == 0:  # Checks whether it is the normal or popular strategy
+            if agent.get_strategy() == "popular":#"mix_adaptable_popular":
+                #if agent.get_pop_adapt() == 0:  # Checks whether it is the normal or popular strategy
                     agent.set_k(k)
                     agent.set_m(m)
 
@@ -457,8 +507,8 @@ class KM(Games):
     # Each run this functions appends the utility of the popular agents to the list
     def __append_list_popular_agent_utility(self):
         for agent in self._agents:
-            if agent.get_strategy() == "mix_adaptable_popular":
-                if agent.get_pop_adapt() == 0:          #Checks whether it is the normal or popular strategy
+            if agent.get_strategy() == "popular":#"mix_adaptable_popular":
+                #if agent.get_pop_adapt() == 0:          #Checks whether it is the normal or popular strategy
                     self.__popular_agent_utility.append(agent.get_total_utility())
                     agent.reset_total_utility()
 

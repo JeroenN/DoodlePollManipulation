@@ -1,4 +1,5 @@
 import quick_sort
+import random
 
 # The class creates the time-slots and counts how often
 # a certain time slot is chosen
@@ -117,8 +118,11 @@ class Environment:
 
     # Quick-sort the willingness
     def rank_willingness(self):
+        # Commenting the following two lines out makes the agents vote in the order that they are created
         n_elements = len(self.__willingness_agents)
         quick_sort.quick_sort(self.__willingness_agents, self.__index_agents, 0, n_elements - 1)
+        pass
+
 
     # After this function is called another function removes the first element. Thus everytime this function is
     # is called a new element will be given until the list is empty in which case it returns none.
@@ -135,9 +139,8 @@ class Environment:
     def get_n_agents_waiting_to_vote(self):
         return len(self.__index_agents)
 
-    # May break the whole program by commeting out don't know if this function is used any where
-    #def get_number_of_agents(self):
-     #   return len(self.__index_agents)
+    def get_index_agents(self):
+        return self.__index_agents
 
     def get_number_of_willingness_agents(self):
         return len(self.__willingness_agents)

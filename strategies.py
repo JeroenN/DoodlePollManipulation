@@ -11,8 +11,8 @@ class Standard(Agent):
         Agent.__init__(self, environment, n_agents, ID, bonus_type)
         self.__threshold = 0.55
         self.__ID = ID
-        self.willingness_mean = 0.4
-        self.willingness_sd = 0.2
+        self.willingness_mean = 0.2
+        self.willingness_sd = 0.1
         self._willingness = random_number_generator.generate_random_number_normal_distribution(self.willingness_mean, self.willingness_sd, 0, 1)
         self._strategy = "standard"
         self.__n_agents = n_agents
@@ -103,8 +103,8 @@ class Popular_adaptive(Agent):
     def __count_n_votes(self):
         n_votes = 0
         n_elements = len(self.__popular_time_slots_preference)
-        for i in range(n_elements - self.__n_slots_consideration - 1, n_elements-1):
-            if self.__popular_time_slots_preference[i] > 0.7:
+        for i in range(n_elements):
+            if self.__popular_time_slots_preference[i] > 0.65:
                 n_votes += 1
         if n_votes == 0:
             return 1
@@ -118,9 +118,10 @@ class Popular_adaptive(Agent):
 
         quick_sort.quick_sort(self.__popular_time_slots_preference, self.__popular_time_slots_idx, 0,
                               self.__n_slots_consideration - 1)
-
+        #print(self.__popular_time_slots_preference)
         #self.__n_votes = self.__count_n_votes()
         #print(self.__n_votes)
+
         # Vote for n_votes time-slots with the highest preference from the n_slots_consideration most popular time slots
         for idx in range(self.__n_slots_consideration - self.__n_votes, self.__n_slots_consideration):
             #print("voted for slot: ", self.__popular_time_slots_idx[idx])
@@ -239,7 +240,7 @@ class Mix_popular_adapt(Agent):
         Agent.__init__(self, environment, n_agents, ID, bonus_type)
         self.__popular_time_slots_idx = []
         self.__popular_time_slots_preference = []
-        self.__n_slots_consideration = 7  # The number of time slots that will be taken in consideration\
+        self.__n_slots_consideration = 7  # The number of time slots that will be taken in consideration
         self.__n_votes = 3  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
         self._willingness = random_number_generator.generate_random_number_normal_distribution(1, 0.1, 0, 1)
         self._strategy = "mix_adaptable_popular"
@@ -342,9 +343,11 @@ class Popular_prediction(Agent):
         self.__means_per_slot = []
         self.__standard_deviation_per_slot = []
         self._strategy = 'popular_prediction'
-        self._willingness = random_number_generator.generate_random_number_normal_distribution(0.2, 0.1, 0, 1)
-        self.__n_slots_consideration = 0  # The number of time slots that will be taken in consideration\
-        self.__n_votes = 0  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
+        self.willingness_mean = 0.1
+        self.willingness_sd = 0.1
+        self._willingness = random_number_generator.generate_random_number_normal_distribution(self.willingness_mean, self.willingness_sd, 0, 1)
+        self.__n_slots_consideration = 4  # The number of time slots that will be taken in consideration\
+        self.__n_votes = 2  # How many votes the agent should cast, this has to be always equal or greater than n_slots_consideration
         self.__popular_time_slots_idx = []
         self.__popular_time_slots_preference = []
         self.__slots_preference_prediction = []

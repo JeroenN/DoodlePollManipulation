@@ -11,8 +11,17 @@ def create_agents(n_agents, n_mix_pop_adapt, n_pop_agents, n_pop_adapt, n_pop_pr
                   n_highest_utility, n_median_utility, environment,
                   bonus_type, n_social_agents = 0, n_social_pop_agents = 0, n_social_pop_predic_agents = 0):
     agents = []
+    #tot_agents = 10
+
+    #for i in range(8):
+    #    agents.append(strategies.Standard(environment, tot_agents, i, bonus_type))
+    #agents.append(strategies.Popular(environment, tot_agents, 8, bonus_type))
+    #for i in range(1):
+    #    agents.append(strategies.Standard(environment, tot_agents, 9, bonus_type))
+
     tot_agents = n_agents +n_mix_pop_adapt + n_pop_agents + n_pop_adapt + n_pop_predic_agents +\
                  n_above_average_utility + n_highest_utility
+
     for i in range(n_agents):
         agent = strategies.Standard(environment, tot_agents, i, bonus_type)
         agents.append(agent)
@@ -131,7 +140,7 @@ def play_game(environment, agents, bonus_type):
     if game_type == 0:
         games.Normal(agents, environment, bonus_type)
     elif game_type == 1:
-        games.KM_predict(agents, environment)
+        games.KM(agents, environment)
     elif game_type == 2:
         games.Threshold(agents, environment, bonus_type)
     elif game_type == 3:
@@ -141,7 +150,7 @@ def play_game(environment, agents, bonus_type):
     elif game_type == 5:
         games.willingness(agents, environment, bonus_type)
     elif game_type == 6:
-        games.Distribution_50(agents, environment, 20)
+        games.Distribution(agents, environment, 10)
 
 def main():
     environment = create_environment(
