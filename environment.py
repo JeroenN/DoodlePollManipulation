@@ -52,6 +52,13 @@ class Environment:
 
         self.__idx_most_popular_time_slot = idx
 
+        #idx_top_slots = []
+        #for i in range(self.__n_time_slots):
+        #    if self.__time_slots_votes[i] == max:
+        #            idx_top_slots.append(self.__initial_idx_time_slots[i])
+
+        #self.__idx_most_popular_time_slot = random.choice(idx_top_slots)
+
     # Using quick_sort to sort the time-slots based on popularity
     def rank_popularity_time_slots(self):
         # TODO: make a boolean that keeps track of whether the time slots have already been ranked
@@ -119,8 +126,8 @@ class Environment:
     # Quick-sort the willingness
     def rank_willingness(self):
         # Commenting the following two lines out makes the agents vote in the order that they are created
-        n_elements = len(self.__willingness_agents)
-        quick_sort.quick_sort(self.__willingness_agents, self.__index_agents, 0, n_elements - 1)
+        #n_elements = len(self.__willingness_agents)
+        #quick_sort.quick_sort(self.__willingness_agents, self.__index_agents, 0, n_elements - 1)
         pass
 
 

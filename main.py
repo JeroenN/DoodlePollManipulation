@@ -133,7 +133,7 @@ def print_max_threshold(threshold_welfares_standard):
 
 # Chooses which type of game is going to be played
 def play_game(environment, agents, bonus_type):
-    game_type = int(input("What type of game do you want to play?\n0 = normal game, 1 = km game, 2 = threshold game, 3 = agent slot game, 4 = agent type game, 5 = willingness game, 6 = Distribution\n"))  # 0 = normal game, 1 = km game, 2 = threshold game, 3 = agent slot game, 4 = type of agent game
+    game_type = int(input("What type of game do you want to play?\n0 = normal game, 1 = km game, 2 = threshold game, 3 = agent slot game, 4 = agent type game, 5 = willingness game, 6 = Distribution, 7 = Slots, 8 = Slots preference\n"))  # 0 = normal game, 1 = km game, 2 = threshold game, 3 = agent slot game, 4 = type of agent game
 
     print("Playing game...")
 
@@ -144,13 +144,17 @@ def play_game(environment, agents, bonus_type):
     elif game_type == 2:
         games.Threshold(agents, environment, bonus_type)
     elif game_type == 3:
-        games.Agent_slot(agents, environment, 20, 20, 75, bonus_type)
+        games.Agent_slot(agents, environment, 20, 20, 0, bonus_type)
     elif game_type == 4: 
         games.agent_type(agents, environment, bonus_type)
     elif game_type == 5:
         games.willingness(agents, environment, bonus_type)
     elif game_type == 6:
-        games.Distribution(agents, environment, 10)
+        games.Distribution_50(agents, environment, 20)
+    elif game_type == 7:
+        games.Slots(agents, environment, 20, bonus_type)
+    elif game_type == 8:
+        games.Slots_preference(agents, environment, 20, bonus_type)
 
 def main():
     environment = create_environment(
@@ -159,11 +163,11 @@ def main():
     bonus_type = 0 # int(input("Do you want the agents to use social bonus?\n 0 = no, 1 = yes\n"))
     
     if bonus_type == 0:
-        agents = create_agents(9, #int(input("How many standard voters are in the Doodle poll?: ")),
+        agents = create_agents(0, #int(input("How many standard voters are in the Doodle poll?: ")),
                                0, #int(input("How many mix adaptable popular are in the Doodle poll?: ")),
                             0, #int(input("How many popular voters are in the Doodle poll?: ")),
                             0, #int(input("How many adaptive popular voters are in the Doodle poll?: ")),
-                            1, #int(input("How many popular prediction voters are in the Doodle poll?: ")),
+                            0, #int(input("How many popular prediction voters are in the Doodle poll?: ")),
                             0, #int(input("How many above average utility voters are in the Doodle poll?: ")),
                             0, #int(input("How many highest utility voters are in the Doodle poll?: ")),
                             0, #int(input("How many median utility voters are in the Doodle poll?: ")),

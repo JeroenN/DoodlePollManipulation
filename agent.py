@@ -17,6 +17,7 @@ class Agent:
         self._n_time_slots = environment.get_n_time_slots()
         self.create_time_slot_preference()
         self.__ID = ID  # assign an ID
+        self.__n_preferred_time_slot_won = 0
         self._willingness = 0
         self._strategy = ""
         self._bonus_type = bonus_type # 0 = no social bonus, 1 = social bonus
@@ -26,7 +27,7 @@ class Agent:
             self._social_bonus_cap = round(self._n_time_slots/3) # the number of slots an agent can pick in order to get social bonus. Could also be in environment
         
     def __str__(self):
-        return f"Basic agent {self.__ID}"
+        return f"{self.__ID}"
 
     def get_willingness(self):
         return self._willingness
@@ -48,7 +49,13 @@ class Agent:
     # Calculate and return the total utility
     def calculate_utility(self):
         self.__utility += self._time_slot_preference[self.environment.get_most_popular_time_slot()]
-
+        # Check whether the agent voted on this specific time slot, works only for sincere agents with a
+        # threshold of 0.55
+        #if self.__utility > 0.55:
+        #    self.__n_preferred_time_slot_won += 1
+        for time_slot_chosen in self._time_slots_chosen:
+            if time_slot_chosen == self.environment.get_most_popular_time_slot():
+                self.__n_preferred_time_slot_won += 1
         #TODO: find a better way to fix that the social bonus can make the utility go above 1
         if self.__utility > 1: 
             self.__utility = 1
@@ -76,6 +83,9 @@ class Agent:
     def get_time_slot_preference(self, idx_slot):
         return self._time_slot_preference[idx_slot]
 
+    def get_list_slot_preference(self):
+        return self._time_slot_preference
+
     def get_social_utility(self):
         return self._social_utility
 
@@ -99,6 +109,9 @@ class Agent:
         for _ in range(self._n_time_slots):
             # creates normally distributed random value with mean 0 and sd 1 and stores this in time_slot_preference
             self._time_slot_preference.append(random_number_generator.generate_random_number_normal_distribution())
+
+    def get_n_preferred_slot_won(self):
+        return self.__n_preferred_time_slot_won
 
     def __debug(self):
         print(f"agent {self.__ID}: {self._time_slot_preference}")
