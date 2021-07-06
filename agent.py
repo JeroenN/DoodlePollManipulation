@@ -48,7 +48,7 @@ class Agent:
     def calculate_utility(self):
         self.__utility += self._time_slot_preference[self.environment.get_most_popular_time_slot()]
 
-        #TODO: find a better way to fix that the social bonus can make the utility go above 1
+        # Sets the utility back to 1 if it goes above it (only when social bonus is present)
         if self.__utility > 1: 
             self.__utility = 1
 
@@ -61,7 +61,7 @@ class Agent:
         self.__utility += self._social_bonus
         self._social_utility += self._social_bonus
 
-        #TODO: find a better way to fix that the social bonus can make the utility go above 1
+        # Sets the utility back to 1 if it goes above it (only when social bonus is present)
         if self.__utility > 1: 
             self.__utility = 1
 

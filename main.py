@@ -5,9 +5,10 @@ import quick_sort
 import games
 from progress.bar import IncrementalBar
 
+## DISCLAIMER: this file contains many old functions. These were not removed to avoid the possibility of breaking other parts of the program, but are generally not used anymore. 
 
-# Right now this function creates agents with the standard strategy
-# storing these agents might not be necessary anymore because it is stored in the environment now 
+
+# Creates agents 
 def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, environment, bonus_type, n_social_agents = 0, n_social_pop_agents = 0, n_social_pop_predic_agents = 0):
     agents = []
     tot_agents = n_agents + n_pop_agents + n_pop_predic_agents + n_social_agents + n_social_pop_agents + n_social_pop_agents
@@ -95,7 +96,7 @@ def print_agent_slot_game_results(agents, rounds, social_welfare_scores, min_uti
         print(f"Maximum utility: ", max_utility_scores[idx]/rounds) # agent with largest utility
 
 def set_number_of_agents(environment, agents, n_agents, bonus_type):
-    agents.clear()  # TODO: make this more efficient, should not be cleared every time
+    agents.clear()  
     for i in range(n_agents):
         agent = strategies.Standard(environment, n_agents,i, bonus_type)
         agents.append(agent)

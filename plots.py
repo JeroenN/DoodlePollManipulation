@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# creates a 3d graph 
 def plot_3d_graph(x, y, z, x_max, y_max, x_label, y_label, z_label, title):
     X = np.reshape(x, (x_max, y_max))
     Y = np.reshape(y, (x_max, y_max))
@@ -16,7 +17,7 @@ def plot_3d_graph(x, y, z, x_max, y_max, x_label, y_label, z_label, title):
     ax.set_zlabel(z_label)
     plt.show()
 
-
+# finds the minimum item in a list 
 def find_min(list):
     min = 1000000
     for item in list:
@@ -24,6 +25,7 @@ def find_min(list):
             min = item
     return min
 
+# creates a 3d graph with a cutoff 
 def plot_3d_graph_cutoff(x, y, z, x_max, y_max, x_label, y_label, z_label, title):
     for idx in range(len(z)):
         if z[idx] == 0:
@@ -47,6 +49,7 @@ def plot_3d_graph_cutoff(x, y, z, x_max, y_max, x_label, y_label, z_label, title
     ax.set_zlabel('mean utility')
     plt.show()
 
+# plots the results of the threshold game 
 def plot_threshold_results(threshold_welfares_standard, threshold_welfares_popular, min_standard, min_popular, max_standard, max_popular, game_type):
 
     if game_type == 1: 
@@ -80,6 +83,7 @@ def plot_threshold_results(threshold_welfares_standard, threshold_welfares_popul
         plt.show()
         plt.savefig('price_of_anarchy_welfares_threshold.png')
 
+# plots the results of the agent game 
 def plot_agent_results(agent_welfares, agent_min, agent_max, n_of_agents):
 
     plt.plot(range(0, n_of_agents+1), agent_welfares, label="Mean utility")
@@ -91,6 +95,7 @@ def plot_agent_results(agent_welfares, agent_min, agent_max, n_of_agents):
     plt.show()
     plt.savefig(f'agents_welfares_{n_of_agents}.png')
 
+# plots the results of the willingness game 
 def plot_willingness_results(welfares, min_utility, max_utility, strategies):
     plt.plot(np.arange(0, 1.1, 0.1), welfares, label="Mean utility")
     plt.plot(np.arange(0, 1.1, 0.1), min_utility, label="Minimum utility")

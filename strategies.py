@@ -9,7 +9,7 @@ class Standard(Agent):
 
     def __init__(self, environment, n_agents, ID, bonus_type):
         Agent.__init__(self, environment, n_agents, ID, bonus_type)
-        self.__threshold = 0.55  # TODO: change to normal distribution
+        self.__threshold = 0.55  
         self.__ID = ID
         self._willingness = random_number_generator.generate_random_number_normal_distribution(0.4, 0.2, 0, 1)
         self._strategy = "standard"
@@ -32,8 +32,8 @@ class Standard(Agent):
     def set_threshold(self, threshold):
         self.__threshold = threshold
 
+# sincere strategy adapted to use social bonus 
 class Standard_social(Agent): 
-    #FIXME: currently isn't better than the regular standard agent, even in de social bonus scenario 
     # this agent will vote for the k most unpopular slots as well as the p slots with the highest utility, which together are exactly the social bonus cap. 
     def __init__(self, environment, n_agents, ID, bonus_type):
         Agent.__init__(self, environment, n_agents, ID, bonus_type)
@@ -196,6 +196,7 @@ class Popular(Agent):
         self.__popular_time_slots_idx.clear()
         self.environment.remove_agent_from_voting_list()
 
+# popular strategy adapted to work with social bonus 
 class Popular_social(Agent):
         #the social bonus variant of the popular agent doesn't just vote for the x most popular slots, it also votes for the y least popular songs 
     def __init__(self, environment, n_agents, ID, bonus_type):
@@ -277,7 +278,7 @@ class Popular_social(Agent):
         self.__popular_time_slots_idx.clear()
         self.environment.remove_agent_from_voting_list()
 
-
+# popular prediction strategy: attemps to predict the votes of other agents, and votes on predicted to be most popular time slots 
 class Popular_prediction(Agent):
 
     def __init__(self, environment, n_agents, ID, bonus_type):
@@ -397,12 +398,11 @@ class Popular_prediction(Agent):
         self.__slots_preference_prediction.clear() # DEBUG, should be removed later
         self.environment.remove_agent_from_voting_list()
 
-        # TODO: make it so that preference for the slots changes per round
-        # TODO: take into account how many votes each slot already has
+    
 
 
 
-
+# popular prediction strategy adapted to work with social bonus 
 class Popular_prediction_social(Agent):
 
     def __init__(self, environment, n_agents, ID, bonus_type):
@@ -541,6 +541,3 @@ class Popular_prediction_social(Agent):
         self.__slots_preference_prediction_idx.clear()
         self.__slots_preference_prediction.clear() # DEBUG, should be removed later
         self.environment.remove_agent_from_voting_list()
-
-        # TODO: make it so that preference for the slots changes per round
-        # TODO: take into account how many votes each slot already has

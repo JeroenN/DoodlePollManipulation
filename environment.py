@@ -11,8 +11,8 @@ class Environment:
                                            # popular time slots the original indexes should still be known 
         self.__idx_most_popular_time_slot = 0 # the idx of the most popular time slot 
         self.__rank_popularity_time_slots = []
-        self.__willingness_agents = []
-        self.__index_agents = []
+        self.__willingness_agents = [] # the willingness of all agents 
+        self.__index_agents = []  
         self.__create_time_slots()
 
     def __str__(self):

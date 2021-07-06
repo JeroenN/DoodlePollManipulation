@@ -16,17 +16,17 @@ class Games:
 
         self._social_welfare = 0
         self._social_bonus_utility = 0 # keeps track of the total utility that is gained from social bonus 
-        self._min_utility = 0
-        self._max_utility = 0
-        self._rounds = 10000
-        self._social_welfare_scores = []
-        self._min_utility_scores = []
-        self._max_utility_scores = []
-        self._n_agents = 0
-        self._n_standard_agents = 0
-        self._n_popular_agents = 0
-        self._n_popular_prediction_agents = 0
-        self._mean_utility_popular_agents = []
+        self._min_utility = 0 # the utility of the agent with the lowest utility
+        self._max_utility = 0 # the utility of the agent with the highest utility
+        self._rounds = 10000 # number of rounds 
+        self._social_welfare_scores = [] # keeps track of social welfare scores across rounds 
+        self._min_utility_scores = [] # keeps track of minimum utility scores across rounds 
+        self._max_utility_scores = [] # keeps track of maximum utility scores across rounds 
+        self._n_agents = 0 # the total number of agents 
+        self._n_standard_agents = 0 # the number of sincere agents 
+        self._n_popular_agents = 0 # the number of popular agents 
+        self._n_popular_prediction_agents = 0 # the number of popular prediction agents 
+        self._mean_utility_popular_agents = [] # the mean utility of all popular agents 
         self._file = None
 
         self._calculate_number_of_agents()  # Determine how many agents there are of each type
@@ -151,7 +151,6 @@ class Games:
         for agent in self._agents:
             self._social_bonus_utility += agent.get_social_utility()
 
-    # FIXME: using quicksort is rather in efficient for this problem, just use the standard method for
     # finding min and max
     def __calculate_egalitarian_welfare(self):
         welfares = []
@@ -239,14 +238,14 @@ class Games:
         self._calculate_number_of_agents()
         self._environment.reset(self._agents)
 
-
+    # converts the social welfare to mean utility and gets a mean across rounds of all values that can directly be plotted 
     def _prepare_for_plotting(self, runs):
         for idx in range(0, runs):
             self._social_welfare_scores[idx] = (self._social_welfare_scores[idx] / self._rounds) / self._n_agents
             self._min_utility_scores[idx] = self._min_utility_scores[idx] / self._rounds
             self._max_utility_scores[idx] = self._max_utility_scores[idx] / self._rounds
 
-
+# the "standard" game 
 class Normal(Games):
     def __init__(self, agents, environment, bonus_type):
         Games.__init__(self, agents, environment)
@@ -269,7 +268,7 @@ class Normal(Games):
         self._environment.rank_popularity_time_slots()
         self.__print_results()
 
-
+# game used to test the effect of K and M (popular strategy) on welfare 
 class KM(Games):
     def __init__(self, agents, environment, max_k, max_m):
         Games.__init__(self, agents, environment)
@@ -355,7 +354,7 @@ class KM(Games):
                                    'votes per agent', 'slots taken into consideration per agent', 'mean utility',
                                    'mean utility with popular strategy')
 
-
+# used to test the effect of number of agents and number of time slots on welfare 
 class Agent_slot(Games):
     def __init__(self, agents, environment, max_agents, max_slots, percentage_strategic_agents, bonus_type):
         Games.__init__(self, agents, environment)
@@ -415,8 +414,6 @@ class Agent_slot(Games):
         self._n_agents = n_agents
         # Clears all the agents, then it create the number of sincere voters that have to created and next
         # The popular agents are created
-        # TODO: just calculate how many sincere and strategic voters should be created instead of using this convoluted
-        # way
         self.__calculate_n_agent_per_type(n_agents)
         self._agents.clear()
         for i in range(self.__n_sincere_voters):
@@ -434,7 +431,6 @@ class Agent_slot(Games):
         if n_agents != len(self._agents):
             print("ERROR: not enough agents were created in the agent_slot_game")
 
-    # TODO: change this to a name that better describes the function or split it in two
     # Tell the agents how many time slots there are and change for how many slots the agent has a certain preference
     def __inform_agents_n_slots(self, n_slots):
         for agent in self._agents:
@@ -501,6 +497,7 @@ class Agent_slot(Games):
                             - self.__starting_n_agents + 1, self.__max_slots - self.__starting_n_slots + 1,
                             'agents', 'time slots', 'mean utility', 'mean utility based on agents and time slots')
 
+# used to test the effect of threshold on welfare 
 class Threshold(Games):
     def __init__(self, agents, environment, bonus_type):
         Games.__init__(self, agents, environment)
@@ -537,6 +534,7 @@ class Threshold(Games):
 
         self._file.writerow(['threshold', 'mean_utility', 'min_utility', 'max_utility'])
 
+    # plays the game 
     def __play_game(self):
         self.__open_file()
         bar = self.__create_progress_bar()
@@ -554,6 +552,7 @@ class Threshold(Games):
         min_normal = self._min_utility_scores.copy()
         max_normal = self._max_utility_scores.copy()
 
+        # in case the price of anarchy needs to be found, new agents are created 
         if self.__game_type == 2:
             self._create_agents(0, self._n_standard_agents, 0, self.__bonus_type) # reverse the number of agents 
             self.__clear_scores()
@@ -569,7 +568,7 @@ class Threshold(Games):
         plots.plot_threshold_results(social_welfare_normal, self._social_welfare_scores, min_normal,
                                      self._min_utility_scores, max_normal, self._max_utility_scores, self.__game_type)
 
-
+# used to test the effect of agent type / ratio on welfare 
 class agent_type(Games):
     def __init__(self, agents, environment, bonus_type):
         Games.__init__(self, agents, environment)
@@ -591,6 +590,7 @@ class agent_type(Games):
         plots.plot_agent_results(self._social_welfare_scores, self._min_utility_scores, self._max_utility_scores,
                                  self._n_agents)
 
+# used to test the effect of willingness on welfare  
 class willingness(Games):
     def __init__(self, agents, environment, bonus_type):
         Games.__init__(self, agents, environment)
@@ -599,6 +599,7 @@ class willingness(Games):
         self.__pareto_agents = []
         self.__play_game()
     
+    # creates pareto agents 
     def __create_willingness_agents(self, n_agents, n_pop_agents, n_pop_predic_agents):
         agents = []
         tot_agents = n_agents + n_pop_agents + n_pop_predic_agents
