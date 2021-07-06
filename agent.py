@@ -2,7 +2,6 @@ import random_number_generator
 import environment
 import numpy as np
 
-
 # creates the parent class agent. This class contains the time_slot_preference (and maybe more later).
 # From this class children classes can be made a use different strategies
 
@@ -31,8 +30,8 @@ class Agent:
     def get_willingness(self):
         return self._willingness
     
-    def set_willingness(self, mean, sd):
-        self._willingness = random_number_generator.generate_random_number_normal_distribution(mean, sd, 0, 1)
+    def set_willingness(self, m):
+        self._willingness = np.random.pareto(1, 1) + m
 
     def get_strategy(self):
         return self._strategy

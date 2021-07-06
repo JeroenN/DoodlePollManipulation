@@ -10,7 +10,7 @@ from progress.bar import IncrementalBar
 # storing these agents might not be necessary anymore because it is stored in the environment now 
 def create_agents(n_agents, n_pop_agents, n_pop_predic_agents, environment, bonus_type, n_social_agents = 0, n_social_pop_agents = 0, n_social_pop_predic_agents = 0):
     agents = []
-    tot_agents = n_agents + n_pop_agents + n_pop_predic_agents
+    tot_agents = n_agents + n_pop_agents + n_pop_predic_agents + n_social_agents + n_social_pop_agents + n_social_pop_agents
     for i in range(n_agents):
         agent = strategies.Standard(environment, tot_agents, i, bonus_type)
         agents.append(agent)

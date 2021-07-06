@@ -1,3 +1,4 @@
+from numpy.core.fromnumeric import mean
 import quick_sort
 import plots
 import normal_distribution
@@ -5,6 +6,7 @@ from progress.bar import IncrementalBar
 import numpy as np
 import strategies
 from environment import Environment
+import csv
 
 
 class Games:
@@ -16,7 +18,7 @@ class Games:
         self._social_bonus_utility = 0 # keeps track of the total utility that is gained from social bonus 
         self._min_utility = 0
         self._max_utility = 0
-        self._rounds = 1000
+        self._rounds = 10000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -25,6 +27,7 @@ class Games:
         self._n_popular_agents = 0
         self._n_popular_prediction_agents = 0
         self._mean_utility_popular_agents = []
+        self._file = None
 
         self._calculate_number_of_agents()  # Determine how many agents there are of each type
 
@@ -39,6 +42,18 @@ class Games:
             self._agents_calculate_utility()
             self.__calculate_social_welfare()
             self.__calculate_egalitarian_welfare()
+            if bonus_type == 1:
+                self.__calculate_social_bonus_utility()
+            self._environment.reset(self._agents)
+
+    # same as the previous except it can be used to store values for statistical analysis 
+    # separated from the previous for less clutter in games that do not need/want statistics 
+    def _go_through_rounds_statistics(self, parameter, bonus_type=0): 
+        for _ in range(self._rounds):
+            self._show_popular_prediction_agents_preferences()
+            self._agents_vote()
+            self._agents_calculate_utility()
+            self.__save_utilities(parameter)
             if bonus_type == 1:
                 self.__calculate_social_bonus_utility()
             self._environment.reset(self._agents)
@@ -78,7 +93,7 @@ class Games:
                 standard_deviations_per_slot.append(standard_deviation)
 
             for agent in self._agents:
-                if agent.get_strategy() == 'popular_prediction':
+                if agent.get_strategy() == 'popular_prediction' or agent.get_strategy() == 'popular_prediction_social':
                     agent.set_normal_distribution(means_per_slot, standard_deviations_per_slot)
 
     # append the egalitarian and social welfare scores in lists, this is too keep track
@@ -101,11 +116,11 @@ class Games:
         self._n_popular_agents = 0
         self._n_popular_prediction_agents = 0
         for agent in self._agents:
-            if agent.get_strategy() == "standard":
+            if agent.get_strategy() == "standard" or agent.get_strategy() == "strategy_social":
                 self._n_standard_agents += 1
-            if agent.get_strategy() == "popular":
+            if agent.get_strategy() == "popular" or agent.get_strategy() == "popular_social":
                 self._n_popular_agents += 1
-            if agent.get_strategy() == "popular_prediction":
+            if agent.get_strategy() == "popular_prediction" or agent.get_strategy() == "popular_prediction_social":
                 self._n_popular_prediction_agents += 1
 
         self._n_agents = len(self._agents)
@@ -150,6 +165,37 @@ class Games:
 
         self._min_utility += welfares[0]
         self._max_utility += welfares[self._n_agents - 1]
+    
+    # calculates the mean utility of the current rounds and stores it in a csv file
+    def __save_utilities(self, parameter):
+        mean_utility = 0 
+        welfares = []
+        welfare_idx = []
+        min_utility = 0 
+        max_utility = 0
+
+        for idx, agent in enumerate(self._agents):
+            agent_utility = agent.get_utility()
+            mean_utility += agent_utility
+            welfares.append(agent_utility)
+            welfare_idx.append(idx)
+            self._social_welfare += agent_utility
+
+        # prepare data 
+        quick_sort.quick_sort(welfares, welfare_idx, 0, self._n_agents - 1)
+        mean_utility = mean_utility / self._n_agents
+        level = round(parameter, 1)
+
+        # store for graph 
+        self._min_utility += welfares[0]
+        self._max_utility += welfares[self._n_agents - 1]
+
+        # store for CSV
+        min_utility = welfares[0]
+        max_utility = welfares[self._n_agents - 1]
+
+        # write to CSV 
+        self._file.writerow([f'{level}', f'{mean_utility}', f'{min_utility}', f'{max_utility}'])
 
     # calculates the mean utility of the popular agents and then adds it to list mean_utility_popular_agents
     def _create_list_mean_utility(self, utility_agents, n_agents, n_runs):
@@ -483,13 +529,21 @@ class Threshold(Games):
         self._social_welfare_scores.clear()
         self._min_utility_scores.clear()
         self._max_utility_scores.clear()
+    
+    # opens CSV file 
+    def __open_file(self): 
+        self._file = open('threshold_utilities.csv', mode='w')
+        self._file = csv.writer(self._file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        self._file.writerow(['threshold', 'mean_utility', 'min_utility', 'max_utility'])
 
     def __play_game(self):
+        self.__open_file()
         bar = self.__create_progress_bar()
 
         for threshold in np.arange(0, 1.1, 0.1):
             self.__set_threshold_normal_agents(threshold)
-            self._go_through_rounds()
+            self._go_through_rounds_statistics(parameter=threshold)
             self._append_scores_per_run()  # this is not divided by rounds yet
             self._reset_scores()
             bar.next()
@@ -505,7 +559,7 @@ class Threshold(Games):
             self.__clear_scores()
 
             for threshold in np.arange(0, 1.1, 0.1):
-                self._go_through_rounds()
+                self._go_through_rounds_statistics(parameter=threshold)
                 self._append_scores_per_run()
                 self._reset_scores()
                 bar.next()
@@ -542,7 +596,44 @@ class willingness(Games):
         Games.__init__(self, agents, environment)
         self.__bonus_type = bonus_type #keeps track of the bonus type for when new agents have to be created
         self.__strategies = set()
+        self.__pareto_agents = []
         self.__play_game()
+    
+    def __create_willingness_agents(self, n_agents, n_pop_agents, n_pop_predic_agents):
+        agents = []
+        tot_agents = n_agents + n_pop_agents + n_pop_predic_agents
+
+        for i in range(n_agents):
+            agent = strategies.Standard(self._environment, tot_agents, i, self.__bonus_type)
+            self._agents.append(agent)
+            self.__pareto_agents.append(agent)
+        for i in range(n_pop_agents):
+            agent = (strategies.Popular(self._environment, tot_agents, i +n_agents, self.__bonus_type))
+            self._agents.append(agent)
+            self.__pareto_agents.append(agent)
+        for i in range(n_pop_predic_agents):
+            agent = (strategies.Popular_prediction(self._environment, tot_agents, i + n_agents + n_pop_agents, self.__bonus_type))
+            self._agents.append(agent)
+            self.__pareto_agents.append(agent)
+            
+        if self.__bonus_type == 1:
+            n_social_agents = int(input("How many sincere social bonus pareto agents?"))
+            n_social_pop_agents = int(input("How many popular social bonus pareto agents?"))
+            n_social_pop_predic_agents = int(input("How many popular prediction social bonus agents?"))
+            for i in range(n_social_agents):
+                agent =strategies.Standard_social(self._environment, tot_agents + n_social_agents + n_social_pop_agents + n_social_pop_predic_agents, tot_agents + i, self.__bonus_type)
+                self._agents.append(agent)
+                self.__pareto_agents.append(agent)
+            for i in range(n_social_pop_agents):
+                agent = strategies.Popular_social(self._environment, tot_agents + n_social_agents + n_social_pop_agents + n_social_pop_predic_agents, i+tot_agents+n_social_agents, self.__bonus_type)
+                self._agents.append(agent)
+                self.__pareto_agents.append(agent)
+            for i in range(n_social_pop_predic_agents):
+                agent = strategies.Popular_prediction_social(self._environment, tot_agents + n_social_agents + n_social_pop_agents + n_social_pop_predic_agents, i+tot_agents+n_social_agents+n_social_pop_agents, self.__bonus_type)
+                self._agents.append(agent)
+                self.__pareto_agents.append(agent)
+
+        self._calculate_number_of_agents()
 
     # creates the correct progress bar depending on game type 
     def __create_progress_bar(self):
@@ -551,30 +642,40 @@ class willingness(Games):
 
     # changes the agents' willingness
     def __set_willingess(self, willingness):
-        for agent in self._agents:
-            if agent.get_strategy() == "standard" or agent.get_strategy() == "standard_social":
-                agent.set_willingness(willingness, 0.1)
-            else: 
-                agent.set_willingness(willingness, 0.2)
+        for agent in self.__pareto_agents:
+            agent.set_willingness(willingness)
     
     # figure out agent types
     def __agent_types(self):
         for agent in self._agents: 
             self.__strategies.add(agent.get_strategy())
+
+    # opens CSV file 
+    def __open_file(self): 
+        self._file = open('willingness_utilities.csv', mode='w')
+        self._file = csv.writer(self._file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        self._file.writerow(['willingness', 'mean_utility', 'min_utility', 'max_utility'])
             
-    
-    def __play_game(self):       
-        self.__agent_types() 
+    def __play_game(self):              
+        self.__create_willingness_agents(int(input("How many pareto standard agents?")), int(input("How many pareto popular agents?")), int(input("How many pareto popular prediction agents?")) )
+        self.__open_file()
+        self.__agent_types()
         bar = self.__create_progress_bar()
 
+
+        # play game 
         for willingness in np.arange(0, 1.1, 0.1):
             self.__set_willingess(willingness)
-            self._go_through_rounds()
+            self._go_through_rounds_statistics(parameter = willingness)
             self._append_scores_per_run()  # this is not divided by rounds yet
             self._reset_scores()
             bar.next()
-
+        
+        # prepare results for plitting 
         self._prepare_for_plotting(11)
 
         bar.finish()
+
+        # plot results 
         plots.plot_willingness_results(self._social_welfare_scores, self._min_utility_scores, self._max_utility_scores, self.__strategies)
