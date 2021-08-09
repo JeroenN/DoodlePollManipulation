@@ -20,7 +20,7 @@ class Games:
         self._min_indexes = []
         self._max_utility = 0
 
-        self._rounds = 10000
+        self._rounds = 100
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -782,6 +782,152 @@ class Agent_slot(Games):
                             - self.__starting_n_agents + 1, self.__max_slots - self.__starting_n_slots + 1,
                             'number of agents', 'number of time slots', 'mean social welfare', 'Mean utility based on the number of agents and time slots')
 
+#Play a game with x sincere agent plus 1 of the four strategies for each strategy for each number of time slots and each number of agents
+# Next compare the utility obtained by the last agent in each game. Rank the strategies in accordance of who scored the highest
+# Store this ranking in a list and at the end make a histogram out of it.
+class Agent_slot_strategy(Games):
+    def __init__(self, agents, environment, max_agents, max_slots, bonus_type):
+        Games.__init__(self, agents, environment)
+        # Set to 4 since if you have 25% strategic voters, the first game you can play with this is with 1
+        # strategic voter and 3 sincere voters. If for each condition they are set to four the graphs can be more
+        # easily compared
+        self.__starting_n_agents = 3
+        # Set to 4 since the popular strategy works best when it considers 4 slots and then votes on 1
+        self.__starting_n_slots = 3
+        self.__max_agents = max_agents
+        self.__max_slots = max_slots
+        self.__popular_agent_utility = []
+        self.__list_slots = []
+        self.__list_agents = []
+        self.__n_runs = 0
+        self.__bonus_type = bonus_type
+        self.__score_agents_using_strategy = []
+        self.__ranking = []
+        self.__ranking_frequency = []
+
+        #self.__calculate_n_agent_per_type()
+        self.__play_game()
+
+    # The program loops through max_agents and max_slots both starting at 1, each loop is one run. This functions
+    # calculates in how many runs this results and stores it in __n_runs
+    def __calculate_number_of_runs(self):
+        self.__n_runs = (self.__max_agents - self.__starting_n_agents + 1) * (self.__max_slots - self.__starting_n_slots + 1)
+
+    def __set_number_of_agents_different_types(self, n_agents, strategy):
+        self._n_agents = n_agents
+        # Clears all the agents, then it create the number of sincere voters that have to created and next
+        # one popular agent is created
+        self._agents.clear()
+        for i in range(n_agents-1):
+            agent = strategies.Standard(self._environment, n_agents, i, self.__bonus_type)
+            self._agents.append(agent)
+
+        if strategy == 0:
+            strategic_agent = strategies.Popular_adaptive(self._environment, n_agents, n_agents-1, self.__bonus_type)
+        elif strategy == 1:
+            strategic_agent = strategies.Popular(self._environment, n_agents, n_agents - 1, self.__bonus_type)
+        elif strategy == 2:
+            strategic_agent = strategies.Popular_prediction(self._environment, n_agents, n_agents - 1, self.__bonus_type)
+        elif strategy == 3:
+            strategic_agent = strategies.Standard(self._environment, n_agents, n_agents - 1, self.__bonus_type)
+        else:
+            print("ERROR, there are only 4 strategies")
+            strategic_agent = strategies.Popular_adaptive(self._environment, n_agents, n_agents-1, self.__bonus_type)
+
+        self._agents.append(strategic_agent)
+        #print("n_agents:", n_agents)
+        #for agent in self._agents:
+        #    print("strategy: ", agent.get_strategy())
+
+        #print("")
+        if n_agents != len(self._agents):
+            print("ERROR: not enough agents were created in the agent_slot_game")
+
+    # TODO: change this to a name that better describes the function or split it in two
+    # Tell the agents how many time slots there are and change for how many slots the agent has a certain preference
+    def __inform_agents_n_slots(self, n_slots):
+        for agent in self._agents:
+            agent.set_n_time_slots(n_slots)
+            agent.create_time_slot_preference()
+
+    # Prints all the different results that we have calculated
+    def __print_results(self):
+        print("Game ended! \n")
+        # prints the strategy used by each agent and the average utility of each agent
+        for agent in self._agents:
+            print(agent,
+                  ", Strategy: ", agent.get_strategy(), "Total utility: ", agent.get_total_utility() / self._rounds)
+
+        for idx in range(self.__n_runs):
+            print("n_slots: ", self.__list_slots[idx])
+            print("n_agents: ", self.__list_agents[idx])
+            print('Social welfare: ', self._social_welfare_scores[idx] / self._rounds)
+            n_agents = self.__list_agents[idx]
+            print('Mean utility; ', (self._social_welfare_scores[idx] / n_agents / self._rounds))
+
+            print('Minimum utility ', self._min_utility_scores[idx] / self._rounds)  # agent with smallest utility
+            print("Maximum utility: ", self._max_utility_scores[idx] / self._rounds)  # agent with largest utility
+            print("\n")
+    # Keep track of the number of agents and time slots each run
+    def __append_parameters(self, n_slots, n_agents):
+        self.__list_slots.append(n_slots)
+        self.__list_agents.append(n_agents)
+
+    def __create_list_mean_utility_varying_agents_per_run(self):
+        mean_utility = []
+        for idx in range(len(self._social_welfare_scores)):
+            n_agents = self.__list_agents[idx]
+            mean_utility.append(self._social_welfare_scores[idx] / n_agents / self._rounds)
+        return mean_utility
+
+    def __play_game(self):
+        # Loop over the slots
+        for n_slots in range(self.__starting_n_slots, self.__max_slots + 1):
+            # Loop over the the agents
+            for n_agents in range(self.__starting_n_agents, self.__max_agents + 1):
+                # Play a game with each strategy for each number of time slots and each number of agents
+                for strategy in range(4):
+                    # Set the number of agents, if the percentage of strategic voter is 0 a special function has to be used
+                    self.__set_number_of_agents_different_types(n_agents, strategy)
+                    self._environment.change_time_slots(n_slots)
+                    self.__inform_agents_n_slots(n_slots)
+                    self._calculate_number_of_agents()
+                    self._go_through_rounds()
+
+                    self._append_scores_per_run()
+                    #self.__append_parameters(n_slots, n_agents)
+                    #Appends the score of the last agent, that is the agent using the strategy
+                    self.__score_agents_using_strategy.append(self._agents[n_agents-1].get_total_utility() / self._rounds)
+                    self._reset_scores()
+                    self._environment.reset(self._agents)
+
+                # store in which order the strategies were ranked in this particular run in __ranking and add another element
+                # to frequency and set it to one, or, if this order is already is stored in __ranking add one to
+                # __ranking_frequency in the right place. That is the place that the ranking order is stored in __ranking
+                ranking_order = [0,1,2,3]
+                order_found = False
+                quick_sort.quick_sort(self.__score_agents_using_strategy, ranking_order, 0, len(self.__score_agents_using_strategy) - 1)
+                for idx, order in enumerate(self.__ranking):
+                    if order == ranking_order:
+                        self.__ranking_frequency[idx] += 1
+                        order_found = True
+
+                if not order_found:
+                    self.__ranking.append(ranking_order)
+                    self.__ranking_frequency.append(1)
+
+                self.__append_parameters(n_slots, n_agents)
+                self.__score_agents_using_strategy.clear()
+        for idx, order in enumerate(self.__ranking):
+            print(order, self.__ranking_frequency[idx])
+        #self._environment.rank_popularity_time_slots()
+        #self.__print_results()
+        #mean_utility = self.__create_list_mean_utility_varying_agents_per_run()
+        #plots.plot_3d_graph(self.__list_agents, self.__list_slots, mean_utility, self.__max_agents
+        #                    - self.__starting_n_agents + 1, self.__max_slots - self.__starting_n_slots + 1,
+        #                    'number of agents', 'number of time slots', 'mean social welfare', 'Mean utility based on the number of agents and time slots')
+
+# Creates a 2d graph of how the number of slots affect the mean utility of all the sincere voters
 class Slots(Games):
     def __init__(self, agents, environment, max_slots, bonus_type):
         Games.__init__(self, agents, environment)

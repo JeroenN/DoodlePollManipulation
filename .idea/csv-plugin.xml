@@ -24,13 +24,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\popular_mean_utility.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="\ten_sincere_mean_utilities.csv">
           <value>
             <Attribute>

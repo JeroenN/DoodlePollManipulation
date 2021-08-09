@@ -133,7 +133,9 @@ def print_max_threshold(threshold_welfares_standard):
 
 # Chooses which type of game is going to be played
 def play_game(environment, agents, bonus_type):
-    game_type = int(input("What type of game do you want to play?\n0 = normal game, 1 = km game, 2 = threshold game, 3 = agent slot game, 4 = agent type game, 5 = willingness game, 6 = Distribution, 7 = Slots, 8 = Slots preference\n"))  # 0 = normal game, 1 = km game, 2 = threshold game, 3 = agent slot game, 4 = type of agent game
+    game_type = int(input("What type of game do you want to play?\n0 = normal game, 1 = km game, 2 = threshold game,"
+                          " 3 = agent slot game, 4 = agent type game, 5 = willingness game, 6 = Distribution, 7 = Slots,"
+                          " 8 = Slots preference, 9 = agent slot strategy game\n"))
 
     print("Playing game...")
 
@@ -155,6 +157,9 @@ def play_game(environment, agents, bonus_type):
         games.Slots(agents, environment, 20, bonus_type)
     elif game_type == 8:
         games.Slots_preference(agents, environment, 20, bonus_type)
+    elif game_type == 9:
+        games.Agent_slot_strategy(agents, environment, 5, 5, bonus_type)
+
 
 def main():
     environment = create_environment(
@@ -163,7 +168,7 @@ def main():
     bonus_type = 0 # int(input("Do you want the agents to use social bonus?\n 0 = no, 1 = yes\n"))
     
     if bonus_type == 0:
-        agents = create_agents(0, #int(input("How many standard voters are in the Doodle poll?: ")),
+        agents = create_agents(0, #int(input("How many sincere voters are in the Doodle poll?: ")),
                                0, #int(input("How many mix adaptable popular are in the Doodle poll?: ")),
                             0, #int(input("How many popular voters are in the Doodle poll?: ")),
                             0, #int(input("How many adaptive popular voters are in the Doodle poll?: ")),
