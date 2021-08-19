@@ -212,6 +212,7 @@ class Popular(Agent):
     def __vote_for_slots_highest_preference(self):
         # Quick sorts the n_slots_consideration most popular time slots in terms of the agents their preference, then
         # the list popular_time_slots_idx can be used to vote for the right time slots.
+        self.__set_n_considerations_to_n_slots()
         quick_sort.quick_sort(self.__popular_time_slots_preference, self.__popular_time_slots_idx, 0,
                               self.__n_slots_consideration - 1)
 

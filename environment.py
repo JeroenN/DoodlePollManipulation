@@ -97,6 +97,7 @@ class Environment:
             self.__time_slots_votes[idx] = 0
             self.__initial_idx_time_slots[idx] = idx
 
+        self.__index_agents.clear()
         self.determine_willingness(agents)
         self.rank_willingness()
         self.reset_utilities(agents)
@@ -111,6 +112,7 @@ class Environment:
     # Get the willingness from each agent and put it in a list
     def determine_willingness(self, agents):
         for idx in range(len(agents)):
+            #print("len(agents): ", len(agents))
             agent = agents[idx]
             self.__willingness_agents.append(agent.get_willingness())
             self.__index_agents.append(idx)
@@ -134,6 +136,7 @@ class Environment:
     # After this function is called another function removes the first element. Thus everytime this function is
     # is called a new element will be given until the list is empty in which case it returns none.
     def get_index_agent_willingness(self):
+        #print("len(index_agents): ", len(self.__index_agents))
         if self.__index_agents:
             return self.__index_agents[0]
         else:
