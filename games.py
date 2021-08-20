@@ -20,7 +20,7 @@ class Games:
         self._min_indexes = []
         self._max_utility = 0
 
-        self._rounds = 1000
+        self._rounds = 100000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -887,6 +887,80 @@ class Agent_slot_strategy(Games):
             mean_utility.append(self._social_welfare_scores[idx] / n_agents / self._rounds)
         return mean_utility
 
+    def __print_orders_per_n_slots(self):
+        # prints the frequency of each ranking order first for the each number of slot and then for each number of
+        # agents
+        for n_slots in range(self.__starting_n_slots, self.__max_slots):
+            print("Game with ", n_slots, "time slots: ")
+            # List that contains every unique combination of orders that has been found in raking_order
+            unique_orders = []
+            # Create the list of every unique order by looping over the list unique_orders, if the order that
+            # currently is being looked at does not exist then add it to the list unique_orders
+            for idx, order in enumerate(self.__ranking):
+                is_unique = True
+                # Check if we have the right slot
+                if self.__list_slots[idx] == n_slots:
+                    for unique_order in unique_orders:
+                        if unique_order == order:
+                            is_unique = False
+
+                    if is_unique:
+                        unique_orders.append(order)
+
+            # Append the list self.__ranking_frequency with one for each element in unique_orders
+            ranking_frequency = [0] * len(unique_orders)
+
+            # Add one for each order in __ranking that matches with a unique order
+            for idx_order, order in enumerate(self.__ranking):
+                if self.__list_slots[idx_order] == n_slots:
+                    for idx_unique_order, unique_order in enumerate(unique_orders):
+                        if order == unique_order:
+                            ranking_frequency[idx_unique_order] += 1
+
+            # Print the results
+            for idx, unique_order in enumerate(unique_orders):
+                print(unique_order, ranking_frequency[idx])  # , self.__ranking_frequency[idx])
+
+            # Clear it so that for the next n_slots the list can be used again
+            unique_orders.clear()
+
+    def __print_orders_per_n_agents(self):
+        # prints the frequency of each ranking order first for the each number of slot and then for each number of
+        # agents
+        for n_agents in range(self.__starting_n_agents, self.__max_agents):
+            print("Game with ", n_agents, "agents: ")
+            # List that contains every unique combination of orders that has been found in raking_order
+            unique_orders = []
+            # Create the list of every unique order by looping over the list unique_orders, if the order that
+            # currently is being looked at does not exist then add it to the list unique_orders
+            for idx, order in enumerate(self.__ranking):
+                is_unique = True
+                # Check if we have the right slot
+                if self.__list_agents[idx] == n_agents:
+                    for unique_order in unique_orders:
+                        if unique_order == order:
+                            is_unique = False
+
+                    if is_unique:
+                        unique_orders.append(order)
+
+            # Append the list self.__ranking_frequency with one for each element in unique_orders
+            ranking_frequency = [0] * len(unique_orders)
+
+            # Add one for each order in __ranking that matches with a unique order
+            for idx_order, order in enumerate(self.__ranking):
+                if self.__list_agents[idx_order] == n_agents:
+                    for idx_unique_order, unique_order in enumerate(unique_orders):
+                        if order == unique_order:
+                            ranking_frequency[idx_unique_order] += 1
+
+            # Print the results
+            for idx, unique_order in enumerate(unique_orders):
+                print(unique_order, ranking_frequency[idx])  # , self.__ranking_frequency[idx])
+
+            # Clear it so that for the next n_slots the list can be used again
+            unique_orders.clear()
+
     def __play_game(self):
         # Loop over the the agents
         for n_agents in range(self.__starting_n_agents, self.__max_agents + 1):
@@ -935,42 +1009,8 @@ class Agent_slot_strategy(Games):
                 self.__score_agents_using_strategy.clear()
                 #self.__ranking_frequency_per_n_slots
 
-        # prints the frequency of each ranking order first for the each number of slot and then for each number of
-        # agents
-        for n_slots in range(self.__starting_n_slots, self.__max_slots):
-            print("Game with ", n_slots, "time slots: ")
-            # List that contains every unique combination of orders that has been found in raking_order
-            unique_orders = []
-            # Create the list of every unique order by looping over the list unique_orders, if the order that
-            # currently is being looked at does not exist then add it to the list unique_orders
-            for idx, order in enumerate(self.__ranking):
-                is_unique = True
-                # Check if we have the right slot
-                if self.__list_slots[idx] == n_slots:
-                    for unique_order in unique_orders:
-                        if unique_order == order:
-                            is_unique = False
-
-                    if is_unique:
-                        unique_orders.append(order)
-
-            # Append the list self.__ranking_frequency with one for each element in unique_orders
-            ranking_frequency = [0] * len(unique_orders)
-
-            # Add one for each order in __ranking that matches with a unique order
-            for idx_order, order in enumerate(self.__ranking):
-                if self.__list_slots[idx_order] == n_slots:
-                    for idx_unique_order, unique_order in enumerate(unique_orders):
-                        if order == unique_order:
-                            ranking_frequency[idx_unique_order] += 1
-
-            # Print the results
-            for idx, unique_order in enumerate(unique_orders):
-                    print(unique_order, ranking_frequency[idx])#, self.__ranking_frequency[idx])
-
-            # Clear it so that for the next n_slots the list can be used again
-            unique_orders.clear()
-
+        self.__print_orders_per_n_slots()
+        self.__print_orders_per_n_agents()
 # Creates a 2d graph of how the number of slots affect the mean utility of all the sincere voters
 class Slots(Games):
     def __init__(self, agents, environment, max_slots, bonus_type):
