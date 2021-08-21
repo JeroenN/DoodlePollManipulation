@@ -964,6 +964,8 @@ class Agent_slot_strategy(Games):
     def __play_game(self):
         # Loop over the the agents
         for n_agents in range(self.__starting_n_agents, self.__max_agents + 1):
+            # progress
+            print(n_agents, "of the ", 20, "agents done")
             # Loop over the slots
             for n_slots in range(self.__starting_n_slots, self.__max_slots + 1):
                 # Play a game with each strategy for each number of time slots and each number of agents
