@@ -20,7 +20,7 @@ class Games:
         self._min_indexes = []
         self._max_utility = 0
 
-        self._rounds = 100000
+        self._rounds = 10000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -804,10 +804,6 @@ class Agent_slot_strategy(Games):
         self.__bonus_type = bonus_type
         self.__score_agents_using_strategy = []
         self.__ranking = []
-        self.__ranking_frequency_per_n_slots = []
-        self.__ranking_order_per_n_slot = []
-        self.__ranking_frequency_per_n_agents = []
-        self.__ranking_order_per_n_agents = []
 
         # self.__calculate_n_agent_per_type()
         self.__play_game()
@@ -996,8 +992,12 @@ class Agent_slot_strategy(Games):
                 #order_found = False
                 quick_sort.quick_sort(self.__score_agents_using_strategy, ranking_order, 0,
                                       len(self.__score_agents_using_strategy) - 1)
+                standard_order = [3, 2, 1, 0]
+                if ranking_order != standard_order:
+                    print("n_agents: ", n_agents, ", n_slots: ", n_slots, ", order: ", ranking_order, self.__score_agents_using_strategy)
 
                 self.__ranking.append(ranking_order)
+
                 #for idx, order in enumerate(self.__ranking):
                 #    if order == ranking_order:
                 #        self.__ranking_frequency[idx] += 1
@@ -1009,10 +1009,9 @@ class Agent_slot_strategy(Games):
 
                 self.__append_parameters(n_slots, n_agents)
                 self.__score_agents_using_strategy.clear()
-                #self.__ranking_frequency_per_n_slots
 
-        self.__print_orders_per_n_slots()
-        self.__print_orders_per_n_agents()
+        #self.__print_orders_per_n_slots()
+        #self.__print_orders_per_n_agents()
 # Creates a 2d graph of how the number of slots affect the mean utility of all the sincere voters
 class Slots(Games):
     def __init__(self, agents, environment, max_slots, bonus_type):
