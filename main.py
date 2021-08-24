@@ -158,7 +158,7 @@ def play_game(environment, agents, bonus_type):
     elif game_type == 8:
         games.Slots_preference(agents, environment, 20, bonus_type)
     elif game_type == 9:
-        games.Agent_slot_strategy(agents, environment, 21, 21, bonus_type)
+        games.Agent_slot_strategy(agents, environment, 10, 10, bonus_type)
 
 
 def main():
