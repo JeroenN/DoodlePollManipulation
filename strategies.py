@@ -173,6 +173,7 @@ class Popular(Agent):
     def __set_n_considerations_to_n_slots(self):
         if self.environment.get_n_time_slots() < self.__n_slots_consideration:
             self.__n_slots_consideration = self.environment.get_n_time_slots()
+            self.__n_votes = int(0.5 * self.__n_slots_consideration - 1)
 
     # Makes sure that if there are less time slots available than the amount of slots the agent wants to vote on
     # , then the amount of time slots voted on is set to the amount of time slots there

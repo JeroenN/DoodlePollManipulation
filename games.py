@@ -20,7 +20,7 @@ class Games:
         self._min_indexes = []
         self._max_utility = 0
 
-        self._rounds = 10000
+        self._rounds = 20000
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -863,25 +863,6 @@ class Agent_slot_strategy(Games):
             agent.set_n_time_slots(n_slots)
             agent.create_time_slot_preference()
 
-    # Prints all the different results that we have calculated
-    def __print_results(self):
-        print("Game ended! \n")
-        # prints the strategy used by each agent and the average utility of each agent
-        for agent in self._agents:
-            print(agent,
-                  ", Strategy: ", agent.get_strategy(), "Total utility: ", agent.get_total_utility() / self._rounds)
-
-        for idx in range(self.__n_runs):
-            print("n_slots: ", self.__list_slots[idx])
-            print("n_agents: ", self.__list_agents[idx])
-            print('Social welfare: ', self._social_welfare_scores[idx] / self._rounds)
-            n_agents = self.__list_agents[idx]
-            print('Mean utility; ', (self._social_welfare_scores[idx] / n_agents / self._rounds))
-
-            print('Minimum utility ', self._min_utility_scores[idx] / self._rounds)  # agent with smallest utility
-            print("Maximum utility: ", self._max_utility_scores[idx] / self._rounds)  # agent with largest utility
-            print("\n")
-
     # Keep track of the number of agents and time slots each run
     def __append_parameters(self, n_slots, n_agents):
         self.__list_slots.append(n_slots)
@@ -1038,9 +1019,6 @@ class Agent_slot_strategy(Games):
                     # Set the number of agents
                     self.__set_number_of_agents_different_types(n_agents, strategy)
 
-                    # self.__inform_agents_n_slots(n_slots) # Probably not needed since the agents are every time
-                    # cleared and then created again.
-
                     self._calculate_number_of_agents()
                     self._go_through_rounds()
 
@@ -1064,6 +1042,9 @@ class Agent_slot_strategy(Games):
                 #order_found = False
                 quick_sort.quick_sort(self.__score_agents_using_strategy, ranking_order, 0,
                                       len(self.__score_agents_using_strategy) - 1)
+                #standard_order = [3, 2, 1, 0]
+                #if ranking_order != standard_order:
+                #print("n_agents: ", n_agents, ", n_slots: ", n_slots, ", order: ", ranking_order, self.__score_agents_using_strategy)
 
                 #self.__print_orders(n_agents, n_slots, ranking_order)
                 self.__ranking.append(ranking_order)
