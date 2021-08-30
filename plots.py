@@ -41,6 +41,15 @@ def plot_slots(mean_social_welfare_per_slot, x_max):
     plt.title("Effect of the number of time slot on the mean social welfare")
     plt.show()
 
+def plot_egalitarian_welfare(difference_egalitarian_welfare_per_agent):
+    plt.plot(difference_egalitarian_welfare_per_agent)
+    #plt.xticks(np.arange(0, x_max, 2), [2,4,6,8,10,12,14,16,18, 20])
+    plt.xlabel("Number of agents")
+    plt.ylabel("Difference egalitarian welfare")
+    plt.title("Effect of the number of agents on the difference in egalitarian welfare")
+    plt.show()
+
+
 def plot_preference(preference_per_slot, x_max):
     plt.plot(preference_per_slot)
     plt.xticks(np.arange(0, 10), [2,4,6,8,10,12,14,16,18, 20])

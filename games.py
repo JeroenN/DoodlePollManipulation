@@ -20,7 +20,7 @@ class Games:
         self._min_indexes = []
         self._max_utility = 0
 
-        self._rounds = 20000
+        self._rounds = 20
         self._social_welfare_scores = []
         self._min_utility_scores = []
         self._max_utility_scores = []
@@ -788,13 +788,14 @@ class Agent_slot(Games):
 # Store this ranking in a list and at the end make a histogram out of it.
 class Agent_slot_strategy(Games):
     def __init__(self, agents, environment, max_agents, max_slots, bonus_type):
+        #max_agents = 10
         Games.__init__(self, agents, environment)
         # Set to 4 since if you have 25% strategic voters, the first game you can play with this is with 1
         # strategic voter and 3 sincere voters. If for each condition they are set to four the graphs can be more
         # easily compared
         self.__starting_n_agents = 4
         # Set to 4 since the popular strategy works best when it considers 4 slots and then votes on 1
-        self.__starting_n_slots = 4
+        self.__starting_n_slots = 20
         self.__max_agents = max_agents
         self.__max_slots = max_slots
         self.__popular_agent_utility = []
@@ -836,9 +837,9 @@ class Agent_slot_strategy(Games):
 
         if strategy == 0:
             strategic_agent = strategies.Popular_adaptive(self._environment, n_agents, n_agents - 1, self.__bonus_type)
-        elif strategy == 1:
-            strategic_agent = strategies.Popular(self._environment, n_agents, n_agents - 1, self.__bonus_type)
         elif strategy == 2:
+            strategic_agent = strategies.Popular(self._environment, n_agents, n_agents - 1, self.__bonus_type)
+        elif strategy == 1:
             strategic_agent = strategies.Popular_prediction(self._environment, n_agents, n_agents - 1,
                                                             self.__bonus_type)
         elif strategy == 3:
@@ -967,8 +968,8 @@ class Agent_slot_strategy(Games):
             self.__max_percentage_difference_social = percentage_difference
             self.__agents_max_percentage_difference = n_agents
             self.__slots_max_percentage_difference = n_slots
-            self.__social_welfare_1 = self.__social_welfare_per_strategy[order_social_welfare[0]] / self._rounds / n_agents
-            self.__social_welfare_2 = self.__social_welfare_per_strategy[order_social_welfare[n_strategies - 1]] / self._rounds / n_agents
+            self.__social_welfare_1 = self.__social_welfare_per_strategy[0] / self._rounds / n_agents
+            self.__social_welfare_2 = self.__social_welfare_per_strategy[n_strategies - 1] / self._rounds / n_agents
             self.__lowest_social_welfare_strategy = order_social_welfare[0]
             self.__highest_social_welfare_strategy = order_social_welfare[n_strategies - 1]
 
@@ -985,8 +986,8 @@ class Agent_slot_strategy(Games):
             self.__max_percentage_difference_egalitarian = percentage_difference
             self.__agents_max_percentage_difference = n_agents
             self.__slots_max_percentage_difference = n_slots
-            self.__egalitarian_welfare_1 = self.__egalitarian_welfare_per_strategy[order_egalitarian_welfare[0]] / self._rounds / n_agents
-            self.__egalitarian_welfare_2 = self.__egalitarian_welfare_per_strategy[order_egalitarian_welfare[n_strategies - 1]] / self._rounds / n_agents
+            self.__egalitarian_welfare_1 = self.__egalitarian_welfare_per_strategy[0] / self._rounds / n_agents
+            self.__egalitarian_welfare_2 = self.__egalitarian_welfare_per_strategy[n_strategies - 1] / self._rounds / n_agents
             self.__lowest_egalitarian_welfare_strategy = order_egalitarian_welfare[0]
             self.__highest_egalitarian_welfare_strategy = order_egalitarian_welfare[n_strategies - 1]
 
@@ -1015,7 +1016,7 @@ class Agent_slot_strategy(Games):
             for n_slots in range(self.__starting_n_slots, self.__max_slots + 1):
                 # Play a game with each strategy for each number of time slots and each number of agents
                 self._environment.change_time_slots(n_slots)
-                for strategy in range(4):
+                for strategy in range(2):
                     # Set the number of agents
                     self.__set_number_of_agents_different_types(n_agents, strategy)
 
@@ -1051,6 +1052,8 @@ class Agent_slot_strategy(Games):
 
                 self.__calculate_max_percentage_difference_social_welfare(n_agents, n_slots)
                 self.__calculate_max_percentage_difference_egalitarian_welfare(n_agents, n_slots)
+                print(self.__max_percentage_difference_egalitarian)
+                self.__max_percentage_difference_egalitarian = 0
                 #for idx, order in enumerate(self.__ranking):
                 #    if order == ranking_order:
                 #        self.__ranking_frequency[idx] += 1
